@@ -1,0 +1,70 @@
+-- Tabela de Clientes
+CREATE TABLE IF NOT EXISTS clientes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cpf text not null ,
+    nome TEXT NOT NULL,
+    endereco text not null,
+    email TEXT NOT NULL ,
+    data_cadastro TEXT DEFAULT CURRENT_TIMESTAMP
+);
+--Tabela Fornecedor
+CREATE TABLE IF NOT EXISTS fornecedor (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cnpj text not null,
+    nome TEXT NOT NULL,
+    endereco text not null,
+    item_fornecido text not null,
+    email TEXT NOT NULL ,
+    data_cadastro TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Produtos
+CREATE TABLE IF NOT EXISTS produtos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    descricao text not null,
+    preco REAL NOT NULL CHECK(preco >= 0),
+    estoque INTEGER NOT NULL DEFAULT 0
+);
+
+-- Tabela de Pedidos
+CREATE TABLE IF NOT EXISTS pedidos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cliente_id INTEGER NOT NULL,
+    data_pedido TEXT DEFAULT CURRENT_TIMESTAMP,
+    total REAL NOT NULL DEFAULT 0.0,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
+);
+
+-- Tabela de Itens do Pedido (Relação Muitos para Muitos)
+CREATE TABLE IF NOT EXISTS itens_pedido (
+    pedido_id INTEGER NOT NULL,
+    produto_id INTEGER NOT NULL,
+    quantidade INTEGER NOT NULL CHECK(quantidade > 0),
+    preco_unitario REAL NOT NULL,
+    PRIMARY KEY (pedido_id, produto_id),
+    FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
+    FOREIGN KEY (produto_id) REFERENCES produtos(id)
+);
+CREATE TABLE IF NOT EXISTS prod_fornecido (
+    pedido_id INTEGER NOT NULL,
+  fornecedor_id integer not null,
+    produtos_id INTEGER NOT NULL,
+    quantidade INTEGER NOT NULL CHECK(quantidade > 0),
+    preco_unitario REAL NOT NULL,
+    PRIMARY KEY (fornecedor_id, produtos_id),
+    FOREIGN KEY (fornecedor_id) REFERENCES fornecedor(id) ON DELETE CASCADE,
+    FOREIGN KEY (produtos_id) REFERENCES produtos(id)
+);
+
+CREATE TABLE IF NOT EXISTS comanda {
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cliente_id INTEGER NOT NULL,
+    status_pagamento TEXT NOT NULL,
+    horario TEXT DEFAULT CURRENT_TIMESTAMP,
+    subtotal REAL NOT NULL DEFAULT 0.0,
+    quantidade INTEGER NOT NULL CHECK(quantidade > 0),
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
+};
+
+
