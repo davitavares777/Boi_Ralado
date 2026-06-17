@@ -1,0 +1,49 @@
+-- 1. POPULAR TABELA DE CLIENTES
+INSERT INTO clientes (nome, email,cpf,endereco) VALUES 
+('Ana sSouza', 'anaada.ssousza@email.com','11111415121111','rrrua da aura'),
+('Carlos Eduardo', 'caaasdsdu@email.com','22212242225222','rrrua da morte'),
+('Beatriz Ramos', 'biaaasrsdamos@email.com','3133432335333','rrrua da macumba1'),
+('Ricardo Santos', 'ricsasaadrdo.santos@email.com','44144424544','rrura kkkkj'),
+('Juliana Lima', 'ju.liamssdaa@email.com','554552551555','rrua da varrzea');
+
+--POPULAR TABELA FORNECEDOR
+INSERT INTO fornecedor (nome,email,cnpj,endereco,item_fornecido) VALUES
+('Jessica R. Cardwell', 'joessicsa@email.com','123456178901122','aure','limaox'),
+('zoom player', 'zooomsplayer@emsail.com','111111111111111','pele','abacatudo'),
+('pipi popo', 'pipiiopsopo@emsail.com','222222222122222','pepe','melancia'),
+('stecanx', 'steecaasnx@email.cosm','333333333331333','ruru','moranguete'),
+('BOOX', 'boooox@emasil.csom','444444444441444','casacasa','banana');
+
+-- 2. POPULAR TABELA DE PRODUTOS
+INSERT INTO produtos (nome, preco, estoque,descricao) VALUES 
+('Notebook Ultra', 4200.00, 15,'bom'),
+('Mouse Ergonômico', 120.50, 40,'ruim'),
+('Teclado Mecânico RGB', 350.00, 25,'maromenos'),
+('Monitor 24 Polegadas', 899.90, 12,'coco'),
+('Fone de Ouvido Bluetooth', 199.00, 50,'perfeito');
+
+-- 3. POPULAR TABELA DE PEDIDOS
+INSERT INTO pedidos (id, cliente_id, total) VALUES 
+(101, 1, 4441.00), -- Pedido da Ana Souza (Notebook + Mouse + Fone)
+(102, 2, 241.00),  -- Pedido do Carlos (Mouse + Fone)
+(103, 3, 1799.80), -- Pedido da Beatriz (2 Monitores)
+(104, 1, 350.00);  -- Segundo pedido da Ana Souza (Teclado)
+
+-- 4. POPULAR TABELA DE ITENS DO PEDIDO
+INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unitario) VALUES 
+-- Itens do Pedido 101 (Ana)
+(101, 1, 1, 4200.00), -- 1x Notebook
+(101, 2, 1, 120.50),  -- 1x Mouse
+(101, 5, 1, 120.50),  -- 1x Fone (na promoção por 120.50)
+
+-- Itens do Pedido 102 (Carlos)
+(102, 2, 1, 120.50),  -- 1x Mouse
+(102, 5, 1, 120.50),  -- 1x Fone
+
+-- Itens do Pedido 103 (Beatriz)
+(103, 4, 2, 899.90),  -- 2x Monitores
+
+-- Itens do Pedido 104 (Ana)
+(104, 3, 1, 350.00);  -- 1x Teclado
+
+SELECT*from clientes;/
