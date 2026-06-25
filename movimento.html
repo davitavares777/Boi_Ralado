@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Movimento | Boi Ralado</title>
+  <link rel="icon" type="image/png" href="img/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <img src="img/logo.png" alt="Logo Boi Ralado" />
+        <div class="sidebar__brand-text">
+          <span class="sidebar__brand-title">Boi Ralado</span>
+          <span class="sidebar__brand-sub">Restaurante</span>
+        </div>
+      </div>
+      <nav class="sidebar__nav">
+        <div class="sidebar__nav-title">Menu Principal</div>
+        <a href="index.html"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="cadastro.html"><i class="fa-solid fa-id-card-clip"></i> Cadastro</a>
+        <a href="movimento.html" class="active"><i class="fa-solid fa-arrow-right-arrow-left"></i> Movimento</a>
+        <a href="relatorios.html"><i class="fa-solid fa-chart-column"></i> Relatórios</a>
+
+        <div class="sidebar__nav-title">Acessos Rápidos</div>
+        <a href="cliente.html"><i class="fa-solid fa-users"></i> Clientes</a>
+        <a href="produto.html"><i class="fa-solid fa-burger"></i> Produtos</a>
+        <a href="fornecedor.html"><i class="fa-solid fa-truck-field"></i> Fornecedores</a>
+        <a href="pedido.html"><i class="fa-solid fa-receipt"></i> Pedidos</a>
+        <a href="entrega.html"><i class="fa-solid fa-motorcycle"></i> Delivery</a>
+      </nav>
+      <div class="sidebar__footer"><i class="fa-solid fa-fire"></i> v1.0 — © 2026</div>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div style="display:flex; align-items:center;">
+          <button class="header__menu-btn"><i class="fa-solid fa-bars"></i></button>
+          <h1 class="header__title">Sistema de Gestão — Restaurante <span>Boi Ralado</span></h1>
+        </div>
+        <div class="header__actions">
+          <button class="header__icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+          <button class="header__icon-btn"><i class="fa-solid fa-bell"></i><span class="badge"></span></button>
+          <div class="header__user">
+            <div class="header__user-avatar">JS</div>
+            <div class="header__user-info">
+              <span class="header__user-name">João Silva</span>
+              <span class="header__user-role">Gerente</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <div class="breadcrumbs"><a href="index.html"><i class="fa-solid fa-house"></i> Início</a> <i class="fa-solid fa-chevron-right"></i> <span class="current">Movimento</span></div>
+            <h2 class="page-head__title">Módulo de Movimento</h2>
+            <p class="page-head__subtitle">Selecione a operação que deseja realizar.</p>
+          </div>
+          <a href="index.html" class="btn btn--outline"><i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard</a>
+        </div>
+
+        <section class="cards-grid">
+          <a href="pedido.html" class="access-card">
+            <div class="access-card__icon"><i class="fa-solid fa-receipt"></i></div>
+            <h4 class="access-card__title">Registrar Pedido</h4>
+            <p class="access-card__desc">Crie pedidos vinculados a mesas e clientes, com adição de itens e finalização.</p>
+            <span class="access-card__link">Novo Pedido <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+
+          <a href="comanda.html" class="access-card">
+            <div class="access-card__icon brown"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+            <h4 class="access-card__title">Emitir Comanda</h4>
+            <p class="access-card__desc">Emita e imprima comandas das mesas com status de pagamento atualizado.</p>
+            <span class="access-card__link">Emitir Comanda <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+
+          <a href="entrega.html" class="access-card">
+            <div class="access-card__icon dark"><i class="fa-solid fa-motorcycle"></i></div>
+            <h4 class="access-card__title">Ordem de Entrega</h4>
+            <p class="access-card__desc">Gere ordens de entrega de delivery com endereço, taxa e forma de pagamento.</p>
+            <span class="access-card__link">Nova Entrega <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+        </section>
+
+        <div class="summary-grid mt-4">
+          <div class="summary-card">
+            <span class="summary-card__label">Pedidos Abertos</span>
+            <span class="summary-card__value">12</span>
+          </div>
+          <div class="summary-card highlight">
+            <span class="summary-card__label">Comandas em Aberto</span>
+            <span class="summary-card__value">8</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card__label">Entregas em Rota</span>
+            <span class="summary-card__value">5</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card__label">Total do Dia</span>
+            <span class="summary-card__value">R$ 4.275,80</span>
+          </div>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <strong>Boi Ralado</strong> — Sistema de Gestão Interna <i class="fa-solid fa-fire"></i> © 2026
+      </footer>
+    </div>
+  </div>
+</body>
+</html>

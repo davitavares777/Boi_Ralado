@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro | Boi Ralado</title>
+  <link rel="icon" type="image/png" href="img/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <img src="img/logo.png" alt="Logo Boi Ralado" />
+        <div class="sidebar__brand-text">
+          <span class="sidebar__brand-title">Boi Ralado</span>
+          <span class="sidebar__brand-sub">Restaurante</span>
+        </div>
+      </div>
+      <nav class="sidebar__nav">
+        <div class="sidebar__nav-title">Menu Principal</div>
+        <a href="index.html"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="cadastro.html" class="active"><i class="fa-solid fa-id-card-clip"></i> Cadastro</a>
+        <a href="movimento.html"><i class="fa-solid fa-arrow-right-arrow-left"></i> Movimento</a>
+        <a href="relatorios.html"><i class="fa-solid fa-chart-column"></i> Relatórios</a>
+
+        <div class="sidebar__nav-title">Acessos Rápidos</div>
+        <a href="cliente.html"><i class="fa-solid fa-users"></i> Clientes</a>
+        <a href="produto.html"><i class="fa-solid fa-burger"></i> Produtos</a>
+        <a href="fornecedor.html"><i class="fa-solid fa-truck-field"></i> Fornecedores</a>
+        <a href="pedido.html"><i class="fa-solid fa-receipt"></i> Pedidos</a>
+        <a href="entrega.html"><i class="fa-solid fa-motorcycle"></i> Delivery</a>
+      </nav>
+      <div class="sidebar__footer"><i class="fa-solid fa-fire"></i> v1.0 — © 2026</div>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div style="display:flex; align-items:center;">
+          <button class="header__menu-btn"><i class="fa-solid fa-bars"></i></button>
+          <h1 class="header__title">Sistema de Gestão — Restaurante <span>Boi Ralado</span></h1>
+        </div>
+        <div class="header__actions">
+          <button class="header__icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+          <button class="header__icon-btn"><i class="fa-solid fa-bell"></i><span class="badge"></span></button>
+          <div class="header__user">
+            <div class="header__user-avatar">JS</div>
+            <div class="header__user-info">
+              <span class="header__user-name">João Silva</span>
+              <span class="header__user-role">Gerente</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <div class="breadcrumbs"><a href="index.html"><i class="fa-solid fa-house"></i> Início</a> <i class="fa-solid fa-chevron-right"></i> <span class="current">Cadastro</span></div>
+            <h2 class="page-head__title">Módulo de Cadastro</h2>
+            <p class="page-head__subtitle">Selecione o tipo de cadastro que deseja realizar.</p>
+          </div>
+          <a href="index.html" class="btn btn--outline"><i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard</a>
+        </div>
+
+        <section class="cards-grid">
+          <a href="cliente.html" class="access-card">
+            <div class="access-card__icon"><i class="fa-solid fa-user-plus"></i></div>
+            <h4 class="access-card__title">Cliente</h4>
+            <p class="access-card__desc">Cadastre informações pessoais, contato e endereço dos clientes do restaurante.</p>
+            <span class="access-card__link">Cadastrar Cliente <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+
+          <a href="fornecedor.html" class="access-card">
+            <div class="access-card__icon brown"><i class="fa-solid fa-truck-field"></i></div>
+            <h4 class="access-card__title">Fornecedor</h4>
+            <p class="access-card__desc">Registre empresas fornecedoras, dados fiscais e informações de contato comercial.</p>
+            <span class="access-card__link">Cadastrar Fornecedor <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+
+          <a href="produto.html" class="access-card">
+            <div class="access-card__icon dark"><i class="fa-solid fa-burger"></i></div>
+            <h4 class="access-card__title">Produto</h4>
+            <p class="access-card__desc">Gerencie produtos, estoque, categorias, preços e validades do cardápio.</p>
+            <span class="access-card__link">Cadastrar Produto <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+        </section>
+
+        <div class="table-wrap mt-4">
+          <div class="table-actions">
+            <h3><i class="fa-solid fa-clock-rotate-left" style="color:var(--color-red);"></i> Últimos Cadastros</h3>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Nome / Razão Social</th>
+                <th>Documento</th>
+                <th>Contato</th>
+                <th>Data</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><i class="fa-solid fa-user" style="color:var(--color-red);"></i> Cliente</td>
+                <td>Maria Oliveira</td>
+                <td>123.456.789-01</td>
+                <td>(11) 98765-4321</td>
+                <td>23/02/2026</td>
+                <td class="row-actions"><button title="Editar"><i class="fa-solid fa-pen"></i></button><button title="Excluir" class="danger"><i class="fa-solid fa-trash"></i></button></td>
+              </tr>
+              <tr>
+                <td><i class="fa-solid fa-truck-field" style="color:var(--color-brown);"></i> Fornecedor</td>
+                <td>Distribuidora Carnes Premium Ltda</td>
+                <td>12.345.678/0001-90</td>
+                <td>contato@carnespremium.com</td>
+                <td>22/02/2026</td>
+                <td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button class="danger"><i class="fa-solid fa-trash"></i></button></td>
+              </tr>
+              <tr>
+                <td><i class="fa-solid fa-burger" style="color:var(--color-brown-dark);"></i> Produto</td>
+                <td>Hambúrguer Artesanal 180g</td>
+                <td>PROD-0042</td>
+                <td>Estoque: 124 un</td>
+                <td>21/02/2026</td>
+                <td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button class="danger"><i class="fa-solid fa-trash"></i></button></td>
+              </tr>
+              <tr>
+                <td><i class="fa-solid fa-user" style="color:var(--color-red);"></i> Cliente</td>
+                <td>Carlos Souza</td>
+                <td>987.654.321-00</td>
+                <td>(11) 91234-5678</td>
+                <td>20/02/2026</td>
+                <td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button class="danger"><i class="fa-solid fa-trash"></i></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <strong>Boi Ralado</strong> — Sistema de Gestão Interna <i class="fa-solid fa-fire"></i> © 2026
+      </footer>
+    </div>
+  </div>
+</body>
+</html>

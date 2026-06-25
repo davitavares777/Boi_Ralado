@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro de Produto | Boi Ralado</title>
+  <link rel="icon" type="image/png" href="img/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <img src="img/logo.png" alt="Logo Boi Ralado" />
+        <div class="sidebar__brand-text">
+          <span class="sidebar__brand-title">Boi Ralado</span>
+          <span class="sidebar__brand-sub">Restaurante</span>
+        </div>
+      </div>
+      <nav class="sidebar__nav">
+        <div class="sidebar__nav-title">Menu Principal</div>
+        <a href="index.html"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="cadastro.html"><i class="fa-solid fa-id-card-clip"></i> Cadastro</a>
+        <a href="movimento.html"><i class="fa-solid fa-arrow-right-arrow-left"></i> Movimento</a>
+        <a href="relatorios.html"><i class="fa-solid fa-chart-column"></i> Relatórios</a>
+
+        <div class="sidebar__nav-title">Acessos Rápidos</div>
+        <a href="cliente.html"><i class="fa-solid fa-users"></i> Clientes</a>
+        <a href="produto.html" class="active"><i class="fa-solid fa-burger"></i> Produtos</a>
+        <a href="fornecedor.html"><i class="fa-solid fa-truck-field"></i> Fornecedores</a>
+        <a href="pedido.html"><i class="fa-solid fa-receipt"></i> Pedidos</a>
+        <a href="entrega.html"><i class="fa-solid fa-motorcycle"></i> Delivery</a>
+      </nav>
+      <div class="sidebar__footer"><i class="fa-solid fa-fire"></i> v1.0 — © 2026</div>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div style="display:flex; align-items:center;">
+          <button class="header__menu-btn"><i class="fa-solid fa-bars"></i></button>
+          <h1 class="header__title">Sistema de Gestão — Restaurante <span>Boi Ralado</span></h1>
+        </div>
+        <div class="header__actions">
+          <button class="header__icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+          <button class="header__icon-btn"><i class="fa-solid fa-bell"></i><span class="badge"></span></button>
+          <div class="header__user">
+            <div class="header__user-avatar">JS</div>
+            <div class="header__user-info">
+              <span class="header__user-name">João Silva</span>
+              <span class="header__user-role">Gerente</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <div class="breadcrumbs"><a href="index.html"><i class="fa-solid fa-house"></i> Início</a> <i class="fa-solid fa-chevron-right"></i> <a href="cadastro.html">Cadastro</a> <i class="fa-solid fa-chevron-right"></i> <span class="current">Produto</span></div>
+            <h2 class="page-head__title">Cadastro de Produto</h2>
+            <p class="page-head__subtitle">Informe os dados do produto, categoria, estoque e fornecedor.</p>
+          </div>
+        </div>
+
+        <form class="form-card" autocomplete="off">
+          <div class="form-card__head">
+            <div class="form-card__head-icon"><i class="fa-solid fa-burger"></i></div>
+            <div>
+              <h2>Dados do Produto</h2>
+              <p>Preencha as informações do item do cardápio ou insumo.</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group col-4">
+              <label>Código do Produto <span class="required">*</span></label>
+              <input type="text" placeholder="Ex: PROD-0042" />
+            </div>
+            <div class="form-group col-8">
+              <label>Nome do Produto <span class="required">*</span></label>
+              <input type="text" placeholder="Ex: Hambúrguer Artesanal 180g" />
+            </div>
+
+            <div class="form-group col-6">
+              <label>Categoria</label>
+              <select>
+                <option value="">Selecione...</option>
+                <option>Lanches</option>
+                <option>Pratos Executivos</option>
+                <option>Marmitas</option>
+                <option>Bebidas</option>
+                <option>Sobremesas</option>
+                <option>Acompanhamentos</option>
+                <option>Insumos</option>
+              </select>
+            </div>
+            <div class="form-group col-6">
+              <label>Fornecedor</label>
+              <select>
+                <option value="">Selecione um fornecedor...</option>
+                <option>Distribuidora Carnes Premium Ltda</option>
+                <option>Hortifruti São José</option>
+                <option>Bebidas & Cia Distribuição</option>
+                <option>Padaria Real Pães Especiais</option>
+              </select>
+            </div>
+
+            <div class="form-group col-12">
+              <label>Descrição</label>
+              <textarea placeholder="Descrição detalhada do produto, ingredientes, sugestões..."></textarea>
+            </div>
+
+            <div class="form-group col-3">
+              <label>Preço Unitário (R$) <span class="required">*</span></label>
+              <input type="text" placeholder="0,00" />
+            </div>
+            <div class="form-group col-3">
+              <label>Qtd. em Estoque</label>
+              <input type="number" placeholder="0" />
+            </div>
+            <div class="form-group col-3">
+              <label>Unidade de Medida</label>
+              <select>
+                <option value="">Selecione...</option>
+                <option>Un (Unidade)</option>
+                <option>Kg (Quilograma)</option>
+                <option>g (Grama)</option>
+                <option>L (Litro)</option>
+                <option>ml (Mililitro)</option>
+                <option>Cx (Caixa)</option>
+                <option>Pct (Pacote)</option>
+              </select>
+            </div>
+            <div class="form-group col-3">
+              <label>Data de Validade</label>
+              <input type="date" />
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <a href="cadastro.html" class="btn btn--outline"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
+            <button type="reset" class="btn btn--ghost"><i class="fa-solid fa-eraser"></i> Limpar</button>
+            <button type="button" class="btn btn--primary"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+          </div>
+        </form>
+      </main>
+
+      <footer class="footer">
+        <strong>Boi Ralado</strong> — Sistema de Gestão Interna <i class="fa-solid fa-fire"></i> © 2026
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
