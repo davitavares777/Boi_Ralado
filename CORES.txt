@@ -1,5 +1,0 @@
-marrom: #5A2802
-
-CREME: #FFF4D4
-
-VERMELHO: #DB0F13
