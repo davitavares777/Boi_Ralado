@@ -1,7 +1,7 @@
 -- Tabela de Clientes
 CREATE TABLE IF NOT EXISTS clientes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    cpf TEXT NOT NULL , -- Adicionado UNIQUE para evitar CPFs duplicados
+    cpf TEXT NOT NULL ,
     nome TEXT NOT NULL,
     endereco TEXT NOT NULL,
     email TEXT NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS clientes (
 -- Tabela Fornecedor
 CREATE TABLE IF NOT EXISTS fornecedor (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    cnpj TEXT NOT NULL , -- Adicionado UNIQUE para evitar CNPJs duplicados
+    cnpj TEXT NOT NULL ,
     nome TEXT NOT NULL,
     endereco TEXT NOT NULL,
     item_fornecido TEXT NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS produtos (
     nome TEXT NOT NULL,
     descricao TEXT NOT NULL,
     preco REAL NOT NULL CHECK(preco >= 0),
-    estoque INTEGER NOT NULL DEFAULT 0 CHECK(estoque >= 0) -- Adicionado CHECK para estoque não ser negativo
+    estoque INTEGER NOT NULL DEFAULT 0 CHECK(estoque >= 0)
 );
 
 -- Tabela de Pedidos
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS itens_pedido (
     FOREIGN KEY (produto_id) REFERENCES produtos(id)
 );
 
--- Tabela de Produtos Fornecidos (Ajustado nome de produtos_id para produto_id)
+-- Tabela de Produtos Fornecidos
 CREATE TABLE IF NOT EXISTS prod_fornecido (
     fornecedor_id INTEGER NOT NULL,
     produto_id INTEGER NOT NULL,
@@ -59,17 +59,17 @@ CREATE TABLE IF NOT EXISTS prod_fornecido (
     FOREIGN KEY (produto_id) REFERENCES produtos(id)
 );
 
--- Tabela de Comanda (Ajustada para remover itens diretos)
+-- Tabela de Comanda
 CREATE TABLE IF NOT EXISTS comanda (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     cliente_id INTEGER NOT NULL,
-    status_pagamento TEXT NOT NULL, -- Ex: 'Pendente', 'Pago'
+    status_pagamento TEXT NOT NULL,
     horario TEXT DEFAULT CURRENT_TIMESTAMP,
     total REAL NOT NULL DEFAULT 0.0 CHECK(total >= 0),
     FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
 );
 
--- NOVA: Tabela de Itens da Comanda (Para permitir múltiplos produtos por comanda)
+-- Tabela de Itens da Comanda
 CREATE TABLE IF NOT EXISTS itens_comanda (
     comanda_id INTEGER NOT NULL,
     produto_id INTEGER NOT NULL,
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS itens_comanda (
 CREATE TABLE IF NOT EXISTS caixa (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     com_id INTEGER NOT NULL,
-    forma_pagamento TEXT NOT NULL, -- Ex: 'Dinheiro', 'Cartão', 'Pix'
+    forma_pagamento TEXT NOT NULL,
     horario TEXT DEFAULT CURRENT_TIMESTAMP,
     total REAL NOT NULL DEFAULT 0.0 CHECK(total >= 0),
     FOREIGN KEY (com_id) REFERENCES comanda(id) ON DELETE CASCADE
