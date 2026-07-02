@@ -1,7 +1,7 @@
 -- Tabela de Clientes
 CREATE TABLE IF NOT EXISTS clientes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    cpf TEXT NOT NULL ,
+    cpf TEXT NOT NULL UNIque,
     nome TEXT NOT NULL,
     endereco TEXT NOT NULL,
     email TEXT NOT NULL,
@@ -11,10 +11,10 @@ CREATE TABLE IF NOT EXISTS clientes (
 -- Tabela Fornecedor
 CREATE TABLE IF NOT EXISTS fornecedor (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    cnpj TEXT NOT NULL ,
+    cnpj TEXT NOT NULL unique,
     nome TEXT NOT NULL,
     endereco TEXT NOT NULL,
-    item_fornecido TEXT NOT NULL,
+    prod_fornecido TEXT NOT NULL,
     email TEXT NOT NULL,
     data_cadastro TEXT DEFAULT CURRENT_TIMESTAMP
 );
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS comanda (
     FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
 );
 
--- Tabela de Itens da Comanda
+-- Tabela de Itens da Comanda11
 CREATE TABLE IF NOT EXISTS itens_comanda (
     comanda_id INTEGER NOT NULL,
     produto_id INTEGER NOT NULL,
@@ -87,5 +87,6 @@ CREATE TABLE IF NOT EXISTS caixa (
     forma_pagamento TEXT NOT NULL,
     horario TEXT DEFAULT CURRENT_TIMESTAMP,
     total REAL NOT NULL DEFAULT 0.0 CHECK(total >= 0),
-    FOREIGN KEY (com_id) REFERENCES comanda(id) ON DELETE CASCADE
+    FOREIGN KEY (com_id) REFERENCES comanda(id) ON DELETE CASCADE,
+    FOREIGN key (total) REFERENCES pedidos(total)
 );
