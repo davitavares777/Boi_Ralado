@@ -1,5 +1,5 @@
 -- 1. POPULAR TABELA DE CLIENTES
-INSERT INTO clientes (nome, email, cpf, endereco) VALUES 
+INSERT INTO clientes (nome, email, cpf, endereco) VALUES
 ('Ana Souza', 'ana.souza@email.com', '11111415121', 'Rua da Aura'),
 ('Carlos Eduardo', 'cadu@email.com', '22212242225', 'Rua da Morte'),
 ('Beatriz Ramos', 'bia.ramos@email.com', '31334323353', 'Rua da Macumba'),
@@ -7,61 +7,70 @@ INSERT INTO clientes (nome, email, cpf, endereco) VALUES
 ('Juliana Lima', 'ju.lima@email.com', '55455255155', 'Rua da Varzea');
 
 -- POPULAR TABELA FORNECEDOR
-INSERT INTO fornecedor (nome, email, cnpj, endereco, item_fornecido) VALUES
-('Jessica R. Cardwell', 'jessica@email.com', '12345617890112', 'Aure', 'Limão'),
-('Zoom Player', 'zoomplayer@email.com', '11111111111111', 'Pele', 'Abacate'),
-('Pipi Popo', 'pipipopo@email.com', '22222222212222', 'Pepe', 'Melancia'),
-('Stecanx', 'stecanx@email.com', '33333333333133', 'Ruru', 'Morango'),
-('BOOX', 'boox@email.com', '44444444444144', 'Casacasa', 'Banana');
+INSERT INTO fornecedor (nome, email, cnpj, endereco, prod_fornecido) VALUES
+('Jessica R. Cardwell', 'jessica@email.com', '12345617890112', 'Aure', 'boi'),
+('Zoom Player', 'zoomplayer@email.com', '11111111111111', 'Pele', 'frango'),
+('Pipi Popo', 'pipipopo@email.com', '22222222212222', 'Pepe', 'porco'),
+('Stecanx', 'stecanx@email.com', '33333333333133', 'Ruru', 'grãos'),
+('BOOX', 'boox@email.com', '44444444444144', 'Casacasa', 'refrigerante');
 
 -- 2. POPULAR TABELA DE PRODUTOS
-INSERT INTO produtos (nome, preco, estoque, descricao) VALUES 
-('Notebook Ultra', 4200.00, 15, 'Bom'),
-('Mouse Ergonômico', 120.50, 40, 'Ruim'),
-('Teclado Mecânico RGB', 350.00, 25, 'Regular'),
-('Monitor 24 Polegadas', 899.90, 12, 'Ruim'),
-('Fone de Ouvido Bluetooth', 199.00, 50, 'Perfeito');
+INSERT INTO produtos (nome, preco, estoque, descricao) VALUES
+('boi ralado marmita', 30.00, 15, 'marmita de boi'),
+('frango ralado marmita', 30.00, 40, 'marmita de frango'),
+('porco ralado marmita', 30.00, 25, 'marmita de porco'),
+('buffet', 40.00, 12, 'por quilo'),
+('refrigerante', 5.00, 50, 'refrigerante lata');
 
 -- 3. POPULAR TABELA DE PEDIDOS
-
-INSERT INTO pedidos (id, cliente_id, total) VALUES 
-(101, 1, 4441.00), -- Pedido da Ana Souza (Notebook + Mouse + Fone)
-(102, 2, 241.00),  -- Pedido do Carlos (Mouse + Fone)
-(103, 3, 1799.80), -- Pedido da Beatriz (2 Monitores)
-(104, 1, 350.00);  -- Segundo pedido da Ana Souza (Teclado)
+INSERT INTO pedidos (id, cliente_id, total) VALUES
+(101, 1, 35.00), -- Pedido da Ana Souza (boi ralado + refrigerante )
+(102, 2, 60.00),  -- Pedido do Carlos (frango ralado + boi ralado)
+(103, 3, 70.00), -- Pedido da Beatriz (porco ralado + buffet)
+(104, 1, 5.00);  -- Segundo pedido da Ana Souza (refrigerante)
 
 -- 4. POPULAR TABELA DE ITENS DO PEDIDO
-INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unitario) VALUES 
+INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unitario) VALUES
 -- Itens do Pedido 101 (Ana)
-(101, 1, 1, 4200.00), 
-(101, 2, 1, 120.50),  
-(101, 5, 1, 120.50),  
+(101, 1, 1, 30.00),
+(101, 5, 1, 5.00),    
 
 -- Itens do Pedido 102 (Carlos)
-(102, 2, 1, 120.50),  
-(102, 5, 1, 120.50),  
+(102, 2, 1, 30.00),  
+(102, 1, 1, 30.00),  
 
 -- Itens do Pedido 103 (Beatriz)
-(103, 4, 2, 899.90),  
+(103, 3, 1, 30.00),
+(103, 4, 1, 40.00), 
 
 -- Itens do Pedido 104 (Ana)
-(104, 3, 1, 350.00);  
+(104, 5, 1, 5.00);  
 
 -- 5. POPULAR TABELA DE COMANDA
 
 INSERT INTO comanda (cliente_id, status_pagamento, total) VALUES
-(1, 'Pago', 67.42),
-(2, 'Pendente', 77.42),
-(2, 'Pago', 87.42);
+(1, 'Pago', 35.00),
+(2, 'Pendente', 60.00),
+(3, 'Pago', 70.00),
+(1,'Pago',5.00);
 
--- 6. POPULAR ITENS DA COMANDA 
+
+-- 6. POPULAR ITENS DA COMANDA (Nova tabela do modelo corrigido)
+
 INSERT INTO itens_comanda (comanda_id, produto_id, quantidade, preco_unitario) VALUES
-(1, 2, 2, 33.71),
+(1, 2, 2, 33.71), -- Exemplo: 2 mouses ou itens correspondentes ao valor
 (2, 3, 1, 77.42),
-(3, 5, 1, 87.42);
+(3, 5, 1, 87.42); 
+-- OBS: ACHO QUE TA ERRADO
+insert into caixa (id,com_id,forma_pagamento,total) VALUES
+(1, 1, 'dinheiro', 35.00),
+(2, 2, 'pix', 60.00),
+(3, 3, 'cartão', 70.00),
+(4, 4, 'dinheiro', 5.00);
 
--- 7. POPULAR CAIXA
-insert into caixa(id,com_id,forma_pagamento,horario,total) VALUES
-(1,1,'dinheiro','18:23',45.33),
-(2,2,'pix','42:23',35.33),
-(3,3,'cartão','50:23',25.33);
+INSERT into prod_fornecido(fornecedor_id,produto_id,quantidade,preco_unitario) VALUES
+( 1, 1, '25 caixas', 145.00 ),
+( 2, 2, '30 caixas', 75.00 ),
+( 3, 3, '15 caixas', 125.00 ),
+( 4, 4, ' 10 caixas', 40.00 ),
+( 5, 5, '5 caixas', 65.00 );
