@@ -1,0 +1,12 @@
+SELECT 
+    p.id AS numero_pedido,
+    c.nome AS cliente,
+    prod.nome AS produto,
+    ip.quantidade,
+    ip.preco_unitario,
+    (ip.quantidade * ip.preco_unitario) AS subtotal_item
+FROM pedidos p
+INNER JOIN clientes c ON p.cliente_id = c.id
+INNER JOIN itens_pedido ip ON p.id = ip.pedido_id
+INNER JOIN produtos prod ON ip.produto_id = prod.id
+ORDER BY p.id ASC;

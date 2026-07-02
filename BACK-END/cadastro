@@ -1,0 +1,67 @@
+-- 1. POPULAR TABELA DE CLIENTES
+INSERT INTO clientes (nome, email, cpf, endereco) VALUES 
+('Ana Souza', 'ana.souza@email.com', '11111415121', 'Rua da Aura'),
+('Carlos Eduardo', 'cadu@email.com', '22212242225', 'Rua da Morte'),
+('Beatriz Ramos', 'bia.ramos@email.com', '31334323353', 'Rua da Macumba'),
+('Ricardo Santos', 'ricardo.santos@email.com', '44144424544', 'Rua Kkkkj'),
+('Juliana Lima', 'ju.lima@email.com', '55455255155', 'Rua da Varzea');
+
+-- POPULAR TABELA FORNECEDOR
+INSERT INTO fornecedor (nome, email, cnpj, endereco, item_fornecido) VALUES
+('Jessica R. Cardwell', 'jessica@email.com', '12345617890112', 'Aure', 'Limão'),
+('Zoom Player', 'zoomplayer@email.com', '11111111111111', 'Pele', 'Abacate'),
+('Pipi Popo', 'pipipopo@email.com', '22222222212222', 'Pepe', 'Melancia'),
+('Stecanx', 'stecanx@email.com', '33333333333133', 'Ruru', 'Morango'),
+('BOOX', 'boox@email.com', '44444444444144', 'Casacasa', 'Banana');
+
+-- 2. POPULAR TABELA DE PRODUTOS
+INSERT INTO produtos (nome, preco, estoque, descricao) VALUES 
+('Notebook Ultra', 4200.00, 15, 'Bom'),
+('Mouse Ergonômico', 120.50, 40, 'Ruim'),
+('Teclado Mecânico RGB', 350.00, 25, 'Regular'),
+('Monitor 24 Polegadas', 899.90, 12, 'Ruim'),
+('Fone de Ouvido Bluetooth', 199.00, 50, 'Perfeito');
+
+-- 3. POPULAR TABELA DE PEDIDOS
+
+INSERT INTO pedidos (id, cliente_id, total) VALUES 
+(101, 1, 4441.00), -- Pedido da Ana Souza (Notebook + Mouse + Fone)
+(102, 2, 241.00),  -- Pedido do Carlos (Mouse + Fone)
+(103, 3, 1799.80), -- Pedido da Beatriz (2 Monitores)
+(104, 1, 350.00);  -- Segundo pedido da Ana Souza (Teclado)
+
+-- 4. POPULAR TABELA DE ITENS DO PEDIDO
+INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unitario) VALUES 
+-- Itens do Pedido 101 (Ana)
+(101, 1, 1, 4200.00), 
+(101, 2, 1, 120.50),  
+(101, 5, 1, 120.50),  
+
+-- Itens do Pedido 102 (Carlos)
+(102, 2, 1, 120.50),  
+(102, 5, 1, 120.50),  
+
+-- Itens do Pedido 103 (Beatriz)
+(103, 4, 2, 899.90),  
+
+-- Itens do Pedido 104 (Ana)
+(104, 3, 1, 350.00);  
+
+-- 5. POPULAR TABELA DE COMANDA
+
+INSERT INTO comanda (cliente_id, status_pagamento, total) VALUES
+(1, 'Pago', 67.42),
+(2, 'Pendente', 77.42),
+(2, 'Pago', 87.42);
+
+-- 6. POPULAR ITENS DA COMANDA 
+INSERT INTO itens_comanda (comanda_id, produto_id, quantidade, preco_unitario) VALUES
+(1, 2, 2, 33.71),
+(2, 3, 1, 77.42),
+(3, 5, 1, 87.42);
+
+-- 7. POPULAR CAIXA
+insert into caixa(id,com_id,forma_pagamento,horario,total) VALUES
+(1,1,'dinheiro','18:23',45.33),
+(2,2,'pix','42:23',35.33),
+(3,3,'cartão','50:23',25.33);

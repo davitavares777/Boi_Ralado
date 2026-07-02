@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro de Fornecedor | Boi Ralado</title>
+  <link rel="icon" type="image/png" href="img/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <img src="img/logo.png" alt="Logo Boi Ralado" />
+        <div class="sidebar__brand-text">
+          <span class="sidebar__brand-title">Boi Ralado</span>
+          <span class="sidebar__brand-sub">Restaurante</span>
+        </div>
+      </div>
+      <nav class="sidebar__nav">
+        <div class="sidebar__nav-title">Menu Principal</div>
+        <a href="index.html"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="cadastro.html"><i class="fa-solid fa-id-card-clip"></i> Cadastro</a>
+        <a href="movimento.html"><i class="fa-solid fa-arrow-right-arrow-left"></i> Movimento</a>
+        <a href="relatorios.html"><i class="fa-solid fa-chart-column"></i> Relatórios</a>
+
+        <div class="sidebar__nav-title">Acessos Rápidos</div>
+        <a href="cliente.html"><i class="fa-solid fa-users"></i> Clientes</a>
+        <a href="produto.html"><i class="fa-solid fa-burger"></i> Produtos</a>
+        <a href="fornecedor.html" class="active"><i class="fa-solid fa-truck-field"></i> Fornecedores</a>
+        <a href="pedido.html"><i class="fa-solid fa-receipt"></i> Pedidos</a>
+        <a href="entrega.html"><i class="fa-solid fa-motorcycle"></i> Delivery</a>
+      </nav>
+      <div class="sidebar__footer"><i class="fa-solid fa-fire"></i> v1.0 — © 2026</div>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div style="display:flex; align-items:center;">
+          <button class="header__menu-btn"><i class="fa-solid fa-bars"></i></button>
+          <h1 class="header__title">Sistema de Gestão — Restaurante <span>Boi Ralado</span></h1>
+        </div>
+        <div class="header__actions">
+          <button class="header__icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+          <button class="header__icon-btn"><i class="fa-solid fa-bell"></i><span class="badge"></span></button>
+          <div class="header__user">
+            <div class="header__user-avatar">JS</div>
+            <div class="header__user-info">
+              <span class="header__user-name">João Silva</span>
+              <span class="header__user-role">Gerente</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <div class="breadcrumbs"><a href="index.html"><i class="fa-solid fa-house"></i> Início</a> <i class="fa-solid fa-chevron-right"></i> <a href="cadastro.html">Cadastro</a> <i class="fa-solid fa-chevron-right"></i> <span class="current">Fornecedor</span></div>
+            <h2 class="page-head__title">Cadastro de Fornecedor</h2>
+            <p class="page-head__subtitle">Preencha os dados fiscais e de contato da empresa fornecedora.</p>
+          </div>
+        </div>
+
+        <form class="form-card" autocomplete="off">
+          <div class="form-card__head">
+            <div class="form-card__head-icon"><i class="fa-solid fa-truck-field"></i></div>
+            <div>
+              <h2>Dados do Fornecedor</h2>
+              <p>Informe os dados da pessoa jurídica.</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group col-8">
+              <label>Razão Social <span class="required">*</span></label>
+              <input type="text" placeholder="Ex: Distribuidora Carnes Premium Ltda" />
+            </div>
+            <div class="form-group col-4">
+              <label>CNPJ <span class="required">*</span></label>
+              <input type="text" placeholder="00.000.000/0000-00" />
+            </div>
+
+            <div class="form-group col-6">
+              <label>Nome Fantasia</label>
+              <input type="text" placeholder="Ex: Carnes Premium" />
+            </div>
+            <div class="form-group col-6">
+              <label>Inscrição Estadual</label>
+              <input type="text" placeholder="000.000.000.000" />
+            </div>
+
+            <div class="form-group col-6">
+              <label>Telefone</label>
+              <input type="tel" placeholder="(00) 0000-0000" />
+            </div>
+            <div class="form-group col-6">
+              <label>E-mail</label>
+              <input type="email" placeholder="contato@empresa.com" />
+            </div>
+
+            <div class="form-group col-3">
+              <label>CEP</label>
+              <input type="text" placeholder="00000-000" />
+            </div>
+            <div class="form-group col-6">
+              <label>Endereço</label>
+              <input type="text" placeholder="Rua, Avenida..." />
+            </div>
+            <div class="form-group col-3">
+              <label>Número</label>
+              <input type="text" placeholder="123" />
+            </div>
+
+            <div class="form-group col-6">
+              <label>Complemento</label>
+              <input type="text" placeholder="Sala, Galpão..." />
+            </div>
+            <div class="form-group col-6">
+              <label>Bairro</label>
+              <input type="text" placeholder="Bairro" />
+            </div>
+
+            <div class="form-group col-8">
+              <label>Cidade</label>
+              <input type="text" placeholder="Cidade" />
+            </div>
+            <div class="form-group col-4">
+              <label>Estado</label>
+              <select>
+                <option value="">Selecione...</option>
+                <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option>
+                <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+                <option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option>
+                <option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                <option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option>
+                <option>SE</option><option>TO</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <a href="cadastro.html" class="btn btn--outline"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
+            <button type="reset" class="btn btn--ghost"><i class="fa-solid fa-eraser"></i> Limpar</button>
+            <button type="button" class="btn btn--primary"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+          </div>
+        </form>
+      </main>
+
+      <footer class="footer">
+        <strong>Boi Ralado</strong> — Sistema de Gestão Interna <i class="fa-solid fa-fire"></i> © 2026
+      </footer>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatórios | Boi Ralado</title>
+  <link rel="icon" type="image/png" href="img/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <img src="img/logo.png" alt="Logo Boi Ralado" />
+        <div class="sidebar__brand-text">
+          <span class="sidebar__brand-title">Boi Ralado</span>
+          <span class="sidebar__brand-sub">Restaurante</span>
+        </div>
+      </div>
+      <nav class="sidebar__nav">
+        <div class="sidebar__nav-title">Menu Principal</div>
+        <a href="index.html"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="cadastro.html"><i class="fa-solid fa-id-card-clip"></i> Cadastro</a>
+        <a href="movimento.html"><i class="fa-solid fa-arrow-right-arrow-left"></i> Movimento</a>
+        <a href="relatorios.html" class="active"><i class="fa-solid fa-chart-column"></i> Relatórios</a>
+
+        <div class="sidebar__nav-title">Acessos Rápidos</div>
+        <a href="cliente.html"><i class="fa-solid fa-users"></i> Clientes</a>
+        <a href="produto.html"><i class="fa-solid fa-burger"></i> Produtos</a>
+        <a href="fornecedor.html"><i class="fa-solid fa-truck-field"></i> Fornecedores</a>
+        <a href="pedido.html"><i class="fa-solid fa-receipt"></i> Pedidos</a>
+        <a href="entrega.html"><i class="fa-solid fa-motorcycle"></i> Delivery</a>
+      </nav>
+      <div class="sidebar__footer"><i class="fa-solid fa-fire"></i> v1.0 — © 2026</div>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div style="display:flex; align-items:center;">
+          <button class="header__menu-btn"><i class="fa-solid fa-bars"></i></button>
+          <h1 class="header__title">Sistema de Gestão — Restaurante <span>Boi Ralado</span></h1>
+        </div>
+        <div class="header__actions">
+          <button class="header__icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+          <button class="header__icon-btn"><i class="fa-solid fa-bell"></i><span class="badge"></span></button>
+          <div class="header__user">
+            <div class="header__user-avatar">JS</div>
+            <div class="header__user-info">
+              <span class="header__user-name">João Silva</span>
+              <span class="header__user-role">Gerente</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <div class="breadcrumbs"><a href="index.html"><i class="fa-solid fa-house"></i> Início</a> <i class="fa-solid fa-chevron-right"></i> <span class="current">Relatórios</span></div>
+            <h2 class="page-head__title">Módulo de Relatórios</h2>
+            <p class="page-head__subtitle">Escolha o tipo de relatório que deseja consultar.</p>
+          </div>
+          <a href="index.html" class="btn btn--outline"><i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard</a>
+        </div>
+
+        <section class="cards-grid">
+          <a href="relatorio_balcao.html" class="access-card">
+            <div class="access-card__icon"><i class="fa-solid fa-cash-register"></i></div>
+            <h4 class="access-card__title">Relatório Balcão</h4>
+            <p class="access-card__desc">Visualize totais de marmitas e almoços por data com detalhamento por forma de pagamento.</p>
+            <span class="access-card__link">Abrir relatório <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+
+          <a href="relatorio_delivery.html" class="access-card">
+            <div class="access-card__icon brown"><i class="fa-solid fa-motorcycle"></i></div>
+            <h4 class="access-card__title">Relatório Delivery</h4>
+            <p class="access-card__desc">Analise vendas, taxas de entrega e formas de pagamento das entregas realizadas.</p>
+            <span class="access-card__link">Abrir relatório <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+        </section>
+
+        <div class="summary-grid mt-4">
+          <div class="summary-card">
+            <span class="summary-card__label">Vendas do Mês</span>
+            <span class="summary-card__value">R$ 87.420,50</span>
+          </div>
+          <div class="summary-card highlight">
+            <span class="summary-card__label">Ticket Médio</span>
+            <span class="summary-card__value">R$ 64,80</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card__label">Total de Pedidos</span>
+            <span class="summary-card__value">1.349</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card__label">Crescimento</span>
+            <span class="summary-card__value">+18,3%</span>
+          </div>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <strong>Boi Ralado</strong> — Sistema de Gestão Interna <i class="fa-solid fa-fire"></i> © 2026
+      </footer>
+    </div>
+  </div>
+</body>
+</html>

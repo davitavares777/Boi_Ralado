@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boi Ralado - Dashboard | Sistema de Gestão</title>
+  <link rel="icon" type="image/png" href="img/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__brand">
+        <img src="img/logo.png" alt="Logo Boi Ralado" />
+        <div class="sidebar__brand-text">
+          <span class="sidebar__brand-title">Boi Ralado</span>
+          <span class="sidebar__brand-sub">Restaurante</span>
+        </div>
+      </div>
+      <nav class="sidebar__nav">
+        <div class="sidebar__nav-title">Menu Principal</div>
+        <a href="index.html" class="active"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="cadastro.html"><i class="fa-solid fa-id-card-clip"></i> Cadastro</a>
+        <a href="movimento.html"><i class="fa-solid fa-arrow-right-arrow-left"></i> Movimento</a>
+        <a href="relatorios.html"><i class="fa-solid fa-chart-column"></i> Relatórios</a>
+
+        <div class="sidebar__nav-title">Acessos Rápidos</div>
+        <a href="cliente.html"><i class="fa-solid fa-users"></i> Clientes</a>
+        <a href="produto.html"><i class="fa-solid fa-burger"></i> Produtos</a>
+        <a href="fornecedor.html"><i class="fa-solid fa-truck-field"></i> Fornecedores</a>
+        <a href="pedido.html"><i class="fa-solid fa-receipt"></i> Pedidos</a>
+        <a href="entrega.html"><i class="fa-solid fa-motorcycle"></i> Delivery</a>
+      </nav>
+      <div class="sidebar__footer">
+        <i class="fa-solid fa-fire"></i> v1.0 — © 2026
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+      <header class="header">
+        <div style="display:flex; align-items:center;">
+          <button class="header__menu-btn" aria-label="Abrir menu"><i class="fa-solid fa-bars"></i></button>
+          <h1 class="header__title">Sistema de Gestão — Restaurante <span>Boi Ralado</span></h1>
+        </div>
+        <div class="header__actions">
+          <button class="header__icon-btn" title="Buscar"><i class="fa-solid fa-magnifying-glass"></i></button>
+          <button class="header__icon-btn" title="Notificações"><i class="fa-solid fa-bell"></i><span class="badge"></span></button>
+          <div class="header__user">
+            <div class="header__user-avatar">JS</div>
+            <div class="header__user-info">
+              <span class="header__user-name">João Silva</span>
+              <span class="header__user-role">Gerente</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <div class="breadcrumbs"><i class="fa-solid fa-house"></i> Início <i class="fa-solid fa-chevron-right"></i> <span class="current">Dashboard</span></div>
+            <h2 class="page-head__title">Bem-vindo de volta, João! 🔥</h2>
+            <p class="page-head__subtitle">Confira o resumo do dia e acesse rapidamente os módulos do sistema.</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn--outline"><i class="fa-solid fa-calendar"></i> Hoje, 24 Fev 2026</button>
+            <button class="btn btn--primary"><i class="fa-solid fa-plus"></i> Novo Pedido</button>
+          </div>
+        </div>
+
+        <!-- STATS -->
+        <section class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--red"><i class="fa-solid fa-coins"></i></div>
+            <div>
+              <div class="stat-card__label">Vendas Hoje</div>
+              <div class="stat-card__value">R$ 4.275,80</div>
+              <div class="stat-card__trend"><i class="fa-solid fa-arrow-up"></i> 12,4% vs ontem</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--brown"><i class="fa-solid fa-receipt"></i></div>
+            <div>
+              <div class="stat-card__label">Pedidos</div>
+              <div class="stat-card__value">87</div>
+              <div class="stat-card__trend"><i class="fa-solid fa-arrow-up"></i> 8 ativos agora</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--beige"><i class="fa-solid fa-motorcycle"></i></div>
+            <div>
+              <div class="stat-card__label">Delivery</div>
+              <div class="stat-card__value">34</div>
+              <div class="stat-card__trend"><i class="fa-solid fa-arrow-up"></i> 5 em rota</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--dark"><i class="fa-solid fa-users"></i></div>
+            <div>
+              <div class="stat-card__label">Clientes Atendidos</div>
+              <div class="stat-card__value">142</div>
+              <div class="stat-card__trend down"><i class="fa-solid fa-arrow-down"></i> 2,1% vs ontem</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ACCESS CARDS -->
+        <h3 class="section-title">Acesso Rápido aos Módulos</h3>
+        <p class="section-subtitle">Selecione um módulo abaixo para gerenciar as informações do restaurante.</p>
+
+        <section class="cards-grid">
+          <a href="cadastro.html" class="access-card">
+            <div class="access-card__icon"><i class="fa-solid fa-id-card-clip"></i></div>
+            <h4 class="access-card__title">Cadastro</h4>
+            <p class="access-card__desc">Gerencie clientes, fornecedores e produtos do restaurante de forma rápida e organizada.</p>
+            <span class="access-card__link">Acessar módulo <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+
+          <a href="movimento.html" class="access-card">
+            <div class="access-card__icon brown"><i class="fa-solid fa-arrow-right-arrow-left"></i></div>
+            <h4 class="access-card__title">Movimento</h4>
+            <p class="access-card__desc">Registre pedidos, emita comandas e organize as ordens de entrega de delivery.</p>
+            <span class="access-card__link">Acessar módulo <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+
+          <a href="relatorios.html" class="access-card">
+            <div class="access-card__icon dark"><i class="fa-solid fa-chart-column"></i></div>
+            <h4 class="access-card__title">Relatórios</h4>
+            <p class="access-card__desc">Visualize relatórios completos de balcão e delivery por período e forma de pagamento.</p>
+            <span class="access-card__link">Acessar módulo <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+        </section>
+
+        <!-- ÚLTIMOS PEDIDOS -->
+        <div style="margin-top:36px;">
+          <div class="table-wrap">
+            <div class="table-actions">
+              <h3><i class="fa-solid fa-clock-rotate-left" style="color:var(--color-red); margin-right:6px;"></i> Últimos Pedidos</h3>
+              <a href="pedido.html" class="btn btn--ghost btn--sm">Ver todos <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Cliente</th>
+                  <th>Mesa</th>
+                  <th>Tipo</th>
+                  <th class="num">Valor</th>
+                  <th>Status</th>
+                  <th>Hora</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>#1087</strong></td>
+                  <td>Maria Oliveira</td>
+                  <td>Mesa 04</td>
+                  <td>Balcão</td>
+                  <td class="num">R$ 87,50</td>
+                  <td><span class="pill pill--paid">Pago</span></td>
+                  <td>12:34</td>
+                </tr>
+                <tr>
+                  <td><strong>#1086</strong></td>
+                  <td>Carlos Souza</td>
+                  <td>—</td>
+                  <td>Delivery</td>
+                  <td class="num">R$ 142,90</td>
+                  <td><span class="pill pill--pending">Em rota</span></td>
+                  <td>12:18</td>
+                </tr>
+                <tr>
+                  <td><strong>#1085</strong></td>
+                  <td>Ana Beatriz</td>
+                  <td>Mesa 12</td>
+                  <td>Balcão</td>
+                  <td class="num">R$ 56,00</td>
+                  <td><span class="pill pill--paid">Pago</span></td>
+                  <td>12:02</td>
+                </tr>
+                <tr>
+                  <td><strong>#1084</strong></td>
+                  <td>Roberto Lima</td>
+                  <td>—</td>
+                  <td>Delivery</td>
+                  <td class="num">R$ 98,20</td>
+                  <td><span class="pill pill--cancelled">Cancelado</span></td>
+                  <td>11:47</td>
+                </tr>
+                <tr>
+                  <td><strong>#1083</strong></td>
+                  <td>Fernanda Mota</td>
+                  <td>Mesa 07</td>
+                  <td>Balcão</td>
+                  <td class="num">R$ 123,40</td>
+                  <td><span class="pill pill--paid">Pago</span></td>
+                  <td>11:30</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+
+      <footer class="footer">
+        <strong>Boi Ralado</strong> — Sistema de Gestão Interna <i class="fa-solid fa-fire"></i> © 2026 Todos os direitos reservados.
+      </footer>
+    </div>
+  </div>
+</body>
+</html>

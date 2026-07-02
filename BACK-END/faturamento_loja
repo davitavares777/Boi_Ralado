@@ -1,0 +1,5 @@
+SELECT 
+    COUNT(DISTINCT id) AS total_pedidos_recebidos,
+    SUM(total) AS faturamento_bruto_total,
+    AVG(total) AS ticket_medio_por_pedido
+FROM pedidos;
