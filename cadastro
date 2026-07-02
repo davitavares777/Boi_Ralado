@@ -63,7 +63,5 @@ INSERT INTO itens_comanda (comanda_id, produto_id, quantidade, preco_unitario) V
 -- 7. POPULAR CAIXA
 insert into caixa(id,com_id,forma_pagamento,horario,total) VALUES
 (1,1,'dinheiro','18:23',45.33),
-(2,3,'pix','42:23',35.33),
-(3,4,'cartão','50:23',25.33),
-(4,5,'dinheiro','45:23',15.33);
-
+(2,2,'pix','42:23',35.33),
+(3,3,'cartão','50:23',25.33);
