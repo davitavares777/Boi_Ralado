@@ -1,33 +1,29 @@
 -- 1. POPULAR TABELA DE CLIENTES
-INSERT INTO clientes (nome, email, cpf, endereco) VALUES
-('Ana Souza', 'ana.souza@email.com', '11111415121', 'Rua da Aura'),
-('Carlos Eduardo', 'cadu@email.com', '22212242225', 'Rua da Morte'),
-('Beatriz Ramos', 'bia.ramos@email.com', '31334323353', 'Rua da Macumba'),
-('Ricardo Santos', 'ricardo.santos@email.com', '44144424544', 'Rua Kkkkj'),
-('Juliana Lima', 'ju.lima@email.com', '55455255155', 'Rua da Varzea');
+INSERT INTO clientes (nome, cpf, data_nascimento, telefone, email, cep, endereco, numero_casa, complemento, bairro, cidade, estado) VALUES
+('Ana Silva', '123.456.789-00', '1990-05-15', 11988887777, 'ana.silva@email.com', 01311200, 'Avenida Paulista', '1500', 'Apto 21', 'Bela Vista', 'São Paulo', 'SP'),
+('Bruno Souza', '987.654.321-11', '1985-10-22', 21977776666, 'bruno.souza@email.com', 22041001, 'Rua Barata Ribeiro', '450', 'Bloco B', 'Copacabana', 'Rio de Janeiro', 'RJ'),
+('Carla Costa', '456.123.789-22', '1998-12-01', 31966665555, 'carla.costa@email.com', 30140010, 'Avenida Cristóvão Colombo', '300', 'Fundos', 'Savassi', 'Belo Horizonte', 'MG');
 
 -- POPULAR TABELA FORNECEDOR
-INSERT INTO fornecedor (nome, email, cnpj, endereco, prod_fornecido) VALUES
-('Jessica R. Cardwell', 'jessica@email.com', '12345617890112', 'Aure', 'boi'),
-('Zoom Player', 'zoomplayer@email.com', '11111111111111', 'Pele', 'frango'),
-('Pipi Popo', 'pipipopo@email.com', '22222222212222', 'Pepe', 'porco'),
-('Stecanx', 'stecanx@email.com', '33333333333133', 'Ruru', 'grãos'),
-('BOOX', 'boox@email.com', '44444444444144', 'Casacasa', 'refrigerante');
+INSERT INTO fornecedor (razao_social, cnpj, nome, inscricao_estadu, endereco, prod_fornecido, email, telefone, cep, numero_casa, complemento, bairro, cidade, estado) VALUES
+('Silva & Santos Distribuidora de Alimentos LTDA', '12345678000199', 'Distribuidora Silva', '111222333', 'Avenida Brasil', 'Hortifrúti e Mercearia', 'contato@silvasantos.com', 11988887777, 01000000, '1500', 'Galpão A', 'Centro', 'São Paulo', 'SP'),
+('TechNova Indústria e Comércio de Eletrônicos SA', '98765432000188', 'TechNova Componentes', '444555666', 'Rua das Flores', 'Cabos e Conectores', 'vendas@technova.com.br', 2133334444, 20000000, '42', 'Bloco 3, Sala 10', 'Botafogo', 'Rio de Janeiro', 'RJ'),
+('Papelaria e Embalagens Progresso EIRELI', '55566677000122', 'Progresso Embalagens', '777888999', 'Alameda das Palmeiras', 'Caixas de Papelão e Fitas', 'comercial@progressoemb.com', 4130302020, 80000000, '500', 'Fundos', 'Industrial', 'Curitiba', 'PR');
 
 -- 2. POPULAR TABELA DE PRODUTOS
-INSERT INTO produtos (nome, preco, estoque, descricao) VALUES
-('boi ralado marmita', 30.00, 15, 'marmita de boi'),
-('frango ralado marmita', 30.00, 40, 'marmita de frango'),
-('porco ralado marmita', 30.00, 25, 'marmita de porco'),
-('buffet', 40.00, 12, 'por quilo'),
-('refrigerante', 5.00, 50, 'refrigerante lata');
+INSERT INTO produtos (codigo_produto, nome_produto, categoria, fornecedor, descricao, preco_unit, quantidade, unidade_medida, data_validade) VALUES
+('PROD-0043', 'Filé de Frango', 'Insumos', 'Avícola Santa Rita LTDA', 'Peito de frango desossado e congelado', '24,50', '15', 'Kg', '15/11/2026'),
+('PROD-0044', 'Arroz Integral', 'Insumos', 'Cerealista São José S.A.', 'Arroz integral tipo 1 pacote 1kg', '8,90', '50', 'Pct', '20/05/2027'),
+('PROD-0045', 'Queijo Mussarela', 'Insumos', 'Laticínios Vale do Sol', 'Queijo mussarela fatiado para hambúrgueres', '42,00', '10', 'Kg', '05/10/2026'),
+('PROD-0046', 'Molho Especial Boi Ralado', 'Acompanhamentos', 'Produção Própria', 'Molho artesanal para lanches da casa', '3,80', '100', 'Un', '18/12/2026'),
+('PROD-0047', 'Refrigerante Lata 350ml', 'Bebidas', 'Bebidas & Cia Distribuição', 'Refrigerante de cola lata 350ml', '7,00', '120', 'Un', '30/08/2027');
 
 -- 3. POPULAR TABELA DE PEDIDOS
-INSERT INTO pedidos (id, cliente_id, total) VALUES
-(101, 1, 35.00), -- Pedido da Ana Souza (boi ralado + refrigerante )
-(102, 2, 60.00),  -- Pedido do Carlos (frango ralado + boi ralado)
-(103, 3, 70.00), -- Pedido da Beatriz (porco ralado + buffet)
-(104, 1, 5.00);  -- Segundo pedido da Ana Souza (refrigerante)
+INSERT INTO pedidos (id, cliente_id, numero_pedido,numero_mesa,nome_cliente,hora) VALUES
+(101, 1,'#1088','04',' Gorgeadi','12:45'),
+(102, 2,'#1078','05',' Hasusa','17:59'),
+(103, 3,'#1068','06',' Naheti','22:42'),
+(104, 1,'#1058','07',' Jerago','09:12');
 
 -- 4. POPULAR TABELA DE ITENS DO PEDIDO
 INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unitario) VALUES
