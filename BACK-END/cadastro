@@ -1,8 +1,13 @@
 -- 1. POPULAR TABELA DE CLIENTES
-INSERT INTO clientes (nome, cpf, data_nasc, telefone, email, cep, endereco, numero_casa, complemento, bairro, cidade, estado) VALUES
-('Ana Silva', '123.456.789-00', '1990-05-15', 11988887777, 'ana.silva@email.com', 01311200, 'Avenida Paulista', '1500', 'Apto 21', 'Bela Vista', 'São Paulo', 'SP'),
-('Bruno Souza', '987.654.321-11', '1985-10-22', 21977776666, 'bruno.souza@email.com', 22041001, 'Rua Barata Ribeiro', '450', 'Bloco B', 'Copacabana', 'Rio de Janeiro', 'RJ'),
-('Carla Costa', '456.123.789-22', '1998-12-01', 31966665555, 'carla.costa@email.com', 30140010, 'Avenida Cristóvão Colombo', '300', 'Fundos', 'Savassi', 'Belo Horizonte', 'MG');
+INSERT INTO clientes (nome, cpf, data_nasc, telefone, email, endereco_id) VALUES
+('Ana Silva', '123.456.789-00', '1990-05-15', 11988887777, 'ana.silva@email.com', 1),
+('Bruno Souza', '987.654.321-11', '1985-10-22', 21977776666, 'bruno.souza@email.com', 2),
+('Carla Costa', '456.123.789-22', '1998-12-01', 31966665555, 'carla.costa@email.com', 3);
+
+INSERT INTO endereco (cep, logradouro, numero_casa, complemento, bairro, cidade, estado) VALUES
+(01311200, 'Avenida Paulista', '1500', 'Apto 21', 'Bela Vista', 'São Paulo', 'SP'),
+(22041001, 'Rua Barata Ribeiro', '450', 'Bloco B', 'Copacabana', 'Rio de Janeiro', 'RJ'),
+(30140010, 'Avenida Cristóvão Colombo', '300', 'Fundos', 'Savassi', 'Belo Horizonte', 'MG');
 
 -- POPULAR TABELA FORNECEDOR
 INSERT INTO fornecedor (razao_social, cnpj, nome, inscricao_estadu, endereco, prod_fornecido, email, telefone, cep, numero_casa, complemento, bairro, cidade, estado) VALUES
