@@ -6,8 +6,14 @@ CREATE TABLE IF NOT EXISTS clientes (
     data_nasc text,
     telefone integer ,
     email TEXT,
-    cep integer,
-    endereco TEXT NOT NULL,
+  	endereco_id INTEGER NOT NULL,
+  	FOREIGN KEy (endereco_id) REFERENCES endereco(id)
+    );
+
+CREATE TABLE IF NOT EXISTS endereco (
+  	id INTEGER PRIMARY KEY AUTOINCREMENT,
+  	cep integer,
+    logradouro TEXT NOT NULL,
     numero_casa text,
     complemento text,
     bairro text,
