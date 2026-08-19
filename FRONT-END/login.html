@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Entrar | Boi Ralado</title>
+  <title>Login | Boi Ralado</title>
   <link rel="icon" type="image/png" href="img/logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,76 +13,82 @@
 </head>
 <body>
   <div class="login-page">
-    <div class="login-wrap">
+    <div class="login-card">
 
-      <!-- LADO ILUSTRATIVO -->
-      <div class="login-side">
-        <div class="login-side__brand">
+      <!-- LADO ESQUERDO -->
+      <div class="login-card__side">
+        <div class="login-card__brand">
           <img src="img/logo.png" alt="Logo Boi Ralado" />
           <div>
-            <div class="login-side__brand-title">Boi Ralado</div>
-            <div class="login-side__brand-sub">Restaurante</div>
+            <div class="login-card__brand-title">Boi Ralado</div>
+            <div class="login-card__brand-sub">Restaurante</div>
           </div>
         </div>
 
-        <div class="login-side__quote">
-          <h2>Acesse sua conta<br />e volte ao trabalho. 🔥</h2>
-          <p>Gerencie pedidos, comandas, delivery e relatórios do restaurante em um só lugar.</p>
+        <div class="login-card__quote">
+          Sabor que <span>conquista</span>,<br />
+          gestão que <span>funciona</span>.
         </div>
 
-        <div class="login-side__footer">
+        <div class="login-card__foot">
           <i class="fa-solid fa-fire"></i> Sistema de Gestão Interna — v1.0 © 2026
         </div>
       </div>
 
-      <!-- FORMULÁRIO -->
-      <div class="login-form-col">
-        <div class="login-form-col__head">
-          <span class="eyebrow">Área do Funcionário</span>
-          <h1>Entrar na sua conta</h1>
-          <p>Informe suas credenciais para acessar o sistema.</p>
-        </div>
-
-        <div class="login-error" id="loginError">
-          <i class="fa-solid fa-circle-exclamation"></i>
-          <span>Usuário ou senha inválidos. Tente novamente.</span>
+      <!-- LADO DIREITO — FORMULÁRIO -->
+      <div class="login-card__form">
+        <div class="login-card__form-head">
+          <h1>Acesse sua conta</h1>
+          <p>Entre com suas credenciais de funcionário para continuar.</p>
         </div>
 
         <form class="login-form" id="loginForm" autocomplete="off">
-          <div class="login-input-group">
+
+          <div class="login-form__error" id="loginError">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>Usuário ou senha inválidos. Tente novamente.</span>
+          </div>
+
+          <div class="form-group">
             <label>Usuário ou E-mail</label>
-            <div class="login-input-wrap">
-              <i class="fa-solid fa-user field-icon"></i>
-              <input type="text" id="loginUser" placeholder="Ex: joao.silva ou joao@boiralado.com" required />
+            <div class="input-wrap">
+              <i class="fa-solid fa-user"></i>
+              <input type="text" id="loginUser" placeholder="joao.silva" value="joao.silva" />
             </div>
           </div>
 
-          <div class="login-input-group">
+          <div class="form-group">
             <label>Senha</label>
-            <div class="login-input-wrap">
-              <i class="fa-solid fa-lock field-icon"></i>
-              <input type="password" id="loginPass" placeholder="Digite sua senha" required />
-              <button type="button" class="toggle-visibility" id="togglePass" title="Mostrar/ocultar senha">
+            <div class="input-wrap">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="loginPass" placeholder="Digite sua senha" />
+              <button type="button" class="toggle-pass" id="togglePass" title="Mostrar/ocultar senha">
                 <i class="fa-solid fa-eye"></i>
               </button>
             </div>
           </div>
 
-          <div class="login-row-between">
-            <label class="login-remember">
-              <input type="checkbox" /> Lembrar de mim
+          <div class="login-form__row">
+            <label class="login-form__remember">
+              <input type="checkbox" checked /> Manter conectado
             </label>
-            <a href="#" class="login-forgot">Esqueci minha senha</a>
+            <a href="#" class="login-form__forgot">Esqueci minha senha</a>
           </div>
 
-          <button type="submit" class="btn btn--primary login-submit">
+          <button type="submit" class="login-form__submit">
             <i class="fa-solid fa-right-to-bracket"></i> Entrar
           </button>
+
+          <div class="login-form__divider">ou</div>
+
+          <a href="index.html" class="btn btn--outline" style="justify-content:center;">
+            <i class="fa-solid fa-house"></i> Continuar sem login (Demo)
+          </a>
         </form>
 
-        <div class="login-divider">acesso restrito à equipe</div>
-
-        <a href="index.html" class="login-back"><i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard</a>
+        <a href="index.html" class="login-card__back">
+          <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
+        </a>
       </div>
 
     </div>
@@ -91,13 +97,13 @@
   <script>
     const form = document.getElementById('loginForm');
     const errorBox = document.getElementById('loginError');
-    const toggleBtn = document.getElementById('togglePass');
+    const togglePass = document.getElementById('togglePass');
     const passInput = document.getElementById('loginPass');
 
-    toggleBtn.addEventListener('click', () => {
-      const isPassword = passInput.type === 'password';
-      passInput.type = isPassword ? 'text' : 'password';
-      toggleBtn.innerHTML = isPassword
+    togglePass.addEventListener('click', () => {
+      const isPass = passInput.type === 'password';
+      passInput.type = isPass ? 'text' : 'password';
+      togglePass.innerHTML = isPass
         ? '<i class="fa-solid fa-eye-slash"></i>'
         : '<i class="fa-solid fa-eye"></i>';
     });
@@ -107,12 +113,15 @@
       const user = document.getElementById('loginUser').value.trim();
       const pass = passInput.value.trim();
 
-      if (user && pass) {
-        // Login simulado — integrar com backend real posteriormente
-        window.location.href = 'index.html';
-      } else {
+      if (user.length === 0 || pass.length === 0) {
+        errorBox.querySelector('span').textContent = 'Preencha usuário e senha para continuar.';
         errorBox.classList.add('show');
+        return;
       }
+
+      // Simulação de autenticação — substituir pela chamada real ao backend.
+      errorBox.classList.remove('show');
+      window.location.href = 'index.html';
     });
   </script>
 </body>
