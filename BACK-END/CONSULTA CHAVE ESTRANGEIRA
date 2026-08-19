@@ -1,0 +1,18 @@
+SELECT
+	clientes.nome AS 'Nome',
+    clientes.cpf AS 'Cpf',
+   	clientes.data_nasc AS 'Data de Nascimento',
+    clientes.telefone AS 'Telefone',
+    clientes.email AS 'Email',
+    endereco.cep as 'cep',
+    endereco.logradouro as 'logradouro',
+    endereco.numero_casa as 'numero_casa',
+    endereco.complemento as 'complemento',
+    endereco.bairro as 'bairro',
+    endereco.cidade as 'cidade',
+    endereco.estado as 'estado',
+    endereco.data_cadastro as 'data_cadastro'
+    
+FROM clientes
+INNER JOIN endereco ON clientes.endereco_id = endereco.id
+ORDER BY clientes.nome ASC;
