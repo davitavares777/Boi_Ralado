@@ -15,4 +15,5 @@ SELECT
     
 FROM clientes
 INNER JOIN endereco ON clientes.endereco_id = endereco.id
+where clientes.cpf = '123.456.789-00'
 ORDER BY clientes.nome ASC;
