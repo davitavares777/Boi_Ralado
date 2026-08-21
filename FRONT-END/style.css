@@ -812,23 +812,78 @@ table.data-table .num { font-variant-numeric: tabular-nums; text-align: right; }
 .login-card__foot i { color: var(--color-red-light); }
 
 .login-card__form {
-  padding: 46px 44px;
+  padding: 40px 44px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  max-height: 100vh;
+  overflow-y: auto;
 }
 
-.login-card__form-head { margin-bottom: 30px; }
+.login-card__form-head { margin-bottom: 24px; }
 .login-card__form-head h1 {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
   color: var(--color-brown);
   margin-bottom: 6px;
 }
 .login-card__form-head p { color: var(--color-text-muted); font-size: 14px; }
 
-.login-form { display: flex; flex-direction: column; gap: 18px; }
+/* ---------- AUTH TABS (Login / Cadastro) ---------- */
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background-color: var(--color-beige-light);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 5px;
+  margin-bottom: 26px;
+}
+.auth-tab {
+  border: none;
+  background: transparent;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.auth-tab:hover { color: var(--color-brown); }
+.auth-tab.active {
+  background: linear-gradient(135deg, var(--color-red), var(--color-red-dark));
+  color: white;
+  box-shadow: 0 4px 12px rgba(178, 34, 34, 0.30);
+}
+
+.auth-panel { display: none; }
+.auth-panel.active { display: block; animation: authFadeIn 0.28s ease; }
+
+@keyframes authFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-form { display: flex; flex-direction: column; gap: 16px; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.auth-switch-text {
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+.auth-switch-text a { color: var(--color-red); font-weight: 600; }
+.auth-switch-text a:hover { text-decoration: underline; }
 
 .login-form .form-group input {
   padding: 13px 14px 13px 44px;
@@ -892,6 +947,19 @@ table.data-table .num { font-variant-numeric: tabular-nums; text-align: right; }
 }
 .login-form__error.show { display: flex; }
 
+.login-form__success {
+  display: none;
+  align-items: center; gap: 10px;
+  background-color: #E3F2E3;
+  color: var(--color-success);
+  border: 1px solid rgba(46, 125, 50, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.login-form__success.show { display: flex; }
+
 .login-card__back {
   margin-top: 24px;
   font-size: 13px;
@@ -904,5 +972,6 @@ table.data-table .num { font-variant-numeric: tabular-nums; text-align: right; }
   .login-card { grid-template-columns: 1fr; }
   .login-card__side { padding: 32px 30px; }
   .login-card__quote { font-size: 20px; margin: 20px 0; }
-  .login-card__form { padding: 34px 28px; }
+  .login-card__form { padding: 34px 28px; max-height: none; }
+  .form-row { grid-template-columns: 1fr; }
 }
