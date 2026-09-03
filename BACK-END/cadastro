@@ -74,3 +74,8 @@ INSERT into prod_fornecido(fornecedor_id,produto_id,quantidade,modelo, preco_uni
 ( 3, 3, 15,'caixa', 125.00 ),
 ( 4, 4, 10,'pacote', 40.00 ),
 ( 5, 5, 5,'pacote', 65.00 );
+
+insert into login( entrar_email, entrar_senha, cadastro_nome, cadastro_cpf, cadastro_email, cadastro_telefone, cadastro_senha, cadastro_confirmarsenha) VALUES
+('carlos.silva92@email.com', 'CarSil#2026!', 'Carlos Eduardo da Silva', '14258396402', 'carlos.silva92@email.com', '11987654321', 'CarSil#2026!', 'CarSil#2026!'),
+('mari.souza.dev@email.com', 'M@riDev*99', 'Mariana de Souza Santos', '28561473915', 'mari.souza.dev@email.com', '21998887766', 'M@riDev*99', 'M@riDev*99'),
+('ricardo.oli85@email.com', 'R1c@rdo_Oli', 'Ricardo Oliveira Lima', '39412758188', 'ricardo.oli85@email.com', '31991234567', 'R1c@rdo_Oli', 'R1c@rdo_Oli');
