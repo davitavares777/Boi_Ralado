@@ -122,3 +122,16 @@ CREATE TABLE IF NOT EXISTS caixa (
   	quantidadeVendas REAL NOT NULL,
     FOREIGN KEY (com_id) REFERENCES comanda(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS login (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+  	entrar_email TEXT NOT NULL,
+  	entrar_senha TEXT NOT NULL,
+  	cadastro_nome TEXT NOT NULL,
+  	cadastro_cpf TEXt NOT NULL UNIQUE,
+  	cadastro_email TEXT noT NULL,
+  	cadastro_telefone INTEGER NOT NULL,
+  	cadastro_senha text NOT NULL,
+  	cadastro_confirmarsenha text NOT NULL
+  
+);
