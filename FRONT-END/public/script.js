@@ -1,7 +1,7 @@
 // endereco.js
 // Conversa com a API /api/enderecos e desenha a tela.
 
-const form = document.getElementById('loginForm');
+const form = document.getElementById('formEndereco');
 const aviso = document.getElementById('aviso');
 const corpoTabela = document.getElementById('corpoTabela');
 
@@ -12,7 +12,10 @@ const corpoTabela = document.getElementById('corpoTabela');
 // Monta um objeto com os campos do formulario, lidos pelo atributo "name".
 // Evitamos Object.fromEntries porque ele nao existe em navegadores antigos.
 function lerFormulario(formulario) {
-  const dados = {};
+  const dados = {
+    loginUser: document.getElementById('loginUser').value.trim(),
+    loginPass: document.getElementById('loginPass').value.trim()
+  };
   const campos = new FormData(formulario);
   campos.forEach(function (valor, chave) {
     dados[chave] = valor;
@@ -49,7 +52,7 @@ form.addEventListener('submit', function (evento) {
         mostrarAviso(resultado.corpo.erro, true);
         return;
       }
-      mostrarAviso('Endereço ' + resultado.corpo.id + ' salvo.', false);
+      mostrarAviso('Cadastro de ID ' + resultado.corpo.id + ' salvo no banco!', false);
       form.reset();
       carregarEnderecos();
     })
@@ -92,10 +95,11 @@ function desenharTabela(lista) {
 
     const colunas = [
       endereco.id,
-      endereco.email,
-      endereco.senha
-
-    
+      endereco.logradouro,
+      endereco.numero,
+      endereco.bairro,
+      endereco.cidade,
+      endereco.uf
     ];
 
     colunas.forEach(function (valor) {
