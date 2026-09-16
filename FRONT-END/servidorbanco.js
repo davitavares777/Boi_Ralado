@@ -72,14 +72,13 @@ var servidor = http.createServer(function (req, res) {
       }
 
       if (!novo.logradouro || !novo.cidade || !novo.uf) {
-        return responderJson(res, 400, { erro: 'Logradouro, cidade e UF sao obrigatorios.' });
+        return responderJson(res, 400, { erro: 'E-mail e senha são obrigatórios.' });
       }
 
-      var sql = 'INSERT INTO endereco (cep, logradouro, numero, complemento, bairro, cidade, uf) ' +
-                'VALUES (?, ?, ?, ?, ?, ?, ?)';
+      var sql = 'INSERT INTO endereco (email, senha) ' +
+                'VALUES (?, ?)';
 
-      var valores = [novo.cep, novo.logradouro, novo.numero,
-                     novo.complemento, novo.bairro, novo.cidade, novo.uf];
+      var valores = [novo.loginUser, novo.loginPass ];
 
       // function() e nao arrow: so assim o this traz o lastID.
       db.run(sql, valores, function (erro) {
@@ -87,7 +86,7 @@ var servidor = http.createServer(function (req, res) {
           return responderJson(res, 500, { erro: erro.message });
         }
         novo.id = this.lastID;
-        console.log('Cadastrado no banco: id ' + novo.id + ' - ' + novo.logradouro);
+        console.log('Usuário cadastrado com ID: ' + novo.id);
         responderJson(res, 201, novo);
       });
     });
@@ -115,7 +114,7 @@ var servidor = http.createServer(function (req, res) {
 
   // ---- Arquivos da pasta public ----
   if (req.method === 'GET') {
-    return servirArquivo(res, caminho === '/' ? 'login .html' : caminho);
+    return servirArquivo(res, caminho === '/' ? 'login.html' : caminho);
   }
 
   responderJson(res, 404, { erro: 'Nao encontrado.' });
@@ -140,3 +139,4 @@ servidor.listen(PORTA, function () {
   console.log('  Para desligar, aperte Ctrl+C aqui nesta janela.');
   console.log('');
 });
+  

@@ -15,9 +15,13 @@ db.serialize(function () {
   db.run(`
     CREATE TABLE IF NOT EXISTS endereco (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      email         TEXT NOT NULL,
-      senha  TEXT NOT NULL
-      
+      cep         TEXT,
+      logradouro  TEXT NOT NULL,
+      numero      TEXT,
+      complemento TEXT,
+      bairro      TEXT,
+      cidade      TEXT NOT NULL,
+      uf          TEXT NOT NULL
     )
   `);
 
