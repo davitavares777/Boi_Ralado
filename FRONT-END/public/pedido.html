@@ -45,13 +45,12 @@
           <h1 class="header__title">Sistema de Gestão — Restaurante <span>Boi Ralado</span></h1>
         </div>
         <div class="header__actions">
-          <button class="header__icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
-          <button class="header__icon-btn"><i class="fa-solid fa-bell"></i><span class="badge"></span></button>
+          <button class="header__icon-btn" title="Buscar"><i class="fa-solid fa-magnifying-glass"></i></button>
           <a href="login.html" class="header__user" title="Sair / Trocar de conta">
-            <div class="header__user-avatar">JS</div>
+            <div class="header__user-avatar">BR</div>
             <div class="header__user-info">
-              <span class="header__user-name">João Silva</span>
-              <span class="header__user-role">Gerente</span>
+              <span class="header__user-name">Usuário</span>
+              <span class="header__user-role">Sistema</span>
             </div>
           </a>
         </div>
@@ -78,7 +77,7 @@
           <div class="form-grid">
             <div class="form-group col-3">
               <label>Número do Pedido</label>
-              <input type="text" value="#1088" readonly />
+              <input type="text" value="#1001" readonly />
             </div>
             <div class="form-group col-3">
               <label>Número da Mesa</label>
@@ -86,16 +85,7 @@
             </div>
             <div class="form-group col-6">
               <label>Nome do Cliente</label>
-              <input type="text" placeholder="Buscar ou digitar nome do cliente..." />
-            </div>
-
-            <div class="form-group col-6">
-              <label>Data</label>
-              <input type="date" value="2026-02-24" />
-            </div>
-            <div class="form-group col-6">
-              <label>Hora</label>
-              <input type="time" value="12:45" />
+              <input type="text" placeholder="Digite o nome do cliente..." />
             </div>
           </div>
         </form>
@@ -120,38 +110,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td><input type="checkbox" /></td>
-                <td>Hambúrguer Artesanal 180g</td>
-                <td class="num">2</td>
-                <td>Sem cebola, ponto da carne ao ponto</td>
-                <td class="num">R$ 32,00</td>
-                <td class="num"><strong>R$ 64,00</strong></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" /></td>
-                <td>Batata Frita Rústica G</td>
-                <td class="num">1</td>
-                <td>Com cheddar e bacon</td>
-                <td class="num">R$ 24,90</td>
-                <td class="num"><strong>R$ 24,90</strong></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" /></td>
-                <td>Refrigerante Lata 350ml</td>
-                <td class="num">2</td>
-                <td>Coca-Cola gelada</td>
-                <td class="num">R$ 7,00</td>
-                <td class="num"><strong>R$ 14,00</strong></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" /></td>
-                <td>Mousse de Maracujá</td>
-                <td class="num">1</td>
-                <td>—</td>
-                <td class="num">R$ 12,00</td>
-                <td class="num"><strong>R$ 12,00</strong></td>
-              </tr>
+              <!-- Os itens adicionados entram aqui dinamicamente -->
             </tbody>
           </table>
         </div>
@@ -159,23 +118,22 @@
         <div class="summary-grid">
           <div class="summary-card">
             <span class="summary-card__label">Subtotal</span>
-            <span class="summary-card__value">R$ 114,90</span>
+            <span class="summary-card__value">R$ 0,00</span>
           </div>
           <div class="summary-card">
             <span class="summary-card__label">Taxa de Serviço (10%)</span>
-            <span class="summary-card__value">R$ 11,49</span>
+            <span class="summary-card__value">R$ 0,00</span>
           </div>
           <div class="summary-card highlight">
             <span class="summary-card__label">Total a Pagar</span>
-            <span class="summary-card__value">R$ 126,39</span>
+            <span class="summary-card__value">R$ 0,00</span>
           </div>
         </div>
 
         <div class="btn-row">
           <a href="movimento.html" class="btn btn--outline"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
           <button class="btn btn--ghost"><i class="fa-solid fa-eraser"></i> Limpar</button>
-          <button class="btn btn--brown"><i class="fa-solid fa-floppy-disk"></i> Salvar Pedido</button>
-          <button class="btn btn--primary"><i class="fa-solid fa-check-double"></i> Finalizar Pedido</button>
+          <button class="btn btn--primary"><i class="fa-solid fa-floppy-disk"></i> Salvar Pedido</button>
         </div>
       </main>
 

@@ -51,12 +51,11 @@
         </div>
         <div class="header__actions">
           <button class="header__icon-btn" title="Buscar"><i class="fa-solid fa-magnifying-glass"></i></button>
-          <button class="header__icon-btn" title="Notificações"><i class="fa-solid fa-bell"></i><span class="badge"></span></button>
           <a href="login.html" class="header__user" title="Sair / Trocar de conta">
-            <div class="header__user-avatar">JS</div>
+            <div class="header__user-avatar">BR</div>
             <div class="header__user-info">
-              <span class="header__user-name">João Silva</span>
-              <span class="header__user-role">Gerente</span>
+              <span class="header__user-name">Usuário</span>
+              <span class="header__user-role">Sistema</span>
             </div>
           </a>
         </div>
@@ -66,12 +65,11 @@
         <div class="page-head">
           <div>
             <div class="breadcrumbs"><i class="fa-solid fa-house"></i> Início <i class="fa-solid fa-chevron-right"></i> <span class="current">Dashboard</span></div>
-            <h2 class="page-head__title">Bem-vindo de volta, João! 🔥</h2>
+            <h2 class="page-head__title">Bem-vindo de volta! 🔥</h2>
             <p class="page-head__subtitle">Confira o resumo do dia e acesse rapidamente os módulos do sistema.</p>
           </div>
-          <div style="display:flex; gap:10px;">
-            <button class="btn btn--outline"><i class="fa-solid fa-calendar"></i> Hoje, 24 Fev 2026</button>
-            <button class="btn btn--primary"><i class="fa-solid fa-plus"></i> Novo Pedido</button>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <!-- Seletor de data dinâmico montado via JS -->
           </div>
         </div>
 
@@ -81,32 +79,28 @@
             <div class="stat-card__icon stat-card__icon--red"><i class="fa-solid fa-coins"></i></div>
             <div>
               <div class="stat-card__label">Vendas Hoje</div>
-              <div class="stat-card__value">R$ 4.275,80</div>
-              <div class="stat-card__trend"><i class="fa-solid fa-arrow-up"></i> 12,4% vs ontem</div>
+              <div class="stat-card__value">R$ 0,00</div>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-card__icon stat-card__icon--brown"><i class="fa-solid fa-receipt"></i></div>
             <div>
               <div class="stat-card__label">Pedidos</div>
-              <div class="stat-card__value">87</div>
-              <div class="stat-card__trend"><i class="fa-solid fa-arrow-up"></i> 8 ativos agora</div>
+              <div class="stat-card__value">0</div>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-card__icon stat-card__icon--beige"><i class="fa-solid fa-motorcycle"></i></div>
             <div>
               <div class="stat-card__label">Delivery</div>
-              <div class="stat-card__value">34</div>
-              <div class="stat-card__trend"><i class="fa-solid fa-arrow-up"></i> 5 em rota</div>
+              <div class="stat-card__value">0</div>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-card__icon stat-card__icon--dark"><i class="fa-solid fa-users"></i></div>
             <div>
               <div class="stat-card__label">Clientes Atendidos</div>
-              <div class="stat-card__value">142</div>
-              <div class="stat-card__trend down"><i class="fa-solid fa-arrow-down"></i> 2,1% vs ontem</div>
+              <div class="stat-card__value">0</div>
             </div>
           </div>
         </section>
@@ -158,51 +152,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td><strong>#1087</strong></td>
-                  <td>Maria Oliveira</td>
-                  <td>Mesa 04</td>
-                  <td>Balcão</td>
-                  <td class="num">R$ 87,50</td>
-                  <td><span class="pill pill--paid">Pago</span></td>
-                  <td>12:34</td>
-                </tr>
-                <tr>
-                  <td><strong>#1086</strong></td>
-                  <td>Carlos Souza</td>
-                  <td>—</td>
-                  <td>Delivery</td>
-                  <td class="num">R$ 142,90</td>
-                  <td><span class="pill pill--pending">Em rota</span></td>
-                  <td>12:18</td>
-                </tr>
-                <tr>
-                  <td><strong>#1085</strong></td>
-                  <td>Ana Beatriz</td>
-                  <td>Mesa 12</td>
-                  <td>Balcão</td>
-                  <td class="num">R$ 56,00</td>
-                  <td><span class="pill pill--paid">Pago</span></td>
-                  <td>12:02</td>
-                </tr>
-                <tr>
-                  <td><strong>#1084</strong></td>
-                  <td>Roberto Lima</td>
-                  <td>—</td>
-                  <td>Delivery</td>
-                  <td class="num">R$ 98,20</td>
-                  <td><span class="pill pill--cancelled">Cancelado</span></td>
-                  <td>11:47</td>
-                </tr>
-                <tr>
-                  <td><strong>#1083</strong></td>
-                  <td>Fernanda Mota</td>
-                  <td>Mesa 07</td>
-                  <td>Balcão</td>
-                  <td class="num">R$ 123,40</td>
-                  <td><span class="pill pill--paid">Pago</span></td>
-                  <td>11:30</td>
-                </tr>
+                <!-- Preenchido dinamicamente via app.js -->
               </tbody>
             </table>
           </div>

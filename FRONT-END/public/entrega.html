@@ -45,13 +45,12 @@
           <h1 class="header__title">Sistema de Gestão — Restaurante <span>Boi Ralado</span></h1>
         </div>
         <div class="header__actions">
-          <button class="header__icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
-          <button class="header__icon-btn"><i class="fa-solid fa-bell"></i><span class="badge"></span></button>
+          <button class="header__icon-btn" title="Buscar"><i class="fa-solid fa-magnifying-glass"></i></button>
           <a href="login.html" class="header__user" title="Sair / Trocar de conta">
-            <div class="header__user-avatar">JS</div>
+            <div class="header__user-avatar">BR</div>
             <div class="header__user-info">
-              <span class="header__user-name">João Silva</span>
-              <span class="header__user-role">Gerente</span>
+              <span class="header__user-name">Usuário</span>
+              <span class="header__user-role">Sistema</span>
             </div>
           </a>
         </div>
@@ -78,24 +77,24 @@
           <div class="form-grid">
             <div class="form-group col-6">
               <label>Nome do Cliente <span class="required">*</span></label>
-              <input type="text" placeholder="Buscar cliente..." value="Carlos Souza" />
+              <input type="text" placeholder="Nome do cliente..." value="" />
             </div>
             <div class="form-group col-3">
               <label>Telefone <span class="required">*</span></label>
-              <input type="tel" placeholder="(00) 00000-0000" value="(11) 91234-5678" />
+              <input type="tel" placeholder="(00) 00000-0000" value="" />
             </div>
             <div class="form-group col-3">
               <label>Número do Pedido</label>
-              <input type="text" value="#1086" readonly />
+              <input type="text" value="#1001" readonly />
             </div>
 
             <div class="form-group col-9">
               <label>Endereço de Entrega</label>
-              <input type="text" placeholder="Rua, Avenida..." value="Rua das Palmeiras, Jardim Primavera" />
+              <input type="text" placeholder="Rua, Avenida, Bairro..." value="" />
             </div>
             <div class="form-group col-3">
               <label>Número</label>
-              <input type="text" placeholder="123" value="427" />
+              <input type="text" placeholder="123" value="" />
             </div>
           </div>
         </form>
@@ -115,10 +114,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr><td>X-Tudo Boi Ralado</td><td class="num">2</td><td class="num">R$ 38,90</td><td class="num">R$ 77,80</td></tr>
-              <tr><td>Porção de Batata G</td><td class="num">1</td><td class="num">R$ 24,90</td><td class="num">R$ 24,90</td></tr>
-              <tr><td>Refrigerante 2L</td><td class="num">1</td><td class="num">R$ 15,00</td><td class="num">R$ 15,00</td></tr>
-              <tr><td>Brownie com Sorvete</td><td class="num">1</td><td class="num">R$ 17,20</td><td class="num">R$ 17,20</td></tr>
+              <!-- Inserido dinamicamente pelo app.js -->
             </tbody>
           </table>
         </div>
@@ -127,15 +123,15 @@
           <div class="form-grid">
             <div class="form-group col-3">
               <label>Subtotal</label>
-              <input type="text" value="R$ 134,90" readonly />
+              <input type="text" value="R$ 0,00" readonly />
             </div>
             <div class="form-group col-3">
               <label>Taxa de Entrega</label>
-              <input type="text" value="R$ 8,00" />
+              <input type="text" value="R$ 0,00" />
             </div>
             <div class="form-group col-3">
               <label>Total</label>
-              <input type="text" value="R$ 142,90" readonly style="font-weight:700; color:var(--color-red); font-size:17px;" />
+              <input type="text" value="R$ 0,00" readonly style="font-weight:700; color:var(--color-red); font-size:17px;" />
             </div>
             <div class="form-group col-3">
               <label>Forma de Pagamento</label>
