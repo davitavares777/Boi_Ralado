@@ -1,4 +1,93 @@
-// app.js — Sistema Boi Ralado com dados 100% dinâmicos, filtros de data e gestão completa.
+// ===== BLOQUEIO DE CARACTERES POR CAMPO =====
+(function () {
+  function soDigitos(v) { return v.replace(/\D/g, ''); }
+  function soLetras(v) { return v.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s'.-]/g, '').replace(/\s{2,}/g, ' '); }
+
+  var formatos = {
+    cpf: function (v) {
+      v = soDigitos(v).slice(0, 11);
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      return v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    },
+    cnpj: function (v) {
+      v = soDigitos(v).slice(0, 14);
+      v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+      v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+      v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+      return v.replace(/(\d{4})(\d)/, '$1-$2');
+    },
+    cep: function (v) {
+      v = soDigitos(v).slice(0, 8);
+      return v.replace(/^(\d{5})(\d)/, '$1-$2');
+    },
+    telefone: function (v) {
+      v = soDigitos(v).slice(0, 11);
+      v = v.replace(/^(\d{2})(\d)/, '($1) $2');
+      return v.length > 13 ? v.replace(/(\d{5})(\d{1,4})$/, '$1-$2')
+                           : v.replace(/(\d{4})(\d{1,4})$/, '$1-$2');
+    },
+    digitos: function (v) { return soDigitos(v); },
+    letras: soLetras,
+    codigo: function (v) { return v.toUpperCase().replace(/[^A-Z0-9-]/g, ''); },
+    dinheiro: function (v) {
+      v = soDigitos(v).replace(/^0+(?=\d)/, '');
+      if (!v) return '';
+      while (v.length < 3) v = '0' + v;
+      var inteiro = v.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      return inteiro + ',' + v.slice(-2);
+    }
+  };
+
+  var regras = [
+    [/^cpf$/, 'cpf', 'numeric'],
+    [/^cnpj$/, 'cnpj', 'numeric'],
+    [/^cep$/, 'cep', 'numeric'],
+    [/telefone|whatsapp/, 'telefone', 'tel'],
+    [/^n[úu]mero$/, 'digitos', 'numeric'],
+    [/n[úu]mero da mesa/, 'digitos', 'numeric'],
+    [/inscri[çc][ãa]o estadual/, 'digitos', 'numeric'],
+    [/qtd\.? em estoque/, 'digitos', 'numeric'],
+    [/pre[çc]o/, 'dinheiro', 'decimal'],
+    [/c[óo]digo do produto/, 'codigo', 'text'],
+    [/^nome completo$|^nome do cliente$|^cidade$|^bairro$/, 'letras', 'text']
+  ];
+
+  function textoDoLabel(input) {
+    var grupo = input.closest('.form-group');
+    var label = grupo && grupo.querySelector('label');
+    if (!label) return '';
+    return label.textContent.replace('*', '').replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  function aplicar() {
+    document.querySelectorAll('input').forEach(function (input) {
+      if (input.readOnly || ['checkbox', 'date', 'time', 'password', 'email'].indexOf(input.type) !== -1) return;
+      var rotulo = textoDoLabel(input);
+      var regra = regras.find(function (r) { return r[0].test(rotulo); });
+      if (!regra) return;
+      var formato = formatos[regra[1]];
+      if (input.type === 'number') input.type = 'text';
+      input.inputMode = regra[2];
+      input.addEventListener('input', function () {
+        input.value = formato(input.value);
+      });
+    });
+
+    document.querySelectorAll('input[type="email"]').forEach(function (input) {
+      input.addEventListener('input', function () {
+        input.value = input.value.replace(/\s/g, '');
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', aplicar);
+  } else {
+    aplicar();
+  }
+})();
+
 (function () {
   'use strict';
 
@@ -532,3 +621,229 @@ document.addEventListener('input', function (e) {
     e.target.value = v;
   }
 });
+// ===== BLOQUEIO DE CARACTERES POR CAMPO (colar no final do app.js) =====
+(function () {
+  function soDigitos(v) { return v.replace(/\D/g, ''); }
+  function soLetras(v) { return v.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s'.-]/g, '').replace(/\s{2,}/g, ' '); }
+
+  var formatos = {
+    cpf: function (v) {
+      v = soDigitos(v).slice(0, 11);
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      return v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    },
+    cnpj: function (v) {
+      v = soDigitos(v).slice(0, 14);
+      v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+      v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+      v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+      return v.replace(/(\d{4})(\d)/, '$1-$2');
+    },
+    cep: function (v) {
+      v = soDigitos(v).slice(0, 8);
+      return v.replace(/^(\d{5})(\d)/, '$1-$2');
+    },
+    telefone: function (v) {
+      v = soDigitos(v).slice(0, 11);
+      v = v.replace(/^(\d{2})(\d)/, '($1) $2');
+      return v.length > 13 ? v.replace(/(\d{5})(\d{1,4})$/, '$1-$2')
+                           : v.replace(/(\d{4})(\d{1,4})$/, '$1-$2');
+    },
+    digitos: function (v) { return soDigitos(v); },
+    letras: soLetras,
+    codigo: function (v) { return v.toUpperCase().replace(/[^A-Z0-9-]/g, ''); },
+    dinheiro: function (v) {
+      v = soDigitos(v).replace(/^0+(?=\d)/, '');
+      if (!v) return '';
+      while (v.length < 3) v = '0' + v;
+      var inteiro = v.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      return inteiro + ',' + v.slice(-2);
+    }
+  };
+
+  // [texto do label, formato, teclado no celular]
+  var regras = [
+    [/^cpf$/, 'cpf', 'numeric'],
+    [/^cnpj$/, 'cnpj', 'numeric'],
+    [/^cep$/, 'cep', 'numeric'],
+    [/telefone|whatsapp/, 'telefone', 'tel'],
+    [/^n[úu]mero$/, 'digitos', 'numeric'],
+    [/n[úu]mero da mesa/, 'digitos', 'numeric'],
+    [/inscri[çc][ãa]o estadual/, 'digitos', 'numeric'],
+    [/qtd\.? em estoque/, 'digitos', 'numeric'],
+    [/pre[çc]o/, 'dinheiro', 'decimal'],
+    [/c[óo]digo do produto/, 'codigo', 'text'],
+    [/^nome completo$|^nome do cliente$|^cidade$|^bairro$/, 'letras', 'text']
+  ];
+
+  function textoDoLabel(input) {
+    var grupo = input.closest('.form-group');
+    var label = grupo && grupo.querySelector('label');
+    if (!label) return '';
+    return label.textContent.replace('*', '').replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  document.querySelectorAll('input').forEach(function (input) {
+    if (input.readOnly || ['checkbox', 'date', 'time', 'password', 'email'].indexOf(input.type) !== -1) return;
+
+    var rotulo = textoDoLabel(input);
+    var regra = regras.find(function (r) { return r[0].test(rotulo); });
+    if (!regra) return;
+
+    var formato = formatos[regra[1]];
+    if (input.type === 'number') input.type = 'text';
+    input.inputMode = regra[2];
+
+    input.addEventListener('input', function () {
+      input.value = formato(input.value);
+    });
+  });
+
+  // E-mail: sem espaços
+  document.querySelectorAll('input[type="email"]').forEach(function (input) {
+    input.addEventListener('input', function () {
+      input.value = input.value.replace(/\s/g, '');
+    });
+  });
+})();
+/* ============================================================
+   CURSOR PERSONALIZADO — Efeito Brasa / Faísca
+   Ativado apenas em dispositivos com ponteiro fino (mouse)
+   ============================================================ */
+(function initCustomCursor() {
+  var isFinePointer = window.matchMedia('(pointer: fine)').matches;
+  if (!isFinePointer) return;
+
+  // Respeita usuários que pediram menos movimento
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Cria os elementos
+  var dot   = document.createElement('div');
+  var ring  = document.createElement('div');
+  var trail = document.createElement('div');
+  dot.className   = 'cursor-dot';
+  ring.className  = 'cursor-ring';
+  trail.className = 'cursor-trail';
+  document.body.appendChild(dot);
+  document.body.appendChild(ring);
+  document.body.appendChild(trail);
+
+  // Ativa modo cursor-customizado (CSS só esconde nativo a partir daqui)
+  document.body.classList.add('has-custom-cursor');
+
+  // Posições alvo / atuais
+  var targetX = window.innerWidth / 2;
+  var targetY = window.innerHeight / 2;
+  var dotX = targetX, dotY = targetY;
+  var ringX = targetX, ringY = targetY;
+  var trailX = targetX, trailY = targetY;
+
+  // Velocidades de suavização (0 < x < 1; menor = mais "atrasado")
+  var dotEase   = reduceMotion ? 1 : 0.55;
+  var ringEase  = reduceMotion ? 1 : 0.18;
+  var trailEase = reduceMotion ? 1 : 0.10;
+
+  // Atualiza posição alvo
+  function onMove(e) {
+    targetX = e.clientX;
+    targetY = e.clientY;
+  }
+  window.addEventListener('mousemove', onMove, { passive: true });
+
+  // Detecta hover em interativos (delegação global — funciona com conteúdo dinâmico)
+  var interactiveSelector =
+    'a, button, .btn, input, select, textarea, label, ' +
+    '[role="button"], .access-card, .stat-card, .card, ' +
+    '.nav a, .sidebar__nav a, .row-actions button, ' +
+    '.header__icon-btn, .header__user, .access-card__link';
+
+  var textSelector = 'input, textarea, [contenteditable="true"]';
+
+  document.addEventListener('mouseover', function (e) {
+    var t = e.target;
+    if (!t || t.nodeType !== 1) return;
+    if (t.closest && t.closest(textSelector)) {
+      ring.classList.add('is-text');
+      ring.classList.remove('is-hover');
+      dot.classList.add('is-hover');
+      return;
+    }
+    ring.classList.remove('is-text');
+    if (t.closest && t.closest(interactiveSelector)) {
+      ring.classList.add('is-hover');
+      dot.classList.add('is-hover');
+    } else {
+      ring.classList.remove('is-hover');
+      dot.classList.remove('is-hover');
+    }
+  }, { passive: true });
+
+  document.addEventListener('mouseout', function (e) {
+    var t = e.target;
+    if (!t || t.nodeType !== 1) return;
+    if (!e.relatedTarget) {
+      ring.classList.remove('is-hover', 'is-text');
+      dot.classList.remove('is-hover');
+    }
+  }, { passive: true });
+
+  // Click
+  window.addEventListener('mousedown', function () {
+    ring.classList.add('is-down');
+    dot.classList.add('is-down');
+  }, { passive: true });
+  window.addEventListener('mouseup', function () {
+    ring.classList.remove('is-down');
+    dot.classList.remove('is-down');
+  }, { passive: true });
+
+  // Esconde quando sai da janela
+  document.addEventListener('mouseleave', function () {
+    dot.style.opacity = '0';
+    ring.style.opacity = '0';
+    trail.style.opacity = '0';
+  });
+  document.addEventListener('mouseenter', function () {
+    dot.style.opacity = '';
+    ring.style.opacity = '';
+    trail.style.opacity = '';
+  });
+
+  // Loop de animação
+  var rafId = null;
+  function loop() {
+    dotX   += (targetX - dotX)   * dotEase;
+    dotY   += (targetY - dotY)   * dotEase;
+    ringX  += (targetX - ringX)  * ringEase;
+    ringY  += (targetY - ringY)  * ringEase;
+    trailX += (targetX - trailX) * trailEase;
+    trailY += (targetY - trailY) * trailEase;
+
+    dot.style.transform   = 'translate3d(' + dotX   + 'px,' + dotY   + 'px,0) translate(-50%,-50%)';
+    ring.style.transform  = 'translate3d(' + ringX  + 'px,' + ringY  + 'px,0) translate(-50%,-50%)';
+    trail.style.transform = 'translate3d(' + trailX + 'px,' + trailY + 'px,0) translate(-50%,-50%)';
+
+    rafId = requestAnimationFrame(loop);
+  }
+  loop();
+
+  // Fallback: se aba perder foco por muito tempo, mantém cursor visual coerente
+  window.addEventListener('blur', function () {
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  });
+  window.addEventListener('focus', function () {
+    if (!rafId) loop();
+  });
+})();
+/* ---- Cursor Brasa: injeta automaticamente em qualquer página ---- */
+(function loadCursorBrasa() {
+  if (window.__brCursorLoaded) return;
+  var s = document.createElement('script');
+  s.src = 'cursor.js';
+  s.async = false;
+  s.onerror = function () {
+    console.warn('[Boi Ralado] cursor.js não encontrado — verifique se está na raiz do projeto.');
+  };
+  document.body.appendChild(s);
+})();
