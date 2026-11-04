@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | Boi Ralado</title>
+  <link rel="icon" type="image/png" href="img/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-card__side">
+        <div class="login-card__brand">
+          <img src="img/logo.png" alt="Logo Boi Ralado" />
+          <div>
+            <div class="login-card__brand-title">Boi Ralado</div>
+            <div class="login-card__brand-sub">Restaurante</div>
+          </div>
+        </div>
+        <div class="login-card__quote">
+          Sabor que <span>conquista</span>,<br />
+          gestão que <span>funciona</span>.
+        </div>
+        <div class="login-card__foot">
+          <i class="fa-solid fa-fire"></i> Sistema de Gestão Interna — v1.0 © 2026
+        </div>
+      </div>
+
+      <div class="login-card__form">
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab active" id="tabLogin" data-tab="login">
+            <i class="fa-solid fa-right-to-bracket"></i> Entrar
+          </button>
+          <button type="button" class="auth-tab" id="tabRegister" data-tab="register">
+            <i class="fa-solid fa-user-plus"></i> Cadastrar
+          </button>
+        </div>
+
+        <div class="auth-panel active" id="panelLogin">
+          <div class="login-card__form-head">
+            <h1>Acesse sua conta</h1>
+            <p>Entre com suas credenciais para continuar.</p>
+          </div>
+          <form class="login-form" id="loginForm" autocomplete="off">
+            <div class="login-form__error" id="loginError">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              <span>Informe seu e-mail e senha.</span>
+            </div>
+            <div class="form-group">
+              <label>E-mail</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="loginUser" placeholder="seuemail@exemplo.com" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Senha</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="loginPass" placeholder="Digite sua senha" />
+                <button type="button" class="toggle-pass" data-target="loginPass" title="Mostrar/ocultar senha">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <button type="submit" class="login-form__submit">
+              <i class="fa-solid fa-right-to-bracket"></i> Entrar
+            </button>
+          </form>
+        </div>
+
+        <div class="auth-panel" id="panelRegister">
+          <div class="login-card__form-head">
+            <h1>Criar conta</h1>
+            <p>Preencha seus dados para cadastrar-se no sistema.</p>
+          </div>
+          <form class="login-form" id="registerForm" autocomplete="off">
+            <div class="login-form__error" id="registerError">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              <span>Preencha todos os campos corretamente.</span>
+            </div>
+            <div class="login-form__success" id="registerSuccess">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>Cadastro realizado com sucesso! Redirecionando...</span>
+            </div>
+            <div class="form-group">
+              <label>Nome Completo <span class="required">*</span></label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-id-card"></i>
+                <input type="text" id="regNome" placeholder="Ex: Nome Sobrenome" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>CPF <span class="required">*</span></label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-address-card"></i>
+                <input type="text" id="regCpf" placeholder="000.000.000-00" maxlength="14" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>E-mail <span class="required">*</span></label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-envelope"></i>
+                  <input type="email" id="regEmail" placeholder="seuemail@exemplo.com" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Telefone <span class="required">*</span></label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-phone"></i>
+                  <input type="tel" id="regTelefone" placeholder="(00) 00000-0000" maxlength="15" />
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Senha <span class="required">*</span></label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-lock"></i>
+                  <input type="password" id="regSenha" placeholder="Mínimo 6 caracteres" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Confirmar Senha <span class="required">*</span></label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-lock"></i>
+                  <input type="password" id="regSenhaConfirma" placeholder="Repita a senha" />
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="login-form__submit">
+              <i class="fa-solid fa-user-plus"></i> Concluir Cadastro
+            </button>
+          </form>
+        </div>
+
+        <a href="index.html" class="login-card__back">
+          <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="cursor.js"></script>
+  <script>
+    (function(){
+      var tabs = document.querySelectorAll('.auth-tab');
+      var panels = { login: document.getElementById('panelLogin'), register: document.getElementById('panelRegister') };
+      function switchTab(t){
+        tabs.forEach(function(x){ x.classList.toggle('active', x.dataset.tab === t); });
+        Object.keys(panels).forEach(function(k){ panels[k].classList.toggle('active', k === t); });
+      }
+      tabs.forEach(function(t){ t.addEventListener('click', function(){ switchTab(t.dataset.tab); }); });
+
+      document.getElementById('loginForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        var user = document.getElementById('loginUser').value.trim();
+        if (!user) return;
+        localStorage.setItem('br_usuario_atual', JSON.stringify({ nome: user.split('@')[0], papel: 'Usuário' }));
+        window.location.href = 'index.html';
+      });
+
+      document.getElementById('registerForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        var nome = document.getElementById('regNome').value.trim();
+        var email = document.getElementById('regEmail').value.trim();
+        if (!nome || !email) return;
+        localStorage.setItem('br_usuario_atual', JSON.stringify({ nome: nome, papel: 'Cliente' }));
+        document.getElementById('registerSuccess').classList.add('show');
+        setTimeout(function(){ window.location.href = 'index.html'; }, 1200);
+      });
+    })();
+  </script>
+</body>
+</html>
