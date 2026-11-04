@@ -46,9 +46,15 @@
       body: dados ? JSON.stringify(dados) : undefined
     })
     .then(function (resposta) {
-      return resposta.json().then(function (corpo) {
-        corpo.codigo = resposta.status;
-        return corpo;
+      return resposta.text().then(function (texto) {
+        try {
+          var corpo = JSON.parse(texto);
+          corpo.codigo = resposta.status;
+          if (corpo.erro) corpo.ok = false;
+          return corpo;
+        } catch (e) {
+          return { ok: false, erro: 'Erro interno do servidor.', codigo: resposta.status };
+        }
       });
     })
     .catch(function () {
@@ -142,61 +148,6 @@
     t.textContent = msg;
     document.body.appendChild(t);
     setTimeout(function () { t.remove(); }, 3200);
-  }
-
-  function modal(title, fields, ok) {
-    var ov = document.createElement('div');
-    ov.className = 'br-ov';
-    var md = document.createElement('div');
-    md.className = 'br-md';
-    md.innerHTML = '<h3>' + esc(title) + '</h3>';
-    var inputs = {};
-    fields.forEach(function (f) {
-      var lb = document.createElement('label');
-      lb.textContent = f.l;
-      var inp;
-      if (f.type === 'select') {
-        inp = document.createElement('select');
-        (f.options || []).forEach(function (opt) {
-          var o = document.createElement('option');
-          o.value = typeof opt === 'object' ? opt.v : opt;
-          o.textContent = typeof opt === 'object' ? opt.l : opt;
-          if (o.value === f.v) o.selected = true;
-          inp.appendChild(o);
-        });
-      } else {
-        inp = document.createElement('input');
-        inp.type = f.t || 'text';
-        inp.value = f.v == null ? '' : f.v;
-        if (f.t === 'number') inp.min = 1;
-      }
-      inputs[f.k] = inp;
-      md.appendChild(lb);
-      md.appendChild(inp);
-    });
-    var acts = document.createElement('div'); acts.className = 'acts';
-    var c = document.createElement('button');
-    c.type = 'button'; c.className = 'btn btn--outline'; c.textContent = 'Cancelar';
-    var o = document.createElement('button');
-    o.type = 'button'; o.className = 'btn btn--primary'; o.textContent = 'Confirmar';
-    acts.appendChild(c); acts.appendChild(o);
-    md.appendChild(acts); ov.appendChild(md); document.body.appendChild(ov);
-
-    function fechar() { ov.remove(); }
-    function confirmar() {
-      var d = {};
-      Object.keys(inputs).forEach(function (k) { d[k] = inputs[k].value.trim(); });
-      if (ok(d) !== false) fechar();
-    }
-    c.addEventListener('click', fechar);
-    o.addEventListener('click', confirmar);
-    ov.addEventListener('click', function (e) { if (e.target === ov) fechar(); });
-    md.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') confirmar();
-      if (e.key === 'Escape') fechar();
-    });
-    var first = md.querySelector('input, select');
-    if (first) first.focus();
   }
 
   function atualizarUsuarioHeader() {
@@ -453,8 +404,6 @@
     var results = $('#topSearchResults');
     if (!wrap || !input || !results) return;
 
-    var PAGINA_DO_TIPO_LOCAL = { Cliente: 'cliente.html', Fornecedor: 'fornecedor.html', Produto: 'produto.html' };
-
     function buscar(q) {
       q = q.toLowerCase().trim();
       if (!q) { results.style.display = 'none'; results.innerHTML = ''; return; }
@@ -594,8 +543,8 @@
       doc: 'cnpj',
       campos: {
         'razão social': 'razao_social',
-        'cnpj': 'cnpj',
         'nome fantasia': 'nome_fantasia',
+        'cnpj': 'cnpj',
         'inscrição estadual': 'inscricao_est',
         'telefone': 'telefone',
         'e-mail': 'email'
@@ -610,7 +559,7 @@
         'código do produto': 'codigo',
         'nome do produto': 'nome',
         'categoria': 'categoria',
-        'fornecedor': 'fornecedor_id',
+        'fornecedor': 'fornecedor',
         'descrição': 'descricao',
         'preço unitário (r$)': 'preco',
         'qtd. em estoque': 'estoque',

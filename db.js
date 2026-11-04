@@ -1,6 +1,4 @@
 // db.js
-// Abre (ou cria) o arquivo banco.db e garante que as tabelas existam.
-
 var sqlite3 = require('sqlite3');
 var path = require('path');
 
@@ -8,13 +6,8 @@ var caminho = path.join(__dirname, 'banco.db');
 var db = new sqlite3.Database(caminho);
 
 db.serialize(function () {
-
-  // Faz o SQLite validar as chaves estrangeiras.
   db.run('PRAGMA foreign_keys = ON');
 
-  // ---------------------------------------------------------------
-  // ENDEREÇO
-  // ---------------------------------------------------------------
   db.run(`
     CREATE TABLE IF NOT EXISTS endereco (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,9 +21,6 @@ db.serialize(function () {
     )
   `);
 
-  // ---------------------------------------------------------------
-  // CLIENTE
-  // ---------------------------------------------------------------
   db.run(`
     CREATE TABLE IF NOT EXISTS cliente (
       id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,9 +36,6 @@ db.serialize(function () {
     )
   `);
 
-  // ---------------------------------------------------------------
-  // FORNECEDOR
-  // ---------------------------------------------------------------
   db.run(`
     CREATE TABLE IF NOT EXISTS fornecedor (
       id             INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,29 +51,22 @@ db.serialize(function () {
     )
   `);
 
-  // ---------------------------------------------------------------
-  // PRODUTO
-  // ---------------------------------------------------------------
   db.run(`
     CREATE TABLE IF NOT EXISTS produto (
-      id           INTEGER PRIMARY KEY AUTOINCREMENT,
-      codigo       TEXT,
-      nome         TEXT NOT NULL,
-      categoria    TEXT,
-      descricao    TEXT,
-      preco        REAL NOT NULL DEFAULT 0,
-      estoque      INTEGER DEFAULT 0,
-      unidade      TEXT,
-      validade     TEXT,
-      fornecedor_id INTEGER,
-      data_cadastro TEXT,
-      FOREIGN KEY (fornecedor_id) REFERENCES fornecedor(id)
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      codigo        TEXT,
+      nome          TEXT NOT NULL,
+      categoria     TEXT,
+      fornecedor    TEXT,
+      descricao     TEXT,
+      preco         REAL NOT NULL DEFAULT 0,
+      estoque       INTEGER DEFAULT 0,
+      unidade       TEXT,
+      validade      TEXT,
+      data_cadastro TEXT
     )
   `);
 
-  // ---------------------------------------------------------------
-  // HORÁRIO DE ATENDIMENTO (do cliente)
-  // ---------------------------------------------------------------
   db.run(`
     CREATE TABLE IF NOT EXISTS horario_atendimento (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -98,9 +78,6 @@ db.serialize(function () {
     )
   `);
 
-  // ---------------------------------------------------------------
-  // PEDIDO (balcão / mesa)
-  // ---------------------------------------------------------------
   db.run(`
     CREATE TABLE IF NOT EXISTS pedido (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -117,9 +94,6 @@ db.serialize(function () {
     )
   `);
 
-  // ---------------------------------------------------------------
-  // ITEM DO PEDIDO
-  // ---------------------------------------------------------------
   db.run(`
     CREATE TABLE IF NOT EXISTS pedido_item (
       id           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -135,9 +109,6 @@ db.serialize(function () {
     )
   `);
 
-  // ---------------------------------------------------------------
-  // ENTREGA (delivery)
-  // ---------------------------------------------------------------
   db.run(`
     CREATE TABLE IF NOT EXISTS entrega (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -156,9 +127,6 @@ db.serialize(function () {
     )
   `);
 
-  // ---------------------------------------------------------------
-  // ITEM DA ENTREGA
-  // ---------------------------------------------------------------
   db.run(`
     CREATE TABLE IF NOT EXISTS entrega_item (
       id           INTEGER PRIMARY KEY AUTOINCREMENT,
