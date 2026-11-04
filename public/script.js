@@ -1,4 +1,4 @@
-// endereco.js
+// script.js
 // Conversa com a API /api/enderecos e desenha a tela.
 
 const form = document.getElementById('formEndereco');
@@ -10,15 +10,11 @@ const corpoTabela = document.getElementById('corpoTabela');
 // ---------------------------------------------------------------
 
 // Monta um objeto com os campos do formulario, lidos pelo atributo "name".
-// Evitamos Object.fromEntries porque ele nao existe em navegadores antigos.
 function lerFormulario(formulario) {
-  const dados = {
-    loginUser: document.getElementById('loginUser').value.trim(),
-    loginPass: document.getElementById('loginPass').value.trim()
-  };
+  const dados = {};
   const campos = new FormData(formulario);
   campos.forEach(function (valor, chave) {
-    dados[chave] = valor;
+    dados[chave] = (valor || '').trim();
   });
   return dados;
 }
@@ -42,7 +38,6 @@ form.addEventListener('submit', function (evento) {
     body: JSON.stringify(dados)
   })
     .then(function (resposta) {
-      // Guardamos o status porque ele se perde depois do .json()
       return resposta.json().then(function (corpo) {
         return { ok: resposta.ok, corpo: corpo };
       });
@@ -52,7 +47,7 @@ form.addEventListener('submit', function (evento) {
         mostrarAviso(resultado.corpo.erro, true);
         return;
       }
-      mostrarAviso('Cadastro de ID ' + resultado.corpo.id + ' salvo no banco!', false);
+      mostrarAviso('Endereço de ID ' + resultado.corpo.id + ' salvo no banco!', false);
       form.reset();
       carregarEnderecos();
     })
@@ -104,8 +99,6 @@ function desenharTabela(lista) {
 
     colunas.forEach(function (valor) {
       const td = document.createElement('td');
-      // textContent, e nao innerHTML: assim um endereco com "<" ou ">"
-      // aparece como texto em vez de virar marcacao.
       td.textContent = (valor === null ? '' : valor);
       tr.appendChild(td);
     });
@@ -129,7 +122,12 @@ function desenharTabela(lista) {
 // ---------------------------------------------------------------
 function excluirEndereco(id) {
   fetch('/api/enderecos/' + id, { method: 'DELETE' })
-    .then(function () {
+    .then(function (resposta) {
+      if (!resposta.ok) {
+        return resposta.json().then(function (corpo) {
+          throw new Error(corpo.erro || 'Erro desconhecido');
+        });
+      }
       mostrarAviso('Endereço ' + id + ' removido.', false);
       carregarEnderecos();
     })

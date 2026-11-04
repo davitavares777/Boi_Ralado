@@ -1,5 +1,5 @@
 /* =====================================================================
-   BOI RALADO — app.js
+   BOI RALADO — app.js (Integrado com API SQLite)
    ===================================================================== */
 (function () {
   'use strict';
@@ -34,6 +34,26 @@
     if (!iso) return '';
     var p = iso.split('-');
     return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
+  }
+
+  // ===================================================================
+  // FUNÇÃO CENTRAL DE COMUNICAÇÃO COM A API
+  // ===================================================================
+  function pedir(metodo, endereco, dados) {
+    return fetch(endereco, {
+      method: metodo,
+      headers: { 'Content-Type': 'application/json' },
+      body: dados ? JSON.stringify(dados) : undefined
+    })
+    .then(function (resposta) {
+      return resposta.json().then(function (corpo) {
+        corpo.codigo = resposta.status;
+        return corpo;
+      });
+    })
+    .catch(function () {
+      return { ok: false, erro: 'Servidor offline. Ele está rodando em localhost:3000?' };
+    });
   }
 
   /* ---------- MÁSCARAS ---------- */
@@ -223,87 +243,90 @@
      MODAL DE PRODUTOS
      ========================================================= */
   function abrirModalProdutos(onAdicionar) {
-    var produtos = store.get('cadastros').filter(function (c) { return c.tipo === 'Produto'; });
+    pedir('GET', '/api/produtos').then(function (r) {
+      if (!r.ok) return toast(r.erro, true);
+      var produtos = r.dados || [];
 
-    var ov = document.createElement('div');
-    ov.className = 'br-ov';
-    var md = document.createElement('div');
-    md.className = 'br-md br-md--produtos';
+      var ov = document.createElement('div');
+      ov.className = 'br-ov';
+      var md = document.createElement('div');
+      md.className = 'br-md br-md--produtos';
 
-    var html = '<h3>Consultar itens</h3>';
+      var html = '<h3>Consultar itens</h3>';
 
-    if (!produtos.length) {
+      if (!produtos.length) {
+        html +=
+          '<div class="br-vazio">' +
+            '<i class="fa-solid fa-burger"></i>' +
+            '<p>Nenhum produto cadastrado ainda. Cadastre um produto para poder adicioná-lo.</p>' +
+            '<a href="produto.html" class="btn btn--primary"><i class="fa-solid fa-plus"></i> Cadastrar produto</a>' +
+          '</div>';
+        md.innerHTML = html;
+
+        var actsV = document.createElement('div'); actsV.className = 'acts';
+        var fecharV = document.createElement('button');
+        fecharV.type = 'button'; fecharV.className = 'btn btn--outline'; fecharV.textContent = 'Fechar';
+        fecharV.addEventListener('click', function () { ov.remove(); });
+        actsV.appendChild(fecharV); md.appendChild(actsV);
+        ov.appendChild(md); document.body.appendChild(ov);
+        ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+        document.addEventListener('keydown', function esc(e) {
+          if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', esc); }
+        });
+        return;
+      }
+
       html +=
-        '<div class="br-vazio">' +
-          '<i class="fa-solid fa-burger"></i>' +
-          '<p>Nenhum produto cadastrado ainda. Cadastre um produto para poder adicioná-lo.</p>' +
-          '<a href="produto.html" class="btn btn--primary"><i class="fa-solid fa-plus"></i> Cadastrar produto</a>' +
-        '</div>';
+        '<div class="br-tabela">' +
+          '<table>' +
+            '<thead><tr>' +
+              '<th style="width:60px"></th>' +
+              '<th>Produto</th>' +
+              '<th class="num" style="width:110px">Preço</th>' +
+              '<th style="width:120px">Estoque</th>' +
+              '<th style="width:50px"></th>' +
+            '</tr></thead><tbody>';
+
+      produtos.forEach(function (p, i) {
+        var preco = num(p.preco);
+        html +=
+          '<tr data-idx="' + i + '">' +
+            '<td><div class="br-prod-img"><img src="' + imagemDoProduto(p.nome) + '" alt="' + esc(p.nome) + '"></div></td>' +
+            '<td><span class="br-prod-nome">' + esc(p.nome) + '</span></td>' +
+            '<td class="num">' + brl(preco) + '</td>' +
+            '<td><small class="br-prod-estoque">' + (p.estoque || 0) + ' un</small></td>' +
+            '<td><span class="br-add-ico"><i class="fa-solid fa-plus"></i></span></td>' +
+          '</tr>';
+      });
+
+      html += '</tbody></table></div>';
       md.innerHTML = html;
 
-      var actsV = document.createElement('div'); actsV.className = 'acts';
-      var fecharV = document.createElement('button');
-      fecharV.type = 'button'; fecharV.className = 'btn btn--outline'; fecharV.textContent = 'Fechar';
-      fecharV.addEventListener('click', function () { ov.remove(); });
-      actsV.appendChild(fecharV); md.appendChild(actsV);
+      var acts = document.createElement('div'); acts.className = 'acts';
+      var fechar = document.createElement('button');
+      fechar.type = 'button'; fechar.className = 'btn btn--outline'; fechar.textContent = 'Fechar';
+      fechar.addEventListener('click', function () { ov.remove(); });
+      acts.appendChild(fechar); md.appendChild(acts);
+
+      md.querySelectorAll('tbody tr').forEach(function (tr) {
+        tr.addEventListener('click', function () {
+          var idx = parseInt(tr.dataset.idx, 10);
+          var p = produtos[idx];
+          if (!p) return;
+          onAdicionar(p.nome, num(p.preco));
+          var ico = tr.querySelector('.br-add-ico');
+          if (ico) {
+            ico.innerHTML = '<i class="fa-solid fa-check"></i>';
+            setTimeout(function () { ico.innerHTML = '<i class="fa-solid fa-plus"></i>'; }, 600);
+          }
+        });
+      });
+
       ov.appendChild(md); document.body.appendChild(ov);
       ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
       document.addEventListener('keydown', function esc(e) {
         if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', esc); }
       });
-      return;
-    }
-
-    html +=
-      '<div class="br-tabela">' +
-        '<table>' +
-          '<thead><tr>' +
-            '<th style="width:60px"></th>' +
-            '<th>Produto</th>' +
-            '<th class="num" style="width:110px">Preço</th>' +
-            '<th style="width:120px">Estoque</th>' +
-            '<th style="width:50px"></th>' +
-          '</tr></thead><tbody>';
-
-    produtos.forEach(function (p, i) {
-      var preco = num(p.valor);
-      html +=
-        '<tr data-idx="' + i + '">' +
-          '<td><div class="br-prod-img"><img src="' + imagemDoProduto(p.nome) + '" alt="' + esc(p.nome) + '"></div></td>' +
-          '<td><span class="br-prod-nome">' + esc(p.nome) + '</span></td>' +
-          '<td class="num">' + brl(preco) + '</td>' +
-          '<td><small class="br-prod-estoque">' + esc(p.contato || '—') + '</small></td>' +
-          '<td><span class="br-add-ico"><i class="fa-solid fa-plus"></i></span></td>' +
-        '</tr>';
-    });
-
-    html += '</tbody></table></div>';
-    md.innerHTML = html;
-
-    var acts = document.createElement('div'); acts.className = 'acts';
-    var fechar = document.createElement('button');
-    fechar.type = 'button'; fechar.className = 'btn btn--outline'; fechar.textContent = 'Fechar';
-    fechar.addEventListener('click', function () { ov.remove(); });
-    acts.appendChild(fechar); md.appendChild(acts);
-
-    md.querySelectorAll('tbody tr').forEach(function (tr) {
-      tr.addEventListener('click', function () {
-        var idx = parseInt(tr.dataset.idx, 10);
-        var p = produtos[idx];
-        if (!p) return;
-        onAdicionar(p.nome, num(p.valor));
-        var ico = tr.querySelector('.br-add-ico');
-        if (ico) {
-          ico.innerHTML = '<i class="fa-solid fa-check"></i>';
-          setTimeout(function () { ico.innerHTML = '<i class="fa-solid fa-plus"></i>'; }, 600);
-        }
-      });
-    });
-
-    ov.appendChild(md); document.body.appendChild(ov);
-    ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
-    document.addEventListener('keydown', function esc(e) {
-      if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', esc); }
     });
   }
 
@@ -429,38 +452,64 @@
     var input = $('#topSearch');
     var results = $('#topSearchResults');
     if (!wrap || !input || !results) return;
+
     var PAGINA_DO_TIPO_LOCAL = { Cliente: 'cliente.html', Fornecedor: 'fornecedor.html', Produto: 'produto.html' };
+
     function buscar(q) {
       q = q.toLowerCase().trim();
       if (!q) { results.style.display = 'none'; results.innerHTML = ''; return; }
+
       var achados = [];
-      store.get('cadastros').forEach(function (c) {
-        if ((c.nome || '').toLowerCase().indexOf(q) > -1 || (c.doc || '').indexOf(q) > -1) {
-          var pag = PAGINA_DO_TIPO_LOCAL[c.tipo] || 'cadastro.html';
-          achados.push({
-            icone: c.tipo === 'Produto' ? 'fa-burger' : (c.tipo === 'Fornecedor' ? 'fa-truck-field' : 'fa-user'),
-            texto: c.tipo + ': ' + c.nome,
-            href: pag + '?id=' + encodeURIComponent(c.id)
+      var promessas = [
+        pedir('GET', '/api/clientes').then(function (r) {
+          if (r.ok) r.dados.forEach(function (c) {
+            if ((c.nome || '').toLowerCase().indexOf(q) > -1 || (c.cpf || '').indexOf(q) > -1) {
+              achados.push({ icone: 'fa-user', texto: 'Cliente: ' + c.nome, href: 'cliente.html?id=' + c.id });
+            }
           });
-        }
+        }),
+        pedir('GET', '/api/fornecedores').then(function (r) {
+          if (r.ok) r.dados.forEach(function (f) {
+            if ((f.razao_social || '').toLowerCase().indexOf(q) > -1 || (f.cnpj || '').indexOf(q) > -1) {
+              achados.push({ icone: 'fa-truck-field', texto: 'Fornecedor: ' + f.razao_social, href: 'fornecedor.html?id=' + f.id });
+            }
+          });
+        }),
+        pedir('GET', '/api/produtos').then(function (r) {
+          if (r.ok) r.dados.forEach(function (p) {
+            if ((p.nome || '').toLowerCase().indexOf(q) > -1 || (p.codigo || '').indexOf(q) > -1) {
+              achados.push({ icone: 'fa-burger', texto: 'Produto: ' + p.nome, href: 'produto.html?id=' + p.id });
+            }
+          });
+        })
+      ];
+
+      Promise.all(promessas).then(function () {
+        store.get('pedidos').forEach(function (p) {
+          if ((p.numero || '').toLowerCase().indexOf(q) > -1 || (p.cliente || '').toLowerCase().indexOf(q) > -1) {
+            achados.push({ icone: 'fa-receipt', texto: 'Pedido ' + p.numero + ' — ' + (p.cliente || 'Cliente'), href: 'pedido.html' });
+          }
+        });
+        store.get('entregas').forEach(function (e) {
+          if ((e.numero || '').toLowerCase().indexOf(q) > -1 || (e.cliente || '').toLowerCase().indexOf(q) > -1) {
+            achados.push({ icone: 'fa-motorcycle', texto: 'Entrega ' + e.numero + ' — ' + (e.cliente || 'Cliente'), href: 'entrega.html' });
+          }
+        });
+
+        if (!achados.length) results.innerHTML = '<div class="empty">Nenhum resultado para "' + esc(q) + '"</div>';
+        else results.innerHTML = achados.slice(0, 8).map(function (a) {
+          return '<a href="' + esc(a.href) + '"><i class="fa-solid ' + a.icone + '"></i> ' + esc(a.texto) + '</a>';
+        }).join('');
+        results.style.display = 'block';
       });
-      store.get('pedidos').forEach(function (p) {
-        if ((p.numero || '').toLowerCase().indexOf(q) > -1 || (p.cliente || '').toLowerCase().indexOf(q) > -1) {
-          achados.push({ icone: 'fa-receipt', texto: 'Pedido ' + p.numero + ' — ' + (p.cliente || 'Cliente'), href: 'pedido.html' });
-        }
-      });
-      store.get('entregas').forEach(function (e) {
-        if ((e.numero || '').toLowerCase().indexOf(q) > -1 || (e.cliente || '').toLowerCase().indexOf(q) > -1) {
-          achados.push({ icone: 'fa-motorcycle', texto: 'Entrega ' + e.numero + ' — ' + (e.cliente || 'Cliente'), href: 'entrega.html' });
-        }
-      });
-      if (!achados.length) results.innerHTML = '<div class="empty">Nenhum resultado para "' + esc(q) + '"</div>';
-      else results.innerHTML = achados.slice(0, 8).map(function (a) {
-        return '<a href="' + esc(a.href) + '"><i class="fa-solid ' + a.icone + '"></i> ' + esc(a.texto) + '</a>';
-      }).join('');
-      results.style.display = 'block';
     }
-    input.addEventListener('input', function () { buscar(this.value); });
+
+    var timer = null;
+    input.addEventListener('input', function () {
+      clearTimeout(timer);
+      var val = this.value;
+      timer = setTimeout(function () { buscar(val); }, 300);
+    });
     input.addEventListener('focus', function () { if (this.value) buscar(this.value); });
     document.addEventListener('click', function (e) { if (!wrap.contains(e.target)) results.style.display = 'none'; });
     document.addEventListener('keydown', function (e) {
@@ -520,11 +569,55 @@
     });
   }
 
-  /* Cadastros */
+  /* =========================================================
+     CADASTROS (Cliente, Fornecedor, Produto)
+     ========================================================= */
   var cfgCadastro = {
-    'cliente.html':    { tipo: 'Cliente',    nome: 'nome completo',   doc: 'cpf',               contato: ['telefone', 'e-mail'] },
-    'fornecedor.html': { tipo: 'Fornecedor', nome: 'razão social',    doc: 'cnpj',              contato: ['e-mail', 'telefone'] },
-    'produto.html':    { tipo: 'Produto',    nome: 'nome do produto', doc: 'código do produto', valor: 'preço unitário' }
+    'cliente.html': {
+      tipo: 'Cliente',
+      api: '/api/clientes',
+      nome: 'nome completo',
+      doc: 'cpf',
+      campos: {
+        'nome completo': 'nome',
+        'cpf': 'cpf',
+        'data de nascimento': 'data_nasc',
+        'telefone': 'telefone',
+        'e-mail': 'email',
+        'whatsapp': 'whatsapp'
+      }
+    },
+    'fornecedor.html': {
+      tipo: 'Fornecedor',
+      api: '/api/fornecedores',
+      nome: 'razão social',
+      doc: 'cnpj',
+      campos: {
+        'razão social': 'razao_social',
+        'cnpj': 'cnpj',
+        'nome fantasia': 'nome_fantasia',
+        'inscrição estadual': 'inscricao_est',
+        'telefone': 'telefone',
+        'e-mail': 'email'
+      }
+    },
+    'produto.html': {
+      tipo: 'Produto',
+      api: '/api/produtos',
+      nome: 'nome do produto',
+      doc: 'código do produto',
+      campos: {
+        'código do produto': 'codigo',
+        'nome do produto': 'nome',
+        'categoria': 'categoria',
+        'fornecedor': 'fornecedor_id',
+        'descrição': 'descricao',
+        'preço unitário (r$)': 'preco',
+        'qtd. em estoque': 'estoque',
+        'unidade de medida': 'unidade',
+        'data de validade': 'validade'
+      }
+    }
   }[page];
 
   if (cfgCadastro) {
@@ -535,34 +628,41 @@
       var o = {};
       $$('.form-group').forEach(function (g) {
         var el = $('input,select,textarea', g);
-        if (el) o[textoLabel(g)] = el.value;
+        if (el) {
+          var chave = cfgCadastro.campos[textoLabel(g)];
+          if (chave) o[chave] = el.value;
+        }
       });
       return o;
     }
 
+    // Carregar dados para edição
     if (idEdicao) {
-      var itemEdit = store.get('cadastros').filter(function (x) { return String(x.id) === String(idEdicao); })[0];
-      if (!itemEdit) toast('Cadastro não encontrado.', true);
-      else {
+      pedir('GET', cfgCadastro.api + '/' + idEdicao).then(function (r) {
+        if (!r.ok) return toast(r.erro, true);
+        var item = r.dados;
+        if (!item) return toast('Cadastro não encontrado.', true);
+
         var titulo = $('.page-head__title');
         if (titulo) titulo.textContent = 'Editar ' + cfgCadastro.tipo;
         if (botaoSalvar) botaoSalvar.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar alteração';
-        if (itemEdit.campos) {
-          $$('.form-group').forEach(function (g) {
-            var el = $('input,select,textarea', g);
-            var v = itemEdit.campos[textoLabel(g)];
-            if (el && v !== undefined) el.value = v;
-          });
-        } else {
-          if (fld(cfgCadastro.nome)) fld(cfgCadastro.nome).value = itemEdit.nome || '';
-          if (fld(cfgCadastro.doc)) fld(cfgCadastro.doc).value = itemEdit.doc || '';
-        }
-      }
+
+        $$('.form-group').forEach(function (g) {
+          var el = $('input,select,textarea', g);
+          var chave = cfgCadastro.campos[textoLabel(g)];
+          if (el && chave && item[chave] !== undefined && item[chave] !== null) {
+            el.value = item[chave];
+          }
+        });
+      });
     }
 
+    // Salvar (POST ou PUT)
     if (botaoSalvar) {
       botaoSalvar.addEventListener('click', function (e) {
         e.preventDefault();
+
+        // Validação de obrigatórios
         var bad = 0;
         $$('.form-group').forEach(function (g) {
           if (!$('.required', g)) return;
@@ -572,79 +672,90 @@
         });
         if (bad) return toast('Preencha os campos obrigatórios (*).', true);
 
-        var nome = fld(cfgCadastro.nome) ? fld(cfgCadastro.nome).value.trim() : '';
-        var doc = fld(cfgCadastro.doc) ? fld(cfgCadastro.doc).value.trim() : '';
-        var valorUnit = cfgCadastro.valor && fld(cfgCadastro.valor) ? num(fld(cfgCadastro.valor).value) : 0;
+        var dados = coletarCampos();
 
-        var contato = '';
-        if (cfgCadastro.tipo === 'Produto') {
-          contato = 'Estoque: ' + (fld('qtd. em estoque') ? fld('qtd. em estoque').value || 0 : 0) + ' un';
-        } else {
-          cfgCadastro.contato.forEach(function (c) {
-            if (!contato && fld(c) && fld(c).value) contato = fld(c).value;
-          });
-        }
+        // Validação mínima por tipo
+        if (cfgCadastro.tipo === 'Cliente' && !dados.nome) return toast('Nome é obrigatório.', true);
+        if (cfgCadastro.tipo === 'Fornecedor' && !dados.razao_social) return toast('Razão social é obrigatória.', true);
+        if (cfgCadastro.tipo === 'Produto' && !dados.nome) return toast('Nome do produto é obrigatório.', true);
 
-        var lista = store.get('cadastros');
-        if (idEdicao) {
-          var existente = lista.filter(function (x) { return String(x.id) === String(idEdicao); })[0];
-          if (!existente) return toast('Cadastro não encontrado.', true);
-          existente.nome = nome; existente.doc = doc;
-          existente.contato = contato; existente.valor = valorUnit;
-          existente.campos = coletarCampos();
-          store.set('cadastros', lista);
-          toast(cfgCadastro.tipo + ' alterado com sucesso!');
-        } else {
-          lista.unshift({
-            id: Date.now(), tipo: cfgCadastro.tipo, nome: nome, doc: doc,
-            contato: contato, valor: valorUnit, campos: coletarCampos(),
-            data: isoToBr(todayIso())
-          });
-          store.set('cadastros', lista);
-          if (cfgCadastro.tipo === 'Cliente') {
-            store.setObj('usuario_atual', { nome: nome, papel: 'Cliente' });
-            atualizarUsuarioHeader();
-          }
-          toast(cfgCadastro.tipo + ' cadastrado com sucesso!');
-        }
-        setTimeout(function () { location.href = 'cadastro.html'; }, 1200);
+        var metodo = idEdicao ? 'PUT' : 'POST';
+        var url = idEdicao ? cfgCadastro.api + '/' + idEdicao : cfgCadastro.api;
+
+        pedir(metodo, url, dados).then(function (r) {
+          if (!r.ok) return toast(r.erro, true);
+          toast(cfgCadastro.tipo + ' ' + (idEdicao ? 'alterado' : 'cadastrado') + ' com sucesso!');
+          setTimeout(function () { location.href = 'cadastro.html'; }, 1200);
+        });
       });
     }
   }
 
-  /* Lista de cadastros */
+  /* =========================================================
+     LISTA DE CADASTROS
+     ========================================================= */
   if (page === 'cadastro.html') {
     var tbCadastros = $('.data-table tbody');
+
     var icones = {
       Cliente:    '<i class="fa-solid fa-user" style="color:var(--ember-light);"></i>',
       Fornecedor: '<i class="fa-solid fa-truck-field" style="color:var(--ink-300);"></i>',
       Produto:    '<i class="fa-solid fa-burger" style="color:var(--ink-400);"></i>'
     };
+
     function renderCadastros() {
       if (!tbCadastros) return;
-      tbCadastros.innerHTML = '';
-      var lista = store.get('cadastros');
-      if (!lista.length) {
-        tbCadastros.innerHTML = '<tr><td colspan="6" class="text-center">Nenhum cadastro realizado ainda.</td></tr>';
-        return;
-      }
-      lista.forEach(function (c) {
-        var tr = document.createElement('tr');
-        tr.dataset.id = c.id;
-        tr.innerHTML =
-          '<td>' + (icones[c.tipo] || '') + ' ' + esc(c.tipo) + '</td>' +
-          '<td>' + esc(c.nome) + '</td>' +
-          '<td>' + esc(c.doc) + '</td>' +
-          '<td>' + esc(c.contato) + '</td>' +
-          '<td>' + esc(c.data) + '</td>' +
-          '<td class="row-actions">' +
-          '  <button title="Editar" class="btnEditCad"><i class="fa-solid fa-pen"></i></button>' +
-          '  <button title="Excluir" class="danger btnDelCad"><i class="fa-solid fa-trash"></i></button>' +
-          '</td>';
-        tbCadastros.appendChild(tr);
+      tbCadastros.innerHTML = '<tr><td colspan="6" class="text-center">Carregando...</td></tr>';
+
+      var promessas = [
+        pedir('GET', '/api/clientes').then(function (r) {
+          return (r.ok ? r.dados : []).map(function (c) {
+            return { tipo: 'Cliente', id: c.id, nome: c.nome, doc: c.cpf, contato: c.email || c.telefone, data: c.data_cadastro || '' };
+          });
+        }),
+        pedir('GET', '/api/fornecedores').then(function (r) {
+          return (r.ok ? r.dados : []).map(function (f) {
+            return { tipo: 'Fornecedor', id: f.id, nome: f.razao_social, doc: f.cnpj, contato: f.email || f.telefone, data: f.data_cadastro || '' };
+          });
+        }),
+        pedir('GET', '/api/produtos').then(function (r) {
+          return (r.ok ? r.dados : []).map(function (p) {
+            return { tipo: 'Produto', id: p.id, nome: p.nome, doc: p.codigo, contato: 'Estoque: ' + (p.estoque || 0) + ' un', data: p.data_cadastro || '' };
+          });
+        })
+      ];
+
+      Promise.all(promessas).then(function (listas) {
+        var lista = listas[0].concat(listas[1]).concat(listas[2]);
+        lista.sort(function (a, b) { return String(b.id).localeCompare(String(a.id)); });
+
+        if (!lista.length) {
+          tbCadastros.innerHTML = '<tr><td colspan="6" class="text-center">Nenhum cadastro realizado ainda.</td></tr>';
+          return;
+        }
+
+        tbCadastros.innerHTML = '';
+        lista.forEach(function (c) {
+          var tr = document.createElement('tr');
+          tr.dataset.id = c.id;
+          tr.dataset.tipo = c.tipo;
+          tr.innerHTML =
+            '<td>' + (icones[c.tipo] || '') + ' ' + esc(c.tipo) + '</td>' +
+            '<td>' + esc(c.nome) + '</td>' +
+            '<td>' + esc(c.doc || '—') + '</td>' +
+            '<td>' + esc(c.contato || '—') + '</td>' +
+            '<td>' + esc(c.data) + '</td>' +
+            '<td class="row-actions">' +
+            '  <button title="Editar" class="btnEditCad"><i class="fa-solid fa-pen"></i></button>' +
+            '  <button title="Excluir" class="danger btnDelCad"><i class="fa-solid fa-trash"></i></button>' +
+            '</td>';
+          tbCadastros.appendChild(tr);
+        });
       });
     }
+
     renderCadastros();
+
     if (tbCadastros) {
       tbCadastros.addEventListener('click', function (e) {
         var btnEdit = e.target.closest('.btnEditCad');
@@ -652,17 +763,21 @@
         var tr = e.target.closest('tr');
         if (!tr || !tr.dataset.id) return;
         var id = tr.dataset.id;
-        var lista = store.get('cadastros');
-        var item = lista.filter(function (x) { return String(x.id) === String(id); })[0];
-        if (!item) return;
+        var tipo = tr.dataset.tipo;
+        var nome = tr.cells[1].textContent;
+
+        var apis = { Cliente: '/api/clientes', Fornecedor: '/api/fornecedores', Produto: '/api/produtos' };
+
         if (btnDel) {
-          if (confirm('Deseja realmente remover "' + item.nome + '"?')) {
-            store.set('cadastros', lista.filter(function (x) { return String(x.id) !== String(id); }));
-            renderCadastros();
-            toast('Cadastro removido com sucesso.');
+          if (confirm('Deseja realmente remover "' + nome + '"?')) {
+            pedir('DELETE', apis[tipo] + '/' + id).then(function (r) {
+              if (!r.ok) return toast(r.erro, true);
+              toast('Cadastro removido com sucesso.');
+              renderCadastros();
+            });
           }
         } else if (btnEdit) {
-          location.href = (PAGINA_DO_TIPO[item.tipo] || 'cadastro.html') + '?id=' + encodeURIComponent(id);
+          location.href = (PAGINA_DO_TIPO[tipo] || 'cadastro.html') + '?id=' + encodeURIComponent(id);
         }
       });
     }

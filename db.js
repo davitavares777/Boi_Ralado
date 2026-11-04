@@ -12,6 +12,9 @@ db.serialize(function () {
   // Faz o SQLite validar as chaves estrangeiras.
   db.run('PRAGMA foreign_keys = ON');
 
+  // ---------------------------------------------------------------
+  // ENDEREÇO
+  // ---------------------------------------------------------------
   db.run(`
     CREATE TABLE IF NOT EXISTS endereco (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,17 +28,65 @@ db.serialize(function () {
     )
   `);
 
+  // ---------------------------------------------------------------
+  // CLIENTE
+  // ---------------------------------------------------------------
   db.run(`
     CREATE TABLE IF NOT EXISTS cliente (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      nome        TEXT NOT NULL,
-      email       TEXT,
-      telefone    TEXT,
-      endereco_id INTEGER,
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome          TEXT NOT NULL,
+      cpf           TEXT,
+      data_nasc     TEXT,
+      email         TEXT,
+      telefone      TEXT,
+      whatsapp      TEXT,
+      endereco_id   INTEGER,
+      data_cadastro TEXT,
       FOREIGN KEY (endereco_id) REFERENCES endereco(id)
     )
   `);
 
+  // ---------------------------------------------------------------
+  // FORNECEDOR
+  // ---------------------------------------------------------------
+  db.run(`
+    CREATE TABLE IF NOT EXISTS fornecedor (
+      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+      razao_social   TEXT NOT NULL,
+      nome_fantasia  TEXT,
+      cnpj           TEXT,
+      inscricao_est  TEXT,
+      email          TEXT,
+      telefone       TEXT,
+      endereco_id    INTEGER,
+      data_cadastro  TEXT,
+      FOREIGN KEY (endereco_id) REFERENCES endereco(id)
+    )
+  `);
+
+  // ---------------------------------------------------------------
+  // PRODUTO
+  // ---------------------------------------------------------------
+  db.run(`
+    CREATE TABLE IF NOT EXISTS produto (
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      codigo       TEXT,
+      nome         TEXT NOT NULL,
+      categoria    TEXT,
+      descricao    TEXT,
+      preco        REAL NOT NULL DEFAULT 0,
+      estoque      INTEGER DEFAULT 0,
+      unidade      TEXT,
+      validade     TEXT,
+      fornecedor_id INTEGER,
+      data_cadastro TEXT,
+      FOREIGN KEY (fornecedor_id) REFERENCES fornecedor(id)
+    )
+  `);
+
+  // ---------------------------------------------------------------
+  // HORÁRIO DE ATENDIMENTO (do cliente)
+  // ---------------------------------------------------------------
   db.run(`
     CREATE TABLE IF NOT EXISTS horario_atendimento (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,6 +95,81 @@ db.serialize(function () {
       hora_inicio TEXT NOT NULL,
       hora_fim    TEXT NOT NULL,
       FOREIGN KEY (cliente_id) REFERENCES cliente(id)
+    )
+  `);
+
+  // ---------------------------------------------------------------
+  // PEDIDO (balcão / mesa)
+  // ---------------------------------------------------------------
+  db.run(`
+    CREATE TABLE IF NOT EXISTS pedido (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      numero     TEXT NOT NULL,
+      mesa       TEXT,
+      cliente_id INTEGER,
+      data       TEXT,
+      hora       TEXT,
+      subtotal   REAL DEFAULT 0,
+      taxa       REAL DEFAULT 0,
+      total      REAL DEFAULT 0,
+      status     TEXT DEFAULT 'Pago',
+      FOREIGN KEY (cliente_id) REFERENCES cliente(id)
+    )
+  `);
+
+  // ---------------------------------------------------------------
+  // ITEM DO PEDIDO
+  // ---------------------------------------------------------------
+  db.run(`
+    CREATE TABLE IF NOT EXISTS pedido_item (
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      pedido_id    INTEGER NOT NULL,
+      produto_id   INTEGER,
+      nome_item    TEXT NOT NULL,
+      quantidade   INTEGER NOT NULL DEFAULT 1,
+      valor_unit   REAL NOT NULL DEFAULT 0,
+      complemento  TEXT,
+      subtotal     REAL NOT NULL DEFAULT 0,
+      FOREIGN KEY (pedido_id) REFERENCES pedido(id) ON DELETE CASCADE,
+      FOREIGN KEY (produto_id) REFERENCES produto(id)
+    )
+  `);
+
+  // ---------------------------------------------------------------
+  // ENTREGA (delivery)
+  // ---------------------------------------------------------------
+  db.run(`
+    CREATE TABLE IF NOT EXISTS entrega (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      numero      TEXT NOT NULL,
+      cliente_id  INTEGER,
+      endereco_id INTEGER,
+      data        TEXT,
+      hora        TEXT,
+      subtotal    REAL DEFAULT 0,
+      taxa        REAL DEFAULT 0,
+      total       REAL DEFAULT 0,
+      pagamento   TEXT,
+      status      TEXT DEFAULT 'Entregue',
+      FOREIGN KEY (cliente_id) REFERENCES cliente(id),
+      FOREIGN KEY (endereco_id) REFERENCES endereco(id)
+    )
+  `);
+
+  // ---------------------------------------------------------------
+  // ITEM DA ENTREGA
+  // ---------------------------------------------------------------
+  db.run(`
+    CREATE TABLE IF NOT EXISTS entrega_item (
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      entrega_id   INTEGER NOT NULL,
+      produto_id   INTEGER,
+      nome_item    TEXT NOT NULL,
+      quantidade   INTEGER NOT NULL DEFAULT 1,
+      valor_unit   REAL NOT NULL DEFAULT 0,
+      subtotal     REAL NOT NULL DEFAULT 0,
+      FOREIGN KEY (entrega_id) REFERENCES entrega(id) ON DELETE CASCADE,
+      FOREIGN KEY (produto_id) REFERENCES produto(id)
     )
   `);
 });
