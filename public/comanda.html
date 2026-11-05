@@ -256,18 +256,6 @@
       border-top: 1px solid rgba(201,179,147,.12) !important;
       display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;
     }
-    .br-md.br-md--produtos .br-vazio {
-      padding: 40px 16px; text-align: center; color: #A89078 !important;
-      display: flex; flex-direction: column; align-items: center; gap: 12px;
-    }
-    .br-md.br-md--produtos .br-vazio i { font-size: 40px; color: #FF7A3D !important; opacity: .6; }
-    .br-md.br-md--produtos .br-vazio p { margin: 0; color: #A89078; }
-
-    /* ---------- Destaque de campo inválido ---------- */
-    .br-bad {
-      border-color: #F87171 !important;
-      box-shadow: 0 0 0 4px rgba(248,113,113,.18), 0 0 24px rgba(248,113,113,.15) !important;
-    }
   </style>
 </head>
 <body>
@@ -328,27 +316,26 @@
             <div class="form-card__head-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
             <div>
               <h2>Dados da Comanda</h2>
-              <p>Campos marcados com <span style="color:var(--color-red);">*</span> são obrigatórios.</p>
+              <p>Informações da comanda a ser emitida.</p>
             </div>
           </div>
 
           <div class="form-grid">
             <div class="form-group col-3">
-              <label>Número da Comanda <span class="required">*</span></label>
-              <input type="text" id="numComanda" value="C-2026-0457" required />
+              <label>Número da Comanda</label>
+              <input type="text" id="numComanda" value="C-2026-0457" readonly />
             </div>
             <div class="form-group col-3">
-              <label>Número da Mesa <span class="required">*</span></label>
-              <input type="text" id="numMesa" placeholder="Ex: 04" value="04" required />
+              <label>Número da Mesa</label>
+              <input type="text" id="numMesa" placeholder="Ex: 04" value="04" />
             </div>
             <div class="form-group col-3">
-              <label>Horário <span class="required">*</span></label>
-              <input type="time" id="horaComanda" value="13:22" required />
+              <label>Horário</label>
+              <input type="time" id="horaComanda" value="13:22" />
             </div>
             <div class="form-group col-3">
-              <label>Status do Pagamento <span class="required">*</span></label>
-              <select id="statusPagamento" required>
-                <option value="">Selecione...</option>
+              <label>Status do Pagamento</label>
+              <select id="statusPagamento">
                 <option value="Pendente">Pendente</option>
                 <option value="Pago" selected>Pago</option>
                 <option value="Parcial">Parcial</option>
@@ -385,11 +372,15 @@
           </table>
         </div>
 
-        <!-- ===== TOTAIS (SEM TAXA DE SERVIÇO) ===== -->
+        <!-- ===== TOTAIS ===== -->
         <div class="comanda-totais">
           <div class="comanda-total-card">
             <span class="comanda-total-label">Subtotal</span>
             <span class="comanda-total-value" id="subtotal">R$ 0,00</span>
+          </div>
+          <div class="comanda-total-card">
+            <span class="comanda-total-label">Taxa de Serviço (10%)</span>
+            <span class="comanda-total-value" id="taxaServico">R$ 0,00</span>
           </div>
           <div class="comanda-total-card comanda-total-card--highlight">
             <span class="comanda-total-label">Total a Pagar</span>
@@ -417,9 +408,9 @@
     'use strict';
 
     /* =========================================================
-       PRODUTOS DO MOSTRUÁRIO (hardcoded — fallback)
+       PRODUTOS DO CARDÁPIO (mesmos do index.html)
        ========================================================= */
-    var PRODUTOS_MOSTRUARIO = [
+    var PRODUTOS = [
       { nome: 'Boi Ralado Tradicional',  preco: 34.90, img: 'img/produtos/boi-ralado.jpg', estoque: 50 },
       { nome: 'Hambúrguer Boi Ralado',   preco: 32.00, img: 'img/produtos/hamburguer.jpg', estoque: 40 },
       { nome: 'Pastel de Boi Ralado',    preco: 14.00, img: 'img/produtos/pastel.jpg', estoque: 80 },
@@ -429,20 +420,6 @@
       { nome: 'Suco de Laranja',         preco: 9.00,  img: 'img/produtos/suco.jpg', estoque: 100 },
       { nome: 'Mousse de Maracujá',      preco: 12.00, img: 'img/produtos/mousse.jpg', estoque: 45 }
     ];
-
-    /* Mapa de imagens por nome (para produtos da API que batem com o mostruário) */
-    var IMGS_PRODUTOS = {
-      'Boi Ralado Tradicional':  'img/produtos/boi-ralado.jpg',
-      'Hambúrguer Boi Ralado':   'img/produtos/hamburguer.jpg',
-      'Pastel de Boi Ralado':    'img/produtos/pastel.jpg',
-      'Picanha na Chapa':        'img/produtos/picanha.jpg',
-      'Prato Executivo da Casa': 'img/produtos/executivo.jpg',
-      'Batata Rústica':          'img/produtos/batata.jpg',
-      'Suco de Laranja':         'img/produtos/suco.jpg',
-      'Mousse de Maracujá':      'img/produtos/mousse.jpg'
-    };
-    var IMG_PADRAO = 'img/produtos/placeholder.jpg';
-    function imagemDoProduto(nome) { return IMGS_PRODUTOS[nome] || IMG_PADRAO; }
 
     /* ---------- helpers ---------- */
     function brl(n) {
@@ -461,155 +438,65 @@
     }
 
     /* =========================================================
-       VALIDAÇÃO DOS DADOS OBRIGATÓRIOS DA COMANDA
-       ========================================================= */
-    function validarDadosComanda() {
-      var numComanda = document.getElementById('numComanda');
-      var numMesa = document.getElementById('numMesa');
-      var horaComanda = document.getElementById('horaComanda');
-      var statusPagamento = document.getElementById('statusPagamento');
-
-      // Limpa destaques anteriores
-      [numComanda, numMesa, horaComanda, statusPagamento].forEach(function (el) {
-        if (el) el.classList.remove('br-bad');
-      });
-
-      var invalidos = [];
-
-      if (!numComanda.value.trim()) {
-        numComanda.classList.add('br-bad');
-        invalidos.push('Número da Comanda');
-      }
-      if (!numMesa.value.trim()) {
-        numMesa.classList.add('br-bad');
-        invalidos.push('Número da Mesa');
-      }
-      if (!horaComanda.value.trim()) {
-        horaComanda.classList.add('br-bad');
-        invalidos.push('Horário');
-      }
-      if (!statusPagamento.value.trim()) {
-        statusPagamento.classList.add('br-bad');
-        invalidos.push('Status do Pagamento');
-      }
-
-      if (invalidos.length) {
-        toast('Preencha os campos obrigatórios: ' + invalidos.join(', ') + '.', true);
-        return false;
-      }
-      return true;
-    }
-
-    /* =========================================================
-       MODAL: LISTA DE PRODUTOS (API + MOSTRUÁRIO)
+       MODAL: LISTA DE PRODUTOS DO CARDÁPIO
        ========================================================= */
     function abrirModalProdutos(onAdicionar) {
-      fetch('/api/produtos')
-        .then(function (resposta) { return resposta.json(); })
-        .then(function (corpo) {
-          var produtosApi = (corpo && corpo.ok && Array.isArray(corpo.dados)) ? corpo.dados : [];
+      var ov = document.createElement('div');
+      ov.className = 'br-ov';
+      var md = document.createElement('div');
+      md.className = 'br-md br-md--produtos';
 
-          // Junta com os produtos do mostruário (hardcoded) sem duplicar pelo nome
-          var nomesApi = {};
-          produtosApi.forEach(function (p) { nomesApi[(p.nome || '').toLowerCase()] = true; });
+      var html = '<h3>Consultar itens do cardápio</h3>';
+      html +=
+        '<div class="br-tabela">' +
+          '<table>' +
+            '<thead><tr>' +
+              '<th style="width:60px"></th>' +
+              '<th>Produto</th>' +
+              '<th class="num" style="width:110px">Preço</th>' +
+              '<th style="width:120px">Estoque</th>' +
+              '<th style="width:50px"></th>' +
+            '</tr></thead><tbody>';
 
-          var produtosMostruario = PRODUTOS_MOSTRUARIO.filter(function (p) {
-            return !nomesApi[p.nome.toLowerCase()];
-          });
+      PRODUTOS.forEach(function (p, i) {
+        html +=
+          '<tr data-idx="' + i + '">' +
+            '<td><div class="br-prod-img"><img src="' + p.img + '" alt="' + p.nome + '" onerror="this.style.display=\'none\'"></div></td>' +
+            '<td><span class="br-prod-nome">' + p.nome + '</span></td>' +
+            '<td class="num">' + brl(p.preco) + '</td>' +
+            '<td><small class="br-prod-estoque">' + p.estoque + ' un</small></td>' +
+            '<td><span class="br-add-ico"><i class="fa-solid fa-plus"></i></span></td>' +
+          '</tr>';
+      });
 
-          // Converte os produtos da API para o formato esperado pelo modal
-          var produtosApiFormatados = produtosApi.map(function (p) {
-            return {
-              nome: p.nome,
-              preco: Number(p.preco) || 0,
-              img: imagemDoProduto(p.nome),
-              estoque: p.estoque || 0
-            };
-          });
+      html += '</tbody></table></div>';
+      md.innerHTML = html;
 
-          var produtos = produtosApiFormatados.concat(produtosMostruario);
+      var acts = document.createElement('div'); acts.className = 'acts';
+      var fechar = document.createElement('button');
+      fechar.type = 'button'; fechar.className = 'btn btn--outline'; fechar.textContent = 'Fechar';
+      fechar.addEventListener('click', function () { ov.remove(); });
+      acts.appendChild(fechar); md.appendChild(acts);
 
-          // Se não houver nenhum produto (nem API, nem mostruário)
-          if (!produtos.length) {
-            var ovVazio = document.createElement('div');
-            ovVazio.className = 'br-ov';
-            ovVazio.innerHTML =
-              '<div class="br-md br-md--produtos">' +
-                '<h3>Consultar itens do cardápio</h3>' +
-                '<div class="br-vazio">' +
-                  '<i class="fa-solid fa-burger"></i>' +
-                  '<p>Nenhum produto cadastrado ainda.</p>' +
-                  '<a href="produto.html" class="btn btn--primary"><i class="fa-solid fa-plus"></i> Cadastrar produto</a>' +
-                '</div>' +
-                '<div class="acts"><button type="button" class="btn btn--outline" id="fecharVazio">Fechar</button></div>' +
-              '</div>';
-            document.body.appendChild(ovVazio);
-            ovVazio.querySelector('#fecharVazio').addEventListener('click', function () { ovVazio.remove(); });
-            ovVazio.addEventListener('click', function (e) { if (e.target === ovVazio) ovVazio.remove(); });
-            return;
+      md.querySelectorAll('tbody tr').forEach(function (tr) {
+        tr.addEventListener('click', function () {
+          var idx = parseInt(tr.dataset.idx, 10);
+          var p = PRODUTOS[idx];
+          if (!p) return;
+          onAdicionar(p);
+          var ico = tr.querySelector('.br-add-ico');
+          if (ico) {
+            ico.innerHTML = '<i class="fa-solid fa-check"></i>';
+            setTimeout(function () { ico.innerHTML = '<i class="fa-solid fa-plus"></i>'; }, 600);
           }
-
-          // Monta o modal
-          var ov = document.createElement('div');
-          ov.className = 'br-ov';
-          var md = document.createElement('div');
-          md.className = 'br-md br-md--produtos';
-
-          var html = '<h3>Consultar itens do cardápio</h3>';
-          html +=
-            '<div class="br-tabela">' +
-              '<table>' +
-                '<thead><tr>' +
-                  '<th style="width:60px"></th>' +
-                  '<th>Produto</th>' +
-                  '<th class="num" style="width:110px">Preço</th>' +
-                  '<th style="width:120px">Estoque</th>' +
-                  '<th style="width:50px"></th>' +
-                '</tr></thead><tbody>';
-
-          produtos.forEach(function (p, i) {
-            html +=
-              '<tr data-idx="' + i + '">' +
-                '<td><div class="br-prod-img"><img src="' + p.img + '" alt="' + p.nome + '" onerror="this.style.display=\'none\'"></div></td>' +
-                '<td><span class="br-prod-nome">' + p.nome + '</span></td>' +
-                '<td class="num">' + brl(p.preco) + '</td>' +
-                '<td><small class="br-prod-estoque">' + p.estoque + ' un</small></td>' +
-                '<td><span class="br-add-ico"><i class="fa-solid fa-plus"></i></span></td>' +
-              '</tr>';
-          });
-
-          html += '</tbody></table></div>';
-          md.innerHTML = html;
-
-          var acts = document.createElement('div'); acts.className = 'acts';
-          var fechar = document.createElement('button');
-          fechar.type = 'button'; fechar.className = 'btn btn--outline'; fechar.textContent = 'Fechar';
-          fechar.addEventListener('click', function () { ov.remove(); });
-          acts.appendChild(fechar); md.appendChild(acts);
-
-          md.querySelectorAll('tbody tr').forEach(function (tr) {
-            tr.addEventListener('click', function () {
-              var idx = parseInt(tr.dataset.idx, 10);
-              var p = produtos[idx];
-              if (!p) return;
-              onAdicionar(p);
-              var ico = tr.querySelector('.br-add-ico');
-              if (ico) {
-                ico.innerHTML = '<i class="fa-solid fa-check"></i>';
-                setTimeout(function () { ico.innerHTML = '<i class="fa-solid fa-plus"></i>'; }, 600);
-              }
-            });
-          });
-
-          ov.appendChild(md); document.body.appendChild(ov);
-          ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
-          document.addEventListener('keydown', function esc(e) {
-            if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', esc); }
-          });
-        })
-        .catch(function (erro) {
-          toast('Erro ao carregar produtos: ' + erro.message, true);
         });
+      });
+
+      ov.appendChild(md); document.body.appendChild(ov);
+      ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+      document.addEventListener('keydown', function esc(e) {
+        if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', esc); }
+      });
     }
 
     /* =========================================================
@@ -641,9 +528,11 @@
         tr.querySelector('.subtotal-cell').textContent = brl(sub);
         subtotal += sub;
       });
-      // SEM TAXA: total = subtotal
+      var taxa = subtotal * 0.10;
+      var total = subtotal + taxa;
       document.getElementById('subtotal').textContent = brl(subtotal);
-      document.getElementById('totalPagar').textContent = brl(subtotal);
+      document.getElementById('taxaServico').textContent = brl(taxa);
+      document.getElementById('totalPagar').textContent = brl(total);
     }
 
     function adicionarLinha(produto) {
@@ -723,6 +612,7 @@
        BADGE DE STATUS
        ========================================================= */
     var selectStatus = document.getElementById('statusPagamento');
+    var badge = document.getElementById('badgeStatus');
 
     /* =========================================================
        MODAL GENÉRICO (imprimir/cancelar/emitir)
@@ -756,9 +646,6 @@
 
     /* ---------- Imprimir ---------- */
     document.getElementById('btnImprimir').addEventListener('click', function () {
-      // Valida os dados antes de imprimir
-      if (!validarDadosComanda()) return;
-
       modal(
         'Imprimir Comanda?',
         'A comanda será enviada para a impressora padrão do sistema.',
@@ -774,9 +661,6 @@
 
     /* ---------- Cancelar ---------- */
     document.getElementById('btnCancelar').addEventListener('click', function () {
-      // Valida os dados antes de cancelar
-      if (!validarDadosComanda()) return;
-
       modal(
         'Cancelar Comanda?',
         'A comanda será cancelada e o status mudará para "Cancelado".',
@@ -792,17 +676,12 @@
 
     /* ---------- Emitir ---------- */
     document.getElementById('btnEmitir').addEventListener('click', function () {
-      // 1) Valida os dados obrigatórios da comanda
-      if (!validarDadosComanda()) return;
-
-      // 2) Valida se há itens
       var linhas = tbody.querySelectorAll('tr[data-produto]');
       if (!linhas.length) {
         toast('Adicione pelo menos 1 item antes de emitir.', true);
         return;
       }
 
-      // 3) Abre o modal de confirmação
       modal(
         'Emitir Comanda?',
         'A comanda será emitida e registrada no sistema.',
