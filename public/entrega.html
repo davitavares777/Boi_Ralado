@@ -121,22 +121,19 @@
           </table>
         </div>
 
+        <!-- ===== TOTAIS (SEM TAXA DE SERVIÇO) ===== -->
         <form class="form-card">
           <div class="form-grid">
-            <div class="form-group col-3">
+            <div class="form-group col-4">
               <label>Subtotal</label>
               <input type="text" value="R$ 0,00" readonly />
             </div>
-            <div class="form-group col-3">
-              <label>Taxa de Entrega</label>
-              <input type="text" value="R$ 0,00" />
-            </div>
-            <div class="form-group col-3">
+            <div class="form-group col-4">
               <label>Total</label>
               <input type="text" value="R$ 0,00" readonly
                 style="font-weight:700; color:var(--color-red); font-size:17px;" />
             </div>
-            <div class="form-group col-3">
+            <div class="form-group col-4">
               <label>Forma de Pagamento</label>
               <select>
                 <option>Dinheiro</option>
@@ -160,10 +157,6 @@
         <strong>Boi Ralado</strong> — Sistema de Gestão Interna <i class="fa-solid fa-fire"></i> © 2026
       </footer>
     </div>
-    <script>
-      // pequeno hack: deixa claro que este form é o de resumo
-      document.querySelectorAll('form.form-card')[1].classList.add('form-resumo-entrega');
-    </script>
   </div>
   <script src="app.js"></script>
   <script src="cursor.js"></script>
