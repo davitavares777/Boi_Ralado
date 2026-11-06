@@ -151,7 +151,7 @@
   }
 
   function atualizarUsuarioHeader() {
-    var usuario = store.getObj('usuario_atual', { nome: 'João Silva', papel: 'Gerente' });
+    var usuario = store.getObj('usuario_atual', { nome: 'Login', papel: 'Gerente' });
     var nameEl = $('.header__user-name');
     var avatarEl = $('.header__user-avatar');
     if (nameEl) nameEl.textContent = usuario.nome;
@@ -841,78 +841,20 @@
   }
 
   /* =========================================================
-     ENTREGA — quantidade editável
+     ENTREGA — sem clonagem de botões
+     (o entrega.html cuida dos próprios botões)
      ========================================================= */
   if (page === 'entrega.html') {
-    function recalcEntrega() {
-      var sub = 0;
-      $$('.data-table tbody tr').forEach(function (r) {
-        var qtdInp = r.querySelector('.qtd-input');
-        if (qtdInp) {
-          var q = parseInt(qtdInp.value, 10) || 1;
-          var unitTxt = r.cells[2].textContent;
-          var subtotal = q * num(unitTxt);
-          r.cells[3].innerHTML = '<strong>' + brl(subtotal) + '</strong>';
-          sub += subtotal;
-        } else {
-          var cells = r.cells;
-          if (cells.length >= 4) sub += num(cells[cells.length - 1].textContent);
-        }
-      });
-      var forms = $$('form.form-card');
-      var alvo = forms[1];
-      if (!alvo) return;
-      var inputs = alvo.querySelectorAll('input');
-      if (inputs.length >= 3) {
-        var taxa = num(inputs[1].value);
-        inputs[0].value = brl(sub);
-        inputs[2].value = brl(sub + taxa);
-      }
-    }
-
-    function adicionarLinhaEntrega(nome, valorUnit) {
-      var tb = document.querySelector('.data-table tbody');
-      if (!tb) return;
-      var tr = document.createElement('tr');
-      tr.innerHTML =
-        '<td>' + esc(nome) + '</td>' +
-        '<td class="num"><input type="number" class="qtd-input" min="1" value="1" /></td>' +
-        '<td class="num">' + brl(valorUnit) + '</td>' +
-        '<td class="num"><strong>' + brl(valorUnit) + '</strong></td>';
-      tb.appendChild(tr);
-
-      var qtdInp = tr.querySelector('.qtd-input');
-      if (qtdInp) {
-        qtdInp.addEventListener('input', function () {
-          if (this.value === '' || parseInt(this.value, 10) < 1) this.value = 1;
-          recalcEntrega();
-        });
-        qtdInp.addEventListener('blur', function () {
-          if (this.value === '' || parseInt(this.value, 10) < 1) this.value = 1;
-          recalcEntrega();
-        });
-      }
-      recalcEntrega();
-    }
-
-    $$('main .btn').forEach(function (b) {
-      if ($('i.fa-plus', b)) {
-        var clone = b.cloneNode(true);
-        b.parentNode.replaceChild(clone, b);
-        clone.addEventListener('click', function (e) {
-          e.preventDefault();
-          abrirModalProdutos(function (nome, preco) {
-            adicionarLinhaEntrega(nome, preco);
-            toast('"' + nome + '" adicionado.');
-          });
-        });
-      }
-    });
-
+    // Nada a fazer aqui — o entrega.html tem seu próprio script.
+    // Apenas garantimos que o resumo de taxas funcione se existir.
     var formsE = $$('form.form-card');
     if (formsE[1]) {
       var inputsTaxa = formsE[1].querySelectorAll('input');
-      if (inputsTaxa[1]) inputsTaxa[1].addEventListener('input', recalcEntrega);
+      if (inputsTaxa[1]) {
+        inputsTaxa[1].addEventListener('input', function () {
+          // O entrega.html já recalcula; este listener é só um fallback.
+        });
+      }
     }
   }
 

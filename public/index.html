@@ -11,6 +11,257 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="extra.css" />
+
+  <style>
+    /* ---------- Toast ---------- */
+    .br-toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #2b0a0a; color: #fff;
+      padding: 12px 18px; border-radius: 10px; z-index: 9999;
+      box-shadow: 0 6px 20px rgba(0,0,0,.35);
+      font: 500 14px 'Poppins', sans-serif; max-width: 340px;
+      animation: toastIn .35s cubic-bezier(.22,1,.36,1);
+      white-space: pre-line;
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---------- Overlay ---------- */
+    .br-ov {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9998; padding: 20px;
+    }
+
+    /* ---------- Modal de detalhes ---------- */
+    .produto-detalhe {
+      background: linear-gradient(145deg, #1F1610, #17100A);
+      border: 1px solid rgba(232, 93, 38, 0.45);
+      border-radius: 20px;
+      width: min(520px, 94vw);
+      max-height: 92vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0,0,0,.65), 0 0 60px rgba(232,93,38,.25);
+      animation: popIn .35s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(.9) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .produto-detalhe__img {
+      width: 100%;
+      height: 220px;
+      overflow: hidden;
+      background: radial-gradient(circle, rgba(232,93,38,.25), #120C08 70%);
+      position: relative;
+    }
+    .produto-detalhe__img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .produto-detalhe__close {
+      position: absolute;
+      top: 14px; right: 14px;
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: rgba(0,0,0,.65);
+      color: #fff;
+      display: grid; place-items: center;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+      border: 1px solid rgba(255,255,255,.15);
+      backdrop-filter: blur(6px);
+    }
+    .produto-detalhe__close:hover {
+      background: #E85D26;
+      transform: rotate(90deg);
+    }
+    .produto-detalhe__body { padding: 24px 26px 26px; }
+    .produto-detalhe__tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #E85D26;
+      background: rgba(232,93,38,.12);
+      border: 1px solid rgba(232,93,38,.3);
+      margin-bottom: 10px;
+    }
+    .produto-detalhe h3 {
+      font: 700 26px 'Playfair Display', serif;
+      color: #fff;
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+    .produto-detalhe__desc {
+      color: #A89078;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+    .produto-detalhe__info {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .produto-detalhe__info-item {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(201,179,147,.12);
+    }
+    .produto-detalhe__info-label {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #A89078;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .produto-detalhe__info-valor {
+      font-size: 18px;
+      font-weight: 700;
+      color: #FF7A3D;
+      font-family: 'Playfair Display', serif;
+    }
+    .produto-detalhe__qtd-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .produto-detalhe__qtd-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #A89078;
+    }
+    .qtd-picker {
+      display: flex;
+      align-items: center;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1.5px solid rgba(201,179,147,.25);
+      background: #120C08;
+    }
+    .qtd-picker button {
+      width: 38px; height: 38px;
+      background: transparent;
+      color: #F1E8D8;
+      font-size: 16px;
+      font-weight: 700;
+      transition: background .15s;
+    }
+    .qtd-picker button:hover {
+      background: rgba(232,93,38,.18);
+      color: #E85D26;
+    }
+    .qtd-picker input {
+      width: 50px; height: 38px;
+      text-align: center;
+      border: none;
+      background: transparent;
+      color: #F1E8D8;
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .qtd-picker input:focus { outline: 0; }
+    .qtd-picker input::-webkit-outer-spin-button,
+    .qtd-picker input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .produto-detalhe__total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      margin-bottom: 18px;
+      border-top: 1px solid rgba(201,179,147,.12);
+      border-bottom: 1px solid rgba(201,179,147,.12);
+    }
+    .produto-detalhe__total-label {
+      font-size: 13px;
+      color: #A89078;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      font-weight: 600;
+    }
+    .produto-detalhe__total-valor {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .produto-detalhe__btn {
+      width: 100%;
+      padding: 15px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #E85D26, #7A1010);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 6px 20px rgba(232,93,38,.4);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .produto-detalhe__btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(232,93,38,.55);
+    }
+    .produto-detalhe__btn:active { transform: translateY(0); }
+
+    /* ---------- Cards do cardápio clicáveis ---------- */
+    .pcard {
+      cursor: pointer;
+      transition: transform .2s, box-shadow .25s, border-color .25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .pcard::after {
+      content: 'Ver detalhes';
+      position: absolute;
+      bottom: 8px; left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      padding: 5px 12px;
+      background: rgba(232,93,38,.95);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      border-radius: 99px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      white-space: nowrap;
+    }
+    .pcard:hover::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .pcard:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(232,93,38,.35);
+    }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -119,40 +370,40 @@
         </section>
 
         <h3 class="section-title">Cardápio em <em>destaque</em></h3>
-        <p class="section-subtitle">Os pratos que mais saem da cozinha.</p>
+        <p class="section-subtitle">Clique em qualquer prato para ver os detalhes e adicionar ao pedido.</p>
 
-        <section class="pgrid">
-          <div class="pcard">
+        <section class="pgrid" id="pgridCardapio">
+          <div class="pcard" data-produto="0">
             <div class="pcard__img"><img src="img/produtos/boi-ralado.jpg" alt="Boi Ralado Tradicional" loading="lazy"></div>
-            <h4>Boi Ralado Tradicional</h4><b>R$ 34,90</b>
+            <h4>Boi Ralado Tradicional</h4>
           </div>
-          <div class="pcard">
+          <div class="pcard" data-produto="1">
             <div class="pcard__img"><img src="img/produtos/hamburguer.jpg" alt="Hambúrguer Boi Ralado" loading="lazy"></div>
-            <h4>Hambúrguer Boi Ralado</h4><b>R$ 32,00</b>
+            <h4>Hambúrguer Boi Ralado</h4>
           </div>
-          <div class="pcard">
+          <div class="pcard" data-produto="2">
             <div class="pcard__img"><img src="img/produtos/pastel.jpg" alt="Pastel de Boi Ralado" loading="lazy"></div>
-            <h4>Pastel de Boi Ralado</h4><b>R$ 14,00</b>
+            <h4>Pastel de Boi Ralado</h4>
           </div>
-          <div class="pcard">
+          <div class="pcard" data-produto="3">
             <div class="pcard__img"><img src="img/produtos/picanha.jpg" alt="Picanha na Chapa" loading="lazy"></div>
-            <h4>Picanha na Chapa</h4><b>R$ 68,90</b>
+            <h4>Picanha na Chapa</h4>
           </div>
-          <div class="pcard">
+          <div class="pcard" data-produto="4">
             <div class="pcard__img"><img src="img/produtos/executivo.jpg" alt="Prato Executivo da Casa" loading="lazy"></div>
-            <h4>Prato Executivo da Casa</h4><b>R$ 29,90</b>
+            <h4>Prato Executivo da Casa</h4>
           </div>
-          <div class="pcard">
+          <div class="pcard" data-produto="5">
             <div class="pcard__img"><img src="img/produtos/batata.jpg" alt="Batata Rústica" loading="lazy"></div>
-            <h4>Batata Rústica</h4><b>R$ 24,90</b>
+            <h4>Batata Rústica</h4>
           </div>
-          <div class="pcard">
+          <div class="pcard" data-produto="6">
             <div class="pcard__img"><img src="img/produtos/suco.jpg" alt="Suco de Laranja" loading="lazy"></div>
-            <h4>Suco de Laranja</h4><b>R$ 9,00</b>
+            <h4>Suco de Laranja</h4>
           </div>
-          <div class="pcard">
+          <div class="pcard" data-produto="7">
             <div class="pcard__img"><img src="img/produtos/mousse.webp" alt="Mousse de Maracujá" loading="lazy"></div>
-            <h4>Mousse de Maracujá</h4><b>R$ 12,00</b>
+            <h4>Mousse de Maracujá</h4>
           </div>
         </section>
 
@@ -183,7 +434,6 @@
         <p class="section-subtitle">Salão + delivery — dados consolidados dos últimos 7 dias.</p>
 
         <section class="charts">
-          <!-- PIZZA -->
           <div class="chart-card">
             <h3>Formas de pagamento</h3>
             <svg class="pie" viewBox="0 0 42 42">
@@ -200,7 +450,6 @@
             </div>
           </div>
 
-          <!-- MAIS VENDIDOS -->
           <div class="chart-card">
             <h3>Mais vendidos</h3>
             <div class="hb"><span>Boi Ralado</span><div><i style="--w:100%"></i></div><b>132</b></div>
@@ -211,7 +460,6 @@
             <div class="hb"><span>Mousse</span><div><i style="--w:28%"></i></div><b>37</b></div>
           </div>
 
-          <!-- FATURAMENTO 7 DIAS -->
           <div class="chart-card">
             <h3>Faturamento — 7 dias</h3>
             <div class="vb">
@@ -291,6 +539,216 @@
       </footer>
     </div>
   </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    /* =========================================================
+       PRODUTOS DO CARDÁPIO (com descrição)
+       ========================================================= */
+    var PRODUTOS = [
+      {
+        nome: 'Boi Ralado Tradicional',
+        preco: 34.90,
+        img: 'img/produtos/boi-ralado.jpg',
+        estoque: 50,
+        categoria: 'Prato Principal',
+        descricao: 'O clássico da casa! Carne bovina desfiada e refogada no ponto certo, servida com arroz branco soltinho, feijão tropeiro, farofa crocante e vinagrete fresco. Uma explosão de sabor que conquistou o paladar dos nossos clientes há mais de uma década.'
+      },
+      {
+        nome: 'Hambúrguer Boi Ralado',
+        preco: 32.00,
+        img: 'img/produtos/hamburguer.jpg',
+        estoque: 40,
+        categoria: 'Lanches',
+        descricao: 'Blend especial de 180g preparado na chapa quente, servido no pão brioche artesanal. Acompanha queijo cheddar derretido, bacon crocante, cebola caramelizada e nosso molho secreto da casa. Vem com batata frita rústica de acompanhamento.'
+      },
+      {
+        nome: 'Pastel de Boi Ralado',
+        preco: 14.00,
+        img: 'img/produtos/pastel.jpg',
+        estoque: 80,
+        categoria: 'Salgados',
+        descricao: 'Pastel grande e crocante, recheado com nosso famoso boi ralado temperado, queijo mussarela derretido e um toque de orégano. Frito na hora, na medida certa para você saborear cada mordida. Perfeito para lanche rápido ou entrada.'
+      },
+      {
+        nome: 'Picanha na Chapa',
+        preco: 68.90,
+        img: 'img/produtos/picanha.jpg',
+        estoque: 25,
+        categoria: 'Prato Principal',
+        descricao: 'Picanha nobre fatiada, grelhada na chapa quente e servida fumegando na mesa. Acompanha arroz branco, farofa da casa, vinagrete e batata frita crocante. Para os amantes de carne, essa é a experiência definitiva do Boi Ralado.'
+      },
+      {
+        nome: 'Prato Executivo da Casa',
+        preco: 29.90,
+        img: 'img/produtos/executivo.jpg',
+        estoque: 60,
+        categoria: 'Executivo',
+        descricao: 'A refeição completa do dia a dia! Arroz, feijão, bife grelhado, batata frita e salada fresca da estação. Servido de segunda a sexta no almoço, é a escolha perfeita para quem quer comer bem sem gastar muito. Sabor caseiro de verdade.'
+      },
+      {
+        nome: 'Batata Rústica',
+        preco: 24.90,
+        img: 'img/produtos/batata.jpg',
+        estoque: 90,
+        categoria: 'Acompanhamento',
+        descricao: 'Batatas rústicas com casca, cortadas em gomos grossos, temperadas com páprica, alho e ervas finas, fritas até ficarem douradas e crocantes por fora, macias por dentro. Acompanha maionese verde da casa para mergulhar.'
+      },
+      {
+        nome: 'Suco de Laranja',
+        preco: 9.00,
+        img: 'img/produtos/suco.jpg',
+        estoque: 100,
+        categoria: 'Bebida',
+        descricao: 'Suco de laranja 100% natural, feito na hora com laranjas frescas selecionadas. Sem açúcar adicionado, sem conservantes. Servido gelado em copo de 400ml. Refrescância e vitamina C para acompanhar qualquer refeição.'
+      },
+      {
+        nome: 'Mousse de Maracujá',
+        preco: 12.00,
+        img: 'img/produtos/mousse.webp',
+        estoque: 45,
+        categoria: 'Sobremesa',
+        descricao: 'Sobremesa cremosa e refrescante feita com polpa de maracujá natural, leite condensado e creme de leite. Textura leve e aveludada, com o equilíbrio perfeito entre o doce e o azedinho da fruta. Finalização perfeita para sua refeição.'
+      }
+    ];
+
+    /* ---------- helpers ---------- */
+    function brl(n) {
+      return 'R$ ' + (Number(n) || 0).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+    function toast(msg, err) {
+      var t = document.createElement('div');
+      t.className = 'br-toast';
+      t.style.background = err ? '#b3261e' : '#2b0a0a';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(function () { t.remove(); }, 3000);
+    }
+
+    /* =========================================================
+       MODAL DE DETALHES DO PRODUTO
+       ========================================================= */
+    function abrirDetalheProduto(produto) {
+      var ov = document.createElement('div');
+      ov.className = 'br-ov';
+
+      ov.innerHTML =
+        '<div class="produto-detalhe">' +
+          '<div class="produto-detalhe__img">' +
+            '<img src="' + produto.img + '" alt="' + produto.nome + '" onerror="this.style.display=\'none\'">' +
+            '<div class="produto-detalhe__close" id="fecharDetalhe"><i class="fa-solid fa-xmark"></i></div>' +
+          '</div>' +
+          '<div class="produto-detalhe__body">' +
+            '<span class="produto-detalhe__tag">' + produto.categoria + '</span>' +
+            '<h3>' + produto.nome + '</h3>' +
+            '<p class="produto-detalhe__desc">' + produto.descricao + '</p>' +
+            '<div class="produto-detalhe__info">' +
+              '<div class="produto-detalhe__info-item">' +
+                '<div class="produto-detalhe__info-label">Preço Unitário</div>' +
+                '<div class="produto-detalhe__info-valor">' + brl(produto.preco) + '</div>' +
+              '</div>' +
+              '<div class="produto-detalhe__info-item">' +
+                '<div class="produto-detalhe__info-label">Estoque</div>' +
+                '<div class="produto-detalhe__info-valor">' + produto.estoque + ' un</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="produto-detalhe__qtd-row">' +
+              '<span class="produto-detalhe__qtd-label">Quantidade:</span>' +
+              '<div class="qtd-picker">' +
+                '<button type="button" id="btnMenos"><i class="fa-solid fa-minus"></i></button>' +
+                '<input type="number" id="qtdDetalhe" min="1" value="1">' +
+                '<button type="button" id="btnMais"><i class="fa-solid fa-plus"></i></button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="produto-detalhe__total">' +
+              '<span class="produto-detalhe__total-label">Total</span>' +
+              '<span class="produto-detalhe__total-valor" id="totalDetalhe">' + brl(produto.preco) + '</span>' +
+            '</div>' +
+            '<button type="button" class="produto-detalhe__btn" id="btnAdicionarPedido">' +
+              '<i class="fa-solid fa-cart-plus"></i> Adicionar ao Pedido' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+
+      document.body.appendChild(ov);
+
+      var qtdInput = ov.querySelector('#qtdDetalhe');
+      var totalEl = ov.querySelector('#totalDetalhe');
+
+      function recalc() {
+        var q = parseInt(qtdInput.value, 10) || 1;
+        if (q < 1) { q = 1; qtdInput.value = 1; }
+        totalEl.textContent = brl(produto.preco * q);
+      }
+
+      ov.querySelector('#btnMenos').addEventListener('click', function () {
+        var q = parseInt(qtdInput.value, 10) || 1;
+        if (q > 1) qtdInput.value = q - 1;
+        recalc();
+      });
+      ov.querySelector('#btnMais').addEventListener('click', function () {
+        var q = parseInt(qtdInput.value, 10) || 1;
+        qtdInput.value = q + 1;
+        recalc();
+      });
+      qtdInput.addEventListener('input', recalc);
+
+      function fechar() { ov.remove(); }
+      ov.querySelector('#fecharDetalhe').addEventListener('click', fechar);
+      ov.addEventListener('click', function (e) { if (e.target === ov) fechar(); });
+      document.addEventListener('keydown', function esc(e) {
+        if (e.key === 'Escape') { fechar(); document.removeEventListener('keydown', esc); }
+      });
+
+      ov.querySelector('#btnAdicionarPedido').addEventListener('click', function () {
+        var q = parseInt(qtdInput.value, 10) || 1;
+        adicionarAoCarrinho(produto, q);
+        fechar();
+      });
+    }
+
+    /* =========================================================
+       CARRINHO (salva no localStorage)
+       ========================================================= */
+    function adicionarAoCarrinho(produto, qtd) {
+      var carrinho = [];
+      try { carrinho = JSON.parse(localStorage.getItem('br_carrinho')) || []; } catch (e) {}
+
+      var existente = carrinho.filter(function (c) { return c.nome === produto.nome; })[0];
+      if (existente) {
+        existente.qtd += qtd;
+      } else {
+        carrinho.push({
+          nome: produto.nome,
+          preco: produto.preco,
+          qtd: qtd,
+          img: produto.img
+        });
+      }
+      try { localStorage.setItem('br_carrinho', JSON.stringify(carrinho)); } catch (e) {}
+
+      var totalItens = carrinho.reduce(function (s, c) { return s + c.qtd; }, 0);
+      toast('"' + produto.nome + '" (' + qtd + 'x) adicionado ao pedido! 🛒\n' + totalItens + ' item(ns) no carrinho.');
+    }
+
+    /* =========================================================
+       CLIQUE NOS CARDS DO CARDÁPIO
+       ========================================================= */
+    var pgrid = document.getElementById('pgridCardapio');
+    if (pgrid) {
+      pgrid.addEventListener('click', function (e) {
+        var card = e.target.closest('.pcard');
+        if (!card) return;
+        var idx = parseInt(card.dataset.produto, 10);
+        if (isNaN(idx) || !PRODUTOS[idx]) return;
+        abrirDetalheProduto(PRODUTOS[idx]);
+      });
+    }
+  })();
+  </script>
+
   <script src="app.js"></script>
   <script src="cursor.js"></script>
 </body>
