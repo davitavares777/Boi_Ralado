@@ -37,40 +37,83 @@ var TIPOS = {
   '.ico': 'image/x-icon'
 };
 
-// ===================================================================
-// SERVE ARQUIVOS DA NOVA ESTRUTURA (public/html, public/css, public/js)
-// ===================================================================
 function servirArquivo(res, caminhoRelativo) {
-  // Se for a raiz, serve o login
-  if (caminhoRelativo === '/') {
-    caminhoRelativo = '/html/login.html';
-  }
-
-  // Normaliza o caminho (remove barras extras)
+  if (caminhoRelativo === '/') caminhoRelativo = '/html/login.html';
   caminhoRelativo = caminhoRelativo.replace(/^\/+/, '');
-
-  // Se não tem extensão e não é API, assume .html
   var extensao = path.extname(caminhoRelativo);
-  if (!extensao) {
-    caminhoRelativo = 'html/' + caminhoRelativo + '.html';
-  }
-
+  if (!extensao) caminhoRelativo = 'html/' + caminhoRelativo + '.html';
   var caminho = path.join(__dirname, 'public', caminhoRelativo);
-
-  // Se não encontrou, tenta na pasta html (para links como /index.html)
   if (!fs.existsSync(caminho) && extensao === '.html' && !caminhoRelativo.startsWith('html/')) {
     var alt = path.join(__dirname, 'public', 'html', path.basename(caminhoRelativo));
     if (fs.existsSync(alt)) caminho = alt;
   }
-
   if (!fs.existsSync(caminho)) {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     return res.end('Arquivo nao encontrado: ' + caminhoRelativo);
   }
-
   var tipo = TIPOS[path.extname(caminho)] || 'application/octet-stream';
   res.writeHead(200, { 'Content-Type': tipo });
   res.end(fs.readFileSync(caminho));
+}
+
+// ===================================================================
+// HELPER: Salva (INSERT ou UPDATE) um endereço e retorna endereco_id
+// ===================================================================
+function salvarEndereco(endereco, enderecoIdExistente, callback) {
+  var campos = [
+    endereco.cep || null,
+    endereco.logradouro || null,
+    endereco.numero || null,
+    endereco.complemento || null,
+    endereco.bairro || null,
+    endereco.cidade || null,
+    endereco.uf || null
+  ];
+  // Se não há nenhum dado de endereço, retorna null
+  var temDados = campos.some(function (v) { return v !== null && v !== ''; });
+  if (!temDados) return callback(null, null);
+
+  if (enderecoIdExistente) {
+    var sqlU = 'UPDATE endereco SET cep=?, logradouro=?, numero=?, complemento=?, bairro=?, cidade=?, uf=? WHERE id=?';
+    db.run(sqlU, campos.concat([enderecoIdExistente]), function (erro) {
+      if (erro) return callback(erro);
+      callback(null, enderecoIdExistente);
+    });
+  } else {
+    var sqlI = 'INSERT INTO endereco (cep, logradouro, numero, complemento, bairro, cidade, uf) VALUES (?, ?, ?, ?, ?, ?, ?)';
+    db.run(sqlI, campos, function (erro) {
+      if (erro) return callback(erro);
+      callback(null, this.lastID);
+    });
+  }
+}
+
+// ===================================================================
+// HELPER: Lê cliente/fornecedor com JOIN no endereço
+// ===================================================================
+function buscarComEndereco(tabela, id, callback) {
+  var sql =
+    'SELECT t.*, ' +
+    'e.cep AS end_cep, e.logradouro AS end_logradouro, e.numero AS end_numero, ' +
+    'e.complemento AS end_complemento, e.bairro AS end_bairro, ' +
+    'e.cidade AS end_cidade, e.uf AS end_uf ' +
+    'FROM ' + tabela + ' t LEFT JOIN endereco e ON e.id = t.endereco_id WHERE t.id = ?';
+  db.get(sql, [id], function (erro, linha) {
+    if (erro) return callback(erro);
+    if (!linha) return callback(null, null);
+    // Achata os campos de endereço
+    linha.cep = linha.end_cep;
+    linha.logradouro = linha.end_logradouro;
+    linha.numero = linha.end_numero;
+    linha.complemento = linha.end_complemento;
+    linha.bairro = linha.end_bairro;
+    linha.cidade = linha.end_cidade;
+    linha.uf = linha.end_uf;
+    delete linha.end_cep; delete linha.end_logradouro; delete linha.end_numero;
+    delete linha.end_complemento; delete linha.end_bairro;
+    delete linha.end_cidade; delete linha.end_uf;
+    callback(null, linha);
+  });
 }
 
 var servidor = http.createServer(function (pedido, resposta) {
@@ -81,7 +124,7 @@ var servidor = http.createServer(function (pedido, resposta) {
   var id = partes[3];
   var metodo = pedido.method;
 
-  // ========== UPLOAD DE IMAGEM ==========
+  // UPLOAD
   if (ehApi && recurso === 'upload' && metodo === 'POST') {
     lerDados(pedido, function (d) {
       if (!d.imagem || !d.nome) return recusar(resposta, 400, 'Dados incompletos.');
@@ -90,21 +133,15 @@ var servidor = http.createServer(function (pedido, resposta) {
         var buffer = Buffer.from(base64Data, 'base64');
         var nomeArquivo = Date.now() + '-' + d.nome.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
         var pastaUpload = path.join(__dirname, 'public', 'img', 'produtos');
-
-        if (!fs.existsSync(pastaUpload)) {
-          fs.mkdirSync(pastaUpload, { recursive: true });
-        }
-
+        if (!fs.existsSync(pastaUpload)) fs.mkdirSync(pastaUpload, { recursive: true });
         fs.writeFileSync(path.join(pastaUpload, nomeArquivo), buffer);
         responder(resposta, 200, { url: 'img/produtos/' + nomeArquivo });
-      } catch (e) {
-        recusar(resposta, 500, 'Erro ao salvar imagem.');
-      }
+      } catch (e) { recusar(resposta, 500, 'Erro ao salvar imagem.'); }
     });
     return;
   }
 
-  // ========== CATEGORIAS ==========
+  // CATEGORIAS
   if (ehApi && recurso === 'categorias') {
     if (metodo === 'GET') {
       return db.all('SELECT * FROM categoria ORDER BY nome ASC', [], function (erro, lista) {
@@ -124,7 +161,7 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
   }
 
-  // ========== CLIENTES ==========
+  // ================= CLIENTES =================
   if (ehApi && recurso === 'clientes') {
     if (metodo === 'GET' && !id) {
       return db.all('SELECT * FROM cliente ORDER BY id DESC', [], function (erro, lista) {
@@ -133,7 +170,7 @@ var servidor = http.createServer(function (pedido, resposta) {
       });
     }
     if (metodo === 'GET' && id) {
-      return db.get('SELECT * FROM cliente WHERE id = ?', [id], function (erro, linha) {
+      return buscarComEndereco('cliente', id, function (erro, linha) {
         if (erro) return recusar(resposta, 500, erro.message);
         if (!linha) return recusar(resposta, 404, 'Cliente não encontrado.');
         responder(resposta, 200, linha);
@@ -142,23 +179,35 @@ var servidor = http.createServer(function (pedido, resposta) {
     if (metodo === 'POST') {
       lerDados(pedido, function (d) {
         if (!d.nome) return recusar(resposta, 400, 'Nome é obrigatório.');
-        var sql = 'INSERT INTO cliente (nome, cpf, data_nasc, email, telefone, whatsapp, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        var val = [d.nome, d.cpf || null, d.data_nasc || null, d.email || null, d.telefone || null, d.whatsapp || null, new Date().toISOString()];
-        db.run(sql, val, function (erro) {
-          if (erro) return recusar(resposta, 400, erro.message);
-          responder(resposta, 201, { id: this.lastID });
+        salvarEndereco(d, null, function (erroEnd, endId) {
+          if (erroEnd) return recusar(resposta, 400, erroEnd.message);
+          var sql = 'INSERT INTO cliente (nome, cpf, data_nasc, email, telefone, whatsapp, endereco_id, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+          var val = [d.nome, d.cpf || null, d.data_nasc || null, d.email || null, d.telefone || null, d.whatsapp || null, endId, new Date().toISOString()];
+          db.run(sql, val, function (erro) {
+            if (erro) return recusar(resposta, 400, erro.message);
+            responder(resposta, 201, { id: this.lastID, endereco_id: endId });
+          });
         });
       });
       return;
     }
     if (metodo === 'PUT' && id) {
-      lerDados(pedido, function (d) {
-        var sql = 'UPDATE cliente SET nome=?, cpf=?, data_nasc=?, email=?, telefone=?, whatsapp=? WHERE id=?';
-        var val = [d.nome, d.cpf || null, d.data_nasc || null, d.email || null, d.telefone || null, d.whatsapp || null, id];
-        db.run(sql, val, function (erro) {
-          if (erro) return recusar(resposta, 400, erro.message);
-          if (this.changes === 0) return recusar(resposta, 404, 'Cliente não encontrado.');
-          responder(resposta, 200, { id: Number(id) });
+      // Busca endereco_id atual
+      db.get('SELECT endereco_id FROM cliente WHERE id = ?', [id], function (err, row) {
+        if (err) return recusar(resposta, 500, err.message);
+        if (!row) return recusar(resposta, 404, 'Cliente não encontrado.');
+        var endIdAtual = row.endereco_id;
+        lerDados(pedido, function (d) {
+          salvarEndereco(d, endIdAtual, function (erroEnd, endId) {
+            if (erroEnd) return recusar(resposta, 400, erroEnd.message);
+            var sql = 'UPDATE cliente SET nome=?, cpf=?, data_nasc=?, email=?, telefone=?, whatsapp=?, endereco_id=? WHERE id=?';
+            var val = [d.nome, d.cpf || null, d.data_nasc || null, d.email || null, d.telefone || null, d.whatsapp || null, endId, id];
+            db.run(sql, val, function (erro) {
+              if (erro) return recusar(resposta, 400, erro.message);
+              if (this.changes === 0) return recusar(resposta, 404, 'Cliente não encontrado.');
+              responder(resposta, 200, { id: Number(id), endereco_id: endId });
+            });
+          });
         });
       });
       return;
@@ -173,7 +222,7 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
   }
 
-  // ========== FORNECEDORES ==========
+  // ================= FORNECEDORES =================
   if (ehApi && recurso === 'fornecedores') {
     if (metodo === 'GET' && !id) {
       return db.all('SELECT * FROM fornecedor ORDER BY id DESC', [], function (erro, lista) {
@@ -182,7 +231,7 @@ var servidor = http.createServer(function (pedido, resposta) {
       });
     }
     if (metodo === 'GET' && id) {
-      return db.get('SELECT * FROM fornecedor WHERE id = ?', [id], function (erro, linha) {
+      return buscarComEndereco('fornecedor', id, function (erro, linha) {
         if (erro) return recusar(resposta, 500, erro.message);
         if (!linha) return recusar(resposta, 404, 'Fornecedor não encontrado.');
         responder(resposta, 200, linha);
@@ -191,23 +240,34 @@ var servidor = http.createServer(function (pedido, resposta) {
     if (metodo === 'POST') {
       lerDados(pedido, function (d) {
         if (!d.razao_social) return recusar(resposta, 400, 'Razão Social é obrigatória.');
-        var sql = 'INSERT INTO fornecedor (razao_social, nome_fantasia, cnpj, inscricao_est, email, telefone, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        var val = [d.razao_social, d.nome_fantasia || null, d.cnpj || null, d.inscricao_est || null, d.email || null, d.telefone || null, new Date().toISOString()];
-        db.run(sql, val, function (erro) {
-          if (erro) return recusar(resposta, 400, erro.message);
-          responder(resposta, 201, { id: this.lastID });
+        salvarEndereco(d, null, function (erroEnd, endId) {
+          if (erroEnd) return recusar(resposta, 400, erroEnd.message);
+          var sql = 'INSERT INTO fornecedor (razao_social, nome_fantasia, cnpj, inscricao_est, email, telefone, endereco_id, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+          var val = [d.razao_social, d.nome_fantasia || null, d.cnpj || null, d.inscricao_est || null, d.email || null, d.telefone || null, endId, new Date().toISOString()];
+          db.run(sql, val, function (erro) {
+            if (erro) return recusar(resposta, 400, erro.message);
+            responder(resposta, 201, { id: this.lastID, endereco_id: endId });
+          });
         });
       });
       return;
     }
     if (metodo === 'PUT' && id) {
-      lerDados(pedido, function (d) {
-        var sql = 'UPDATE fornecedor SET razao_social=?, nome_fantasia=?, cnpj=?, inscricao_est=?, email=?, telefone=? WHERE id=?';
-        var val = [d.razao_social, d.nome_fantasia || null, d.cnpj || null, d.inscricao_est || null, d.email || null, d.telefone || null, id];
-        db.run(sql, val, function (erro) {
-          if (erro) return recusar(resposta, 400, erro.message);
-          if (this.changes === 0) return recusar(resposta, 404, 'Fornecedor não encontrado.');
-          responder(resposta, 200, { id: Number(id) });
+      db.get('SELECT endereco_id FROM fornecedor WHERE id = ?', [id], function (err, row) {
+        if (err) return recusar(resposta, 500, err.message);
+        if (!row) return recusar(resposta, 404, 'Fornecedor não encontrado.');
+        var endIdAtual = row.endereco_id;
+        lerDados(pedido, function (d) {
+          salvarEndereco(d, endIdAtual, function (erroEnd, endId) {
+            if (erroEnd) return recusar(resposta, 400, erroEnd.message);
+            var sql = 'UPDATE fornecedor SET razao_social=?, nome_fantasia=?, cnpj=?, inscricao_est=?, email=?, telefone=?, endereco_id=? WHERE id=?';
+            var val = [d.razao_social, d.nome_fantasia || null, d.cnpj || null, d.inscricao_est || null, d.email || null, d.telefone || null, endId, id];
+            db.run(sql, val, function (erro) {
+              if (erro) return recusar(resposta, 400, erro.message);
+              if (this.changes === 0) return recusar(resposta, 404, 'Fornecedor não encontrado.');
+              responder(resposta, 200, { id: Number(id), endereco_id: endId });
+            });
+          });
         });
       });
       return;
@@ -222,7 +282,7 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
   }
 
-  // ========== PRODUTOS ==========
+  // ================= PRODUTOS =================
   if (ehApi && recurso === 'produtos') {
     if (metodo === 'GET' && !id) {
       return db.all('SELECT * FROM produto ORDER BY id DESC', [], function (erro, lista) {
@@ -271,11 +331,7 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
   }
 
-  // ========== ARQUIVOS ESTÁTICOS ==========
-  if (metodo === 'GET' && !ehApi) {
-    return servirArquivo(resposta, url);
-  }
-
+  if (metodo === 'GET' && !ehApi) return servirArquivo(resposta, url);
   recusar(resposta, 404, 'Rota não encontrada.');
 });
 
