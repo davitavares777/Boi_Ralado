@@ -10,6 +10,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="../css/style.css" />
+
+  <style>
+    .cat-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 99px;
+      background: rgba(232,93,38,.12); border: 1px solid rgba(232,93,38,.35);
+      color: var(--ink-100); font-size: 13px; font-weight: 600;
+      transition: background .2s, border-color .2s;
+    }
+    .cat-tag:hover { background: rgba(232,93,38,.2); border-color: var(--ember); }
+    .cat-tag i.fa-tag { color: var(--ember-light); font-size: 11px; }
+    .cat-tag .cat-del {
+      margin-left: 4px; width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(248,113,113,.15); color: #F87171;
+      display: grid; place-items: center; font-size: 11px;
+      transition: background .15s, color .15s; cursor: pointer; border: 0;
+    }
+    .cat-tag .cat-del:hover { background: #F87171; color: #fff; }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -21,6 +40,7 @@
           <span class="sidebar__brand-sub">Restaurante</span>
         </div>
       </div>
+
       <div class="sidebar__search-wrap">
           <label class="top-search">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -28,6 +48,7 @@
           </label>
           <div class="top-search__results" id="topSearchResults" style="display:none;"></div>
       </div>
+
       <nav class="sidebar__nav">
         <a href="index.html"><i class="fa-solid fa-house"></i> Dashboard</a>
         <a href="cadastro.html"><i class="fa-solid fa-id-card-clip"></i> Cadastro</a>
@@ -64,7 +85,7 @@
           </div>
         </div>
 
-        <form class="form-card" autocomplete="off">
+        <form class="form-card" autocomplete="off" onsubmit="return false;">
           <div class="form-card__head">
             <div class="form-card__head-icon"><i class="fa-solid fa-burger"></i></div>
             <div>
@@ -76,17 +97,17 @@
           <div class="form-grid">
             <div class="form-group col-12">
                 <label>Imagem do Produto</label>
-                <input type="file" id="inputImagemProduto" accept="image/*" />
+                <input type="file" id="inputImagemProduto" name="imagem" accept="image/*" />
                 <small style="color:var(--text-muted);">Selecione uma imagem (jpg, png, webp).</small>
             </div>
 
             <div class="form-group col-4">
               <label>Código do Produto <span class="required">*</span></label>
-              <input type="text" placeholder="Ex: PROD-0042" />
+              <input type="text" id="inputCodigoProduto" placeholder="Ex: PROD-0042" />
             </div>
             <div class="form-group col-8">
               <label>Nome do Produto <span class="required">*</span></label>
-              <input type="text" placeholder="Ex: Hambúrguer Artesanal 180g" />
+              <input type="text" id="inputNomeProduto" placeholder="Ex: Hambúrguer Artesanal 180g" />
             </div>
 
             <div class="form-group col-6">
@@ -104,20 +125,20 @@
 
             <div class="form-group col-12">
               <label>Descrição</label>
-              <textarea placeholder="Descrição detalhada do produto, ingredientes, sugestões..."></textarea>
+              <textarea id="inputDescricaoProduto" placeholder="Descrição detalhada do produto, ingredientes, sugestões..."></textarea>
             </div>
 
             <div class="form-group col-3">
               <label>Preço Unitário (R$) <span class="required">*</span></label>
-              <input type="text" placeholder="0,00" />
+              <input type="text" id="inputPrecoProduto" placeholder="0,00" />
             </div>
             <div class="form-group col-3">
               <label>Qtd. em Estoque</label>
-              <input type="number" placeholder="0" />
+              <input type="number" id="inputEstoqueProduto" placeholder="0" />
             </div>
             <div class="form-group col-3">
               <label>Unidade de Medida</label>
-              <select>
+              <select id="selectUnidadeProduto">
                 <option value="">Selecione...</option>
                 <option>Un (Unidade)</option>
                 <option>Kg (Quilograma)</option>
@@ -130,15 +151,39 @@
             </div>
             <div class="form-group col-3">
               <label>Data de Validade</label>
-              <input type="date" />
+              <input type="date" id="inputValidadeProduto" />
             </div>
           </div>
 
           <div class="btn-row">
             <a href="cadastro.html" class="btn btn--outline"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
             <button type="reset" class="btn btn--ghost"><i class="fa-solid fa-eraser"></i> Limpar</button>
-            <button type="button" class="btn btn--primary"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+            <button type="button" class="btn btn--primary" id="btnSalvarProduto"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
           </div>
+        </form>
+
+        <form class="form-card" id="cardCategorias" autocomplete="off" onsubmit="return false;">
+          <div class="form-card__head">
+            <div class="form-card__head-icon"><i class="fa-solid fa-tags"></i></div>
+            <div>
+              <h2>Gerenciar Categorias</h2>
+              <p>Crie e exclua categorias para organizar seus produtos.</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group col-9">
+              <label>Nova Categoria <span class="required">*</span></label>
+              <input type="text" id="novaCategoria" placeholder="Ex: Bebidas, Sobremesas..." maxlength="50" />
+            </div>
+            <div class="form-group col-3" style="display:flex;align-items:flex-end;">
+              <button type="button" class="btn btn--primary" id="btnAdicionarCategoria" style="width:100%;justify-content:center;">
+                <i class="fa-solid fa-plus"></i> Adicionar
+              </button>
+            </div>
+          </div>
+
+          <div id="listaCategorias" style="margin-top:20px;"></div>
         </form>
       </main>
 
@@ -178,6 +223,5 @@
     </div>
   </div>
   <script src="../js/app.js"></script>
-  <script src="../js/produto.js"></script>
 </body>
 </html>

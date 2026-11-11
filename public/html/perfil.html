@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meu Perfil | Boi Ralado</title>
+  <link rel="icon" type="image/png" href="../img/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+
+  <style>
+    .perfil-grid { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
+    @media (max-width: 860px) { .perfil-grid { grid-template-columns: 1fr; } }
+
+    .perfil-avatar-card {
+      background: linear-gradient(145deg, #1F1610, #17100A);
+      border: 1px solid rgba(232, 93, 38, 0.35);
+      border-radius: 18px; padding: 28px 24px; text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    .perfil-avatar-wrap { position: relative; width: 140px; height: 140px; margin: 0 auto 18px; }
+    .perfil-avatar-img {
+      width: 140px; height: 140px; border-radius: 50%; object-fit: cover;
+      border: 3px solid #E85D26;
+      background: radial-gradient(circle, rgba(232,93,38,.3), #120C08 70%);
+      display: block;
+    }
+    .perfil-avatar-fallback {
+      width: 140px; height: 140px; border-radius: 50%; border: 3px solid #E85D26;
+      background: linear-gradient(135deg, #E85D26, #7A1010); color: #fff;
+      display: grid; place-items: center; font: 800 46px 'Playfair Display', serif;
+      letter-spacing: 1px;
+    }
+    .perfil-avatar-btn {
+      position: absolute; bottom: 4px; right: 4px; width: 40px; height: 40px;
+      border-radius: 50%; border: 2px solid #17100A;
+      background: linear-gradient(135deg, #E85D26, #7A1010); color: #fff;
+      display: grid; place-items: center; cursor: pointer; font-size: 15px;
+      box-shadow: 0 6px 18px rgba(232,93,38,.45);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .perfil-avatar-btn:hover { transform: scale(1.08); box-shadow: 0 10px 26px rgba(232,93,38,.6); }
+
+    .perfil-nome { font: 700 20px 'Playfair Display', serif; color: #F1E8D8; margin-bottom: 4px; }
+    .perfil-papel {
+      display: inline-block; padding: 4px 12px; border-radius: 99px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+      color: #E85D26; background: rgba(232,93,38,.12);
+      border: 1px solid rgba(232,93,38,.3); margin-top: 6px;
+    }
+
+    .perfil-info-card {
+      background: #17100A; border: 1px solid rgba(201,179,147,.15);
+      border-radius: 18px; padding: 26px 28px;
+    }
+    .perfil-info-card h3 {
+      font: 700 18px 'Playfair Display', serif; color: #F1E8D8;
+      margin-bottom: 18px; padding-bottom: 12px;
+      border-bottom: 1px solid rgba(201,179,147,.12);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .perfil-info-card h3 i { color: #E85D26; }
+
+    .perfil-row {
+      display: flex; align-items: center; padding: 14px 0;
+      border-bottom: 1px solid rgba(201,179,147,.08); gap: 14px;
+    }
+    .perfil-row:last-child { border-bottom: 0; }
+    .perfil-row__icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: rgba(232,93,38,.12); border: 1px solid rgba(232,93,38,.25);
+      color: #E85D26; display: grid; place-items: center; flex-shrink: 0;
+    }
+    .perfil-row__label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px;
+      color: #A89078; font-weight: 600; margin-bottom: 2px;
+    }
+    .perfil-row__value { font-size: 15px; color: #F1E8D8; font-weight: 500; }
+    .perfil-row__value--vazio { color: #6b5a45; font-style: italic; }
+
+    .perfil-input {
+      width: 100%; padding: 10px 12px; border-radius: 8px;
+      background: #120C08; border: 1.5px solid rgba(201,179,147,.25);
+      color: #F1E8D8; font: 500 14px Poppins, sans-serif;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .perfil-input:focus {
+      outline: 0; border-color: #E85D26;
+      box-shadow: 0 0 0 3px rgba(232,93,38,.18);
+    }
+
+    .perfil-info-card__head {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; flex-wrap: wrap;
+    }
+    .perfil-info-card__head h3 { margin-bottom: 18px; border-bottom: 0; padding-bottom: 0; }
+
+    .perfil-senha-card {
+      background: #17100A; border: 1px solid rgba(201,179,147,.15);
+      border-radius: 18px; padding: 26px 28px; margin-top: 24px;
+    }
+    .perfil-senha-card h3 {
+      font: 700 18px 'Playfair Display', serif; color: #F1E8D8;
+      margin-bottom: 18px; padding-bottom: 12px;
+      border-bottom: 1px solid rgba(201,179,147,.12);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .perfil-senha-card h3 i { color: #E85D26; }
+
+    .perfil-senha-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+    }
+    @media (max-width: 860px) { .perfil-senha-grid { grid-template-columns: 1fr; } }
+
+    .perfil-senha-form .form-group { margin-bottom: 0; }
+    .perfil-senha-form label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: #A89078; margin-bottom: 8px;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .perfil-senha-actions {
+      display: flex; justify-content: flex-end; margin-top: 20px; gap: 10px;
+    }
+
+    .perfil-editar-actions {
+      display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;
+    }
+
+    .btn-edit-perfil {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 14px; border-radius: 8px;
+      background: rgba(232,93,38,.12); border: 1px solid rgba(232,93,38,.35);
+      color: #E85D26; font: 600 13px Poppins, sans-serif;
+      cursor: pointer; transition: all .2s;
+    }
+    .btn-edit-perfil:hover { background: rgba(232,93,38,.25); border-color: #E85D26; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__brand">
+        <img src="../img/logo.png" alt="Logo Boi Ralado" />
+        <div class="sidebar__brand-text">
+          <span class="sidebar__brand-title">Boi Ralado</span>
+          <span class="sidebar__brand-sub">Restaurante</span>
+        </div>
+      </div>
+      <div class="sidebar__search-wrap">
+          <label class="top-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="topSearch" placeholder="Buscar...">
+          </label>
+          <div class="top-search__results" id="topSearchResults" style="display:none;"></div>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="index.html"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="cadastro.html"><i class="fa-solid fa-id-card-clip"></i> Cadastro</a>
+        <a href="movimento.html"><i class="fa-solid fa-arrow-right-arrow-left"></i> Movimento</a>
+        <a href="relatorios.html"><i class="fa-solid fa-chart-column"></i> Relatórios</a>
+        <a href="cliente.html" class="tn-sep"><i class="fa-solid fa-users"></i> Clientes</a>
+        <a href="produto.html"><i class="fa-solid fa-burger"></i> Produtos</a>
+        <a href="fornecedor.html"><i class="fa-solid fa-truck-field"></i> Fornecedores</a>
+        <a href="pedido.html"><i class="fa-solid fa-receipt"></i> Pedidos</a>
+        <a href="entrega.html"><i class="fa-solid fa-motorcycle"></i> Delivery</a>
+      </nav>
+      <button class="tn-burger" aria-label="Abrir menu"><i class="fa-solid fa-bars"></i></button>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div class="header__actions">
+          <a href="#" class="header__user" title="Opções da Conta">
+            <div class="header__user-avatar">BR</div>
+            <div class="header__user-info">
+              <span class="header__user-name">Usuário</span>
+              <span class="header__user-role">Sistema</span>
+            </div>
+          </a>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <div class="breadcrumbs">
+              <a href="index.html"><i class="fa-solid fa-house"></i> Início</a>
+              <i class="fa-solid fa-chevron-right"></i>
+              <span class="current">Meu Perfil</span>
+            </div>
+            <h2 class="page-head__title">Meu Perfil</h2>
+            <p class="page-head__subtitle">Veja e atualize suas informações pessoais.</p>
+          </div>
+        </div>
+
+        <div class="perfil-grid">
+          <div class="perfil-avatar-card">
+            <div class="perfil-avatar-wrap">
+              <div id="avatarSlot"></div>
+              <button type="button" class="perfil-avatar-btn" id="btnTrocarFoto" title="Trocar foto">
+                <i class="fa-solid fa-camera"></i>
+              </button>
+              <input type="file" id="inputFotoPerfil" accept="image/*" style="display:none;" />
+            </div>
+            <div class="perfil-nome" id="perfilNome">—</div>
+            <span class="perfil-papel" id="perfilPapel">—</span>
+          </div>
+
+          <div>
+            <div class="perfil-info-card">
+              <div class="perfil-info-card__head">
+                <h3><i class="fa-solid fa-id-card"></i> Informações Pessoais</h3>
+                <button type="button" class="btn-edit-perfil" id="btnEditarPerfil">
+                  <i class="fa-solid fa-pen"></i> Editar
+                </button>
+              </div>
+
+              <!-- MODO VISUALIZAÇÃO -->
+              <div id="modoVisualizar">
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-user"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">Nome completo</div>
+                    <div class="perfil-row__value" id="perfilNomeCompleto">—</div>
+                  </div>
+                </div>
+
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-envelope"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">E-mail</div>
+                    <div class="perfil-row__value" id="perfilEmail">—</div>
+                  </div>
+                </div>
+
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-address-card"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">CPF</div>
+                    <div class="perfil-row__value" id="perfilCpf">—</div>
+                  </div>
+                </div>
+
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-phone"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">Telefone</div>
+                    <div class="perfil-row__value" id="perfilTelefone">—</div>
+                  </div>
+                </div>
+
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-calendar"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">Cliente desde</div>
+                    <div class="perfil-row__value" id="perfilDesde">—</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MODO EDIÇÃO -->
+              <div id="modoEditar" style="display:none;">
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-user"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">Nome completo</div>
+                    <input type="text" class="perfil-input" id="editNome" placeholder="Seu nome completo" />
+                  </div>
+                </div>
+
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-envelope"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">E-mail</div>
+                    <input type="email" class="perfil-input" id="editEmail" placeholder="seuemail@exemplo.com" />
+                  </div>
+                </div>
+
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-address-card"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">CPF</div>
+                    <input type="text" class="perfil-input" id="editCpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" />
+                  </div>
+                </div>
+
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-phone"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">Telefone</div>
+                    <input type="tel" class="perfil-input" id="editTelefone" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" />
+                  </div>
+                </div>
+
+                <div class="perfil-editar-actions">
+                  <button type="button" class="btn btn--outline" id="btnCancelarEdicao">
+                    <i class="fa-solid fa-xmark"></i> Cancelar
+                  </button>
+                  <button type="button" class="btn btn--primary" id="btnSalvarPerfil">
+                    <i class="fa-solid fa-floppy-disk"></i> Salvar alterações
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- TROCA DE SENHA -->
+            <div class="perfil-senha-card">
+              <h3><i class="fa-solid fa-lock"></i> Alterar Senha</h3>
+
+              <form class="perfil-senha-form" id="formSenha" autocomplete="off" onsubmit="return false;">
+                <div class="perfil-senha-grid">
+                  <div class="form-group">
+                    <label>Senha atual</label>
+                    <input type="password" class="perfil-input" id="senhaAtual" placeholder="Digite a senha atual" />
+                  </div>
+                  <div class="form-group">
+                    <label>Nova senha</label>
+                    <input type="password" class="perfil-input" id="senhaNova" placeholder="Mínimo 6 caracteres" />
+                  </div>
+                  <div class="form-group">
+                    <label>Confirmar nova senha</label>
+                    <input type="password" class="perfil-input" id="senhaConfirma" placeholder="Repita a nova senha" />
+                  </div>
+                </div>
+
+                <div class="perfil-senha-actions">
+                  <button type="button" class="btn btn--primary" id="btnAlterarSenha">
+                    <i class="fa-solid fa-key"></i> Alterar senha
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row" style="margin-top:24px;">
+          <a href="index.html" class="btn btn--outline"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
+          <button type="button" class="btn btn--danger-outline" id="btnSairPerfil"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</button>
+        </div>
+      </main>
+
+      <footer class="footer pz">
+        <div class="pz__grid">
+          <div>
+            <div class="pz__brand"><img src="../img/logo-puzles.png" alt="Puzles Softwares"><b>Boi Ralado</b></div>
+            <p>Tradição, sabor de fogo e carne de verdade. Do boi ralado ao prato executivo, feito com carinho todos os dias.</p>
+          </div>
+          <div>
+            <h5>Navegação</h5>
+            <a href="index.html">Dashboard</a>
+            <a href="cadastro.html">Cadastro</a>
+            <a href="movimento.html">Movimento</a>
+            <a href="relatorios.html">Relatórios</a>
+          </div>
+          <div>
+            <h5>Contato</h5>
+            <span><i class="fa-solid fa-location-dot"></i> Rua Exemplo, 123 — Centro</span>
+            <span><i class="fa-solid fa-phone"></i> (00) 0000-0000</span>
+            <span><i class="fa-brands fa-whatsapp"></i> (00) 90000-0000</span>
+            <span><i class="fa-solid fa-envelope"></i> contato@boiralado.com.br</span>
+          </div>
+          <div>
+            <h5>Redes Sociais</h5>
+            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank"><i class="fa-brands fa-instagram"></i> Instagram</a>
+          </div>
+        </div>
+        <div class="pz__bar">
+          <span>© 2026 Boi Ralado. Todos os direitos reservados.</span>
+          <span class="pz__by">Desenvolvido com <i class="fa-solid fa-fire"></i> por <a href="#" class="pz__logo"><i class="fa-solid fa-puzzle-piece"></i> Puzles</a></span>
+          <span class="pz__soc">
+            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          </span>
+        </div>
+      </footer>
+    </div>
+  </div>
+  <script src="../js/app.js"></script>
+  <script src="../js/perfil.js"></script>
+</body>
+</html>

@@ -32,6 +32,7 @@ db.serialize(function () {
       whatsapp      TEXT,
       endereco_id   INTEGER,
       data_cadastro TEXT,
+      foto          TEXT,
       FOREIGN KEY (endereco_id) REFERENCES endereco(id)
     )
   `);
@@ -58,7 +59,6 @@ db.serialize(function () {
     )
   `);
 
-  // Insere categorias de exemplo se a tabela estiver vazia
   db.get('SELECT COUNT(*) as count FROM categoria', [], function(err, row) {
       if (row && row.count === 0) {
           var cats = ['Lanches', 'Pratos Executivos', 'Marmitas', 'Bebidas', 'Sobremesas', 'Acompanhamentos', 'Insumos'];
@@ -158,6 +158,27 @@ db.serialize(function () {
       FOREIGN KEY (produto_id) REFERENCES produto(id)
     )
   `);
+
+  // ---- Índices para performance em relatórios e buscas ----
+  db.run('CREATE INDEX IF NOT EXISTS idx_pedido_data      ON pedido(data)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_entrega_data     ON entrega(data)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_produto_cat      ON produto(categoria)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_cliente_cpf      ON cliente(cpf)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_fornecedor_cnpj  ON fornecedor(cnpj)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_pedido_item_ped  ON pedido_item(pedido_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_entrega_item_ent ON entrega_item(entrega_id)');
+
+  // Migração: adiciona coluna 'foto' na tabela cliente se ainda não existir
+  db.all("PRAGMA table_info(cliente)", [], function (err, cols) {
+    if (err) return;
+    var nomes = (cols || []).map(function (c) { return c.name; });
+    if (nomes.indexOf('foto') === -1) {
+      db.run("ALTER TABLE cliente ADD COLUMN foto TEXT", function (e) {
+        if (e) console.log('[migração] erro ao adicionar coluna foto:', e.message);
+        else console.log('[migração] coluna foto adicionada em cliente');
+      });
+    }
+  });
 });
 
 module.exports = db;

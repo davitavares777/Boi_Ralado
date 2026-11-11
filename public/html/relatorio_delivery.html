@@ -12,9 +12,14 @@
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="stylesheet" href="../css/extra.css" />
   <style>
-    /* Desativa animações externas no SVG para não quebrar o desenho */
-    .pie circle {
-      animation: none !important;
+    /* Ajuste para o container do gráfico */
+    .chart-container {
+      position: relative;
+      height: 280px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
   </style>
 </head>
@@ -124,8 +129,10 @@
         <!-- GRÁFICOS -->
         <section class="charts" style="grid-template-columns:1fr 1fr;">
           <div class="chart-card">
-            <h3>Formas de pagamento — Delivery</h3>
-            <svg class="pie" viewBox="0 0 42 42" style="width:200px;height:200px; margin: 0 auto 14px; transform: rotate(-90deg);"></svg>
+            <h3>Origem dos Pedidos — Delivery</h3>
+            <div class="chart-container">
+              <canvas id="graficoDelivery"></canvas>
+            </div>
             <div class="lg" id="legendas-grafico"></div>
           </div>
 
@@ -200,6 +207,10 @@
       </footer>
     </div>
   </div>
+  
+  <!-- Importando Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
   <script src="../js/app.js"></script>
   <script src="../js/relatorio_delivery.js"></script>
 </body>

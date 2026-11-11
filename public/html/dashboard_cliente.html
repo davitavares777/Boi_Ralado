@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meu Painel | Boi Ralado</title>
+  <link rel="icon" type="image/png" href="img/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/extra.css" />
+  <link rel="stylesheet" href="../css/cliente_dashboard.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__brand">
+        <img src="img/logo.png" alt="Logo Boi Ralado" />
+        <div class="sidebar__brand-text">
+          <span class="sidebar__brand-title">Boi Ralado</span>
+          <span class="sidebar__brand-sub">Área do Cliente</span>
+        </div>
+      </div>
+
+      <div class="sidebar__search-wrap">
+        <label class="top-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="topSearch" placeholder="Buscar no cardápio..." />
+        </label>
+      </div>
+
+      <nav class="sidebar__nav">
+        <a href="dashboard_cliente.html" class="active"><i class="fa-solid fa-utensils"></i> Cardápio</a>
+        <a href="#" id="navCarrinho"><i class="fa-solid fa-cart-shopping"></i> Meu Carrinho <span class="cart-badge" id="cartBadge" style="display:none;">0</span></a>
+        <a href="#" id="navPedidos"><i class="fa-solid fa-receipt"></i> Meus Pedidos</a>
+      </nav>
+
+      <div class="cliente-info-top">
+        <div class="cliente-avatar" id="clienteAvatar">CL</div>
+        <div class="cliente-nome" id="clienteNome">Cliente</div>
+      </div>
+
+      <button class="tn-burger" aria-label="Abrir menu"><i class="fa-solid fa-bars"></i></button>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div class="header__actions">
+          <a href="login.html" class="header__user" title="Sair">
+            <div class="header__user-avatar" id="headerAvatar">CL</div>
+            <div class="header__user-info">
+              <span class="header__user-name" id="headerNome">Cliente</span>
+              <span class="header__user-role">Cliente</span>
+            </div>
+          </a>
+        </div>
+      </header>
+
+      <main class="content cliente-content">
+        <section id="secaoCardapio" class="cliente-section active">
+          <div class="page-head">
+            <div>
+              <div class="breadcrumbs"><i class="fa-solid fa-house"></i> Início <i class="fa-solid fa-chevron-right"></i> <span class="current">Cardápio</span></div>
+              <h2 class="page-head__title">Nosso <em>Cardápio</em></h2>
+              <p class="page-head__subtitle">Escolha seus pratos favoritos e adicione ao carrinho.</p>
+            </div>
+          </div>
+
+          <div class="filtros-categoria" id="filtrosCategoria">
+            <button class="filtro-btn active" data-cat="todos">Todos</button>
+          </div>
+
+          <div class="cardapio-grid" id="cardapioGrid">
+            <div class="loading-state">
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              <p>Carregando cardápio...</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="secaoCarrinho" class="cliente-section">
+          <div class="page-head">
+            <div>
+              <div class="breadcrumbs"><i class="fa-solid fa-house"></i> Início <i class="fa-solid fa-chevron-right"></i> <span class="current">Carrinho</span></div>
+              <h2 class="page-head__title">Meu <em>Carrinho</em></h2>
+              <p class="page-head__subtitle">Revise os itens antes de finalizar o pedido.</p>
+            </div>
+            <button class="btn btn--outline" id="btnVoltarCardapio"><i class="fa-solid fa-arrow-left"></i> Voltar ao Cardápio</button>
+          </div>
+
+          <div class="carrinho-layout">
+            <div class="carrinho-lista" id="carrinhoLista">
+              <div class="empty-state">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <p>Seu carrinho está vazio.</p>
+                <button class="btn btn--primary" id="btnIrParaCardapio"><i class="fa-solid fa-utensils"></i> Ver Cardápio</button>
+              </div>
+            </div>
+
+            <div class="carrinho-resumo">
+              <h3><i class="fa-solid fa-receipt"></i> Resumo do Pedido</h3>
+              <div class="resumo-linha"><span>Subtotal</span><span id="resumoSubtotal">R$ 0,00</span></div>
+              <div class="resumo-linha"><span>Taxa de Serviço (10%)</span><span id="resumoTaxa">R$ 0,00</span></div>
+              <div class="resumo-linha total"><span>Total</span><span id="resumoTotal">R$ 0,00</span></div>
+              
+              <div class="form-group" style="margin-top:18px;">
+                <label>Observação do Pedido</label>
+                <textarea id="obsPedido" placeholder="Ex: Sem cebola, ponto da carne bem passado..."></textarea>
+              </div>
+
+              <button class="btn btn--primary btn--full" id="btnFinalizarPedido">
+                <i class="fa-solid fa-paper-plane"></i> Finalizar Pedido
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section id="secaoPedidos" class="cliente-section">
+          <div class="page-head">
+            <div>
+              <div class="breadcrumbs"><i class="fa-solid fa-house"></i> Início <i class="fa-solid fa-chevron-right"></i> <span class="current">Meus Pedidos</span></div>
+              <h2 class="page-head__title">Meus <em>Pedidos</em></h2>
+              <p class="page-head__subtitle">Acompanhe o status dos seus pedidos em tempo real.</p>
+            </div>
+            <button class="btn btn--outline" id="btnAtualizarPedidos"><i class="fa-solid fa-rotate"></i> Atualizar</button>
+          </div>
+
+          <div class="pedidos-lista" id="pedidosLista">
+            <div class="empty-state">
+              <i class="fa-solid fa-receipt"></i>
+              <p>Você ainda não realizou nenhum pedido.</p>
+              <button class="btn btn--primary" id="btnFazerPedido"><i class="fa-solid fa-utensils"></i> Fazer um Pedido</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer pz">
+        <div class="pz__grid">
+          <div>
+            <div class="pz__brand"><img src="img/logo-puzles.png" alt="Puzles Softwares"><b>Boi Ralado</b></div>
+            <p>Tradição, sabor de fogo e carne de verdade. Do boi ralado ao prato executivo, feito com carinho todos os dias.</p>
+          </div>
+          <div>
+            <h5>Navegação</h5>
+            <a href="dashboard_cliente.html">Cardápio</a>
+            <a href="#" data-nav="carrinho">Carrinho</a>
+            <a href="#" data-nav="pedidos">Meus Pedidos</a>
+          </div>
+          <div>
+            <h5>Contato</h5>
+            <span><i class="fa-solid fa-location-dot"></i> Rua Exemplo, 123 — Centro</span>
+            <span><i class="fa-solid fa-phone"></i> (00) 0000-0000</span>
+            <span><i class="fa-brands fa-whatsapp"></i> (00) 90000-0000</span>
+            <span><i class="fa-solid fa-envelope"></i> contato@boiralado.com.br</span>
+          </div>
+          <div>
+            <h5>Redes Sociais</h5>
+            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank"><i class="fa-brands fa-instagram"></i> Instagram</a>
+          </div>
+        </div>
+        <div class="pz__bar">
+          <span>© 2026 Boi Ralado. Todos os direitos reservados.</span>
+          <span class="pz__by">Desenvolvido com <i class="fa-solid fa-fire"></i> por <a href="#" class="pz__logo"><i class="fa-solid fa-puzzle-piece"></i> Puzles</a></span>
+          <span class="pz__soc">
+            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          </span>
+        </div>
+      </footer>
+    </div>
+  </div>
+  <script src="../js/app.js"></script>
+  <script src="../js/dashboard_cliente.js"></script>
+</body>
+</html>

@@ -1,7 +1,6 @@
 /* ============================================================
    extra.css — estilos específicos da dashboard (hero, marquee,
    cardápio, gráficos, footer Puzles, cursor leve).
-   Estes estilos NÃO existem no style.css e por isso são separados.
    ============================================================ */
 
 /* ---------- HERO ---------- */
@@ -77,7 +76,7 @@
 .marq:hover div{animation-play-state:paused}
 @keyframes marq{to{transform:translateX(-50%)}}
 
-/* ---------- CARDÁPIO (produtos com imagem) ---------- */
+/* ---------- CARDÁPIO ---------- */
 .pgrid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
@@ -133,7 +132,6 @@
   font:700 18px var(--font-display);color:#fff;margin-bottom:16px
 }
 
-/* placeholder de pizza quando não há dados */
 .pie-placeholder{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   height:190px;gap:12px;color:var(--text-dim)
@@ -141,7 +139,6 @@
 .pie-placeholder i{font-size:52px;opacity:.4}
 .pie-placeholder span{font-size:13px}
 
-/* barras horizontais */
 .hb{
   display:grid;grid-template-columns:130px 1fr 40px;gap:10px;
   align-items:center;margin-bottom:12px;font-size:13px
@@ -159,7 +156,6 @@
 @keyframes grow{from{width:0}}
 .hb b{text-align:right;color:var(--ember-light)}
 
-/* barras verticais */
 .vb{
   display:flex;align-items:flex-end;gap:10px;height:190px
 }
@@ -209,8 +205,9 @@
 @media(max-width:560px){.pz__grid{grid-template-columns:1fr}}
 .pz__brand{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 .pz__brand img{
-  width:46px;height:46px;border-radius:50%;
-  border:2px solid rgba(232,93,38,.5)
+  width:40px;height:40px;border-radius:50%;object-fit:contain;
+  border:2px solid rgba(232,93,38,.5);
+  background:#fff;padding:4px;
 }
 .pz__brand b{font:800 22px var(--font-display);color:#fff}
 .pz__grid p{font-size:13.5px;line-height:1.7}
@@ -233,7 +230,6 @@
   border-top:1px solid var(--border);font-size:13px
 }
 .pz__by i.fa-fire{color:var(--ember);animation:blink 1.4s infinite}
-@keyframes blink{50%{opacity:.6}}
 .pz__logo{
   display:inline-flex !important;align-items:center;gap:6px;
   margin:0 !important;padding:4px 12px;border-radius:99px;
@@ -255,7 +251,7 @@
 }
 
 /* ============================================================
-   GRÁFICOS — pizza e barra horizontal (usados no dashboard e relatórios)
+   GRÁFICOS — pizza e barra horizontal
    ============================================================ */
 .pie{width:190px;display:block;margin:0 auto 14px;transform:rotate(-90deg)}
 .pie circle{animation:pie 1.2s var(--ease) both}
@@ -302,25 +298,21 @@
 .br-ov{backdrop-filter:blur(6px)}
 
 /* ============================================================
-   MODAL DE PRODUTOS — CORES EXATAS DO SITE (MARROM ESCURO)
+   MODAL DE PRODUTOS — CORES DO SITE
    ============================================================ */
-
-/* O quadrado do modal */
 .br-md.br-md--produtos {
   width: min(1100px, 96vw) !important;
   max-height: 80vh;
   display: flex;
   flex-direction: column;
   padding: 22px !important;
-  background-color: #17100A !important; /* Cor do --surface do site */
+  background-color: #17100A !important;
   background: linear-gradient(145deg, #1F1610, #17100A) !important;
   border: 1px solid rgba(232, 93, 38, 0.45) !important;
-  color: #F1E8D8 !important; /* Texto clarinho */
+  color: #F1E8D8 !important;
   box-shadow: 0 20px 50px rgba(0,0,0,.65), 0 0 60px rgba(232,93,38,.2) !important;
   border-radius: 14px !important;
 }
-
-/* Título "Consultar itens" */
 .br-md.br-md--produtos h3 {
   color: #F1E8D8 !important;
   font-family: var(--font-display, 'Playfair Display', serif) !important;
@@ -328,53 +320,43 @@
   border-bottom: 1px solid rgba(201,179,147,.12) !important;
   margin-bottom: 12px !important;
 }
-
-/* Container da tabela */
 .br-md.br-md--produtos .br-tabela {
   flex: 1;
   overflow: auto;
   border-radius: 10px;
   border: 1px solid rgba(232, 93, 38, 0.25) !important;
-  background: #120C08 !important; /* Cor do --void-2 */
+  background: #120C08 !important;
   max-height: 55vh;
 }
 .br-md.br-md--produtos .br-tabela::-webkit-scrollbar { width: 10px; height: 10px; }
 .br-md.br-md--produtos .br-tabela::-webkit-scrollbar-thumb { background: rgba(232,93,38,.45); border-radius: 5px; }
-
-/* Tabela */
 .br-md.br-md--produtos table {
   width: 100%; min-width: 640px;
   border-collapse: collapse; font-size: 13.5px;
 }
-/* Cabeçalho da tabela */
 .br-md.br-md--produtos thead th {
   padding: 11px 14px; text-align: left;
   font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.4px;
-  color: #A89078 !important; /* --text-muted */
-  background: #1F1610 !important; /* --surface-2 */
+  color: #A89078 !important;
+  background: #1F1610 !important;
   font-weight: 600;
   position: sticky; top: 0; z-index: 1;
   border-bottom: 1px solid rgba(232,93,38,.25) !important;
 }
-/* Linhas */
 .br-md.br-md--produtos tbody td {
   padding: 10px 14px;
   border-top: 1px solid rgba(201,179,147,.12) !important;
   color: #F1E8D8 !important;
   vertical-align: middle;
   white-space: nowrap;
-  background: #120C08 !important; /* --void-2 */
+  background: #120C08 !important;
 }
-/* Preço laranja */
 .br-md.br-md--produtos tbody td.num {
   text-align: right; font-variant-numeric: tabular-nums;
   color: #FF7A3D !important; font-weight: 600;
 }
-/* Hover */
 .br-md.br-md--produtos tbody tr { cursor: pointer; transition: background .15s; }
 .br-md.br-md--produtos tbody tr:hover td { background: rgba(232,93,38,.12) !important; }
-
-/* Imagem 48x48 */
 .br-md.br-md--produtos .br-prod-img {
   width: 48px; height: 48px; border-radius: 8px; overflow: hidden;
   background: radial-gradient(circle, rgba(232,93,38,.2), #120C08 70%);
@@ -383,8 +365,6 @@
 .br-md.br-md--produtos .br-prod-img img {
   width: 48px; height: 48px; object-fit: cover; display: block;
 }
-
-/* Textos */
 .br-md.br-md--produtos .br-prod-nome {
   display: block; font-weight: 600; color: #F1E8D8 !important; line-height: 1.25;
   max-width: 230px; overflow: hidden; text-overflow: ellipsis;
@@ -392,8 +372,6 @@
 .br-md.br-md--produtos .br-prod-estoque {
   display: block; font-size: 11px; color: #A89078 !important; margin-top: 2px;
 }
-
-/* Botão + */
 .br-md.br-md--produtos .br-add-ico {
   width: 32px; height: 32px; border-radius: 50%;
   display: grid; place-items: center;
@@ -403,8 +381,6 @@
   transition: transform .15s;
 }
 .br-md.br-md--produtos tbody tr:hover .br-add-ico { transform: scale(1.1); }
-
-/* Rodapé */
 .br-md.br-md--produtos .acts {
   margin-top: 14px !important; padding-top: 12px;
   border-top: 1px solid rgba(201,179,147,.12) !important;
@@ -414,18 +390,8 @@
   color: #F1E8D8 !important;
   border-color: rgba(201,179,147,.25) !important;
 }
-
-/* Estado vazio */
 .br-md.br-md--produtos .br-vazio {
   padding: 40px 16px; text-align: center; color: #A89078 !important;
   display: flex; flex-direction: column; align-items: center; gap: 12px;
 }
 .br-md.br-md--produtos .br-vazio i { font-size: 40px; color: #FF7A3D !important; opacity: .6; }
-.pz__brand img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: contain;
-  background: #fff; /* Fundo branco para a logo do Puzles aparecer bem */
-  padding: 4px;
-}

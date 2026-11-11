@@ -98,7 +98,7 @@
     loginError.classList.add('show');
   }
 
-  if (loginForm) {
+    if (loginForm) {
     loginForm.addEventListener('submit', function (e) {
       e.preventDefault();
       loginError.classList.remove('show');
@@ -122,25 +122,21 @@
 
       if (!encontrado) return mostrarErroLogin('Usuário ou senha inválidos.');
 
-      var papel = tipoUsuario === 'funcionario' ? 'Funcionário' : 'Cliente';
+      // --- REDIRECIONAMENTO BASEADO NO PAPEL ---
+      var papelReal = encontrado.papel || (tipoUsuario === 'funcionario' ? 'Funcionário' : 'Cliente');
       
       localStorage.setItem('br_usuario_atual', JSON.stringify({
         nome: encontrado.nome,
         email: encontrado.email,
-        papel: papel
+        papel: papelReal
       }));
 
-      window.location.href = 'index.html';
+      if (papelReal === 'Cliente') {
+        window.location.href = 'dashboard_cliente.html';
+      } else {
+        window.location.href = 'index.html';
+      }
     });
-  }
-
-  var registerForm = document.getElementById('registerForm');
-  var registerError = document.getElementById('registerError');
-  var registerSuccess = document.getElementById('registerSuccess');
-
-  function mostrarErroCad(msg) {
-    registerError.querySelector('span').textContent = msg;
-    registerError.classList.add('show');
   }
 
   if (registerForm) {
