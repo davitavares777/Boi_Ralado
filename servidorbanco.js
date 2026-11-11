@@ -33,31 +33,55 @@ var TIPOS = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
-  '.svg': 'image/svg+xml'
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon'
 };
 
+// ===================================================================
+// SERVE ARQUIVOS DA NOVA ESTRUTURA (public/html, public/css, public/js)
+// ===================================================================
 function servirArquivo(res, caminhoRelativo) {
-  var caminho = path.join(__dirname, 'public', caminhoRelativo);
-  if (!fs.existsSync(caminho)) {
-    caminho = path.join(__dirname, caminhoRelativo);
+  // Se for a raiz, serve o login
+  if (caminhoRelativo === '/') {
+    caminhoRelativo = '/html/login.html';
   }
+
+  // Normaliza o caminho (remove barras extras)
+  caminhoRelativo = caminhoRelativo.replace(/^\/+/, '');
+
+  // Se não tem extensão e não é API, assume .html
+  var extensao = path.extname(caminhoRelativo);
+  if (!extensao) {
+    caminhoRelativo = 'html/' + caminhoRelativo + '.html';
+  }
+
+  var caminho = path.join(__dirname, 'public', caminhoRelativo);
+
+  // Se não encontrou, tenta na pasta html (para links como /index.html)
+  if (!fs.existsSync(caminho) && extensao === '.html' && !caminhoRelativo.startsWith('html/')) {
+    var alt = path.join(__dirname, 'public', 'html', path.basename(caminhoRelativo));
+    if (fs.existsSync(alt)) caminho = alt;
+  }
+
   if (!fs.existsSync(caminho)) {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     return res.end('Arquivo nao encontrado: ' + caminhoRelativo);
   }
-  var tipo = TIPOS[path.extname(caminho)] || 'text/plain; charset=utf-8';
+
+  var tipo = TIPOS[path.extname(caminho)] || 'application/octet-stream';
   res.writeHead(200, { 'Content-Type': tipo });
   res.end(fs.readFileSync(caminho));
 }
 
 var servidor = http.createServer(function (pedido, resposta) {
-  var partes = pedido.url.split('/');
+  var url = pedido.url.split('?')[0];
+  var partes = url.split('/');
   var ehApi = (partes[1] === 'api');
   var recurso = partes[2];
   var id = partes[3];
   var metodo = pedido.method;
 
-  // UPLOAD DE IMAGEM
+  // ========== UPLOAD DE IMAGEM ==========
   if (ehApi && recurso === 'upload' && metodo === 'POST') {
     lerDados(pedido, function (d) {
       if (!d.imagem || !d.nome) return recusar(resposta, 400, 'Dados incompletos.');
@@ -65,13 +89,13 @@ var servidor = http.createServer(function (pedido, resposta) {
         var base64Data = d.imagem.replace(/^data:image\/\w+;base64,/, "");
         var buffer = Buffer.from(base64Data, 'base64');
         var nomeArquivo = Date.now() + '-' + d.nome.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
-        var caminhoArquivo = path.join(__dirname, 'img', 'produtos', nomeArquivo);
-        
-        if (!fs.existsSync(path.join(__dirname, 'img', 'produtos'))) {
-          fs.mkdirSync(path.join(__dirname, 'img', 'produtos'), { recursive: true });
+        var pastaUpload = path.join(__dirname, 'public', 'img', 'produtos');
+
+        if (!fs.existsSync(pastaUpload)) {
+          fs.mkdirSync(pastaUpload, { recursive: true });
         }
 
-        fs.writeFileSync(caminhoArquivo, buffer);
+        fs.writeFileSync(path.join(pastaUpload, nomeArquivo), buffer);
         responder(resposta, 200, { url: 'img/produtos/' + nomeArquivo });
       } catch (e) {
         recusar(resposta, 500, 'Erro ao salvar imagem.');
@@ -80,7 +104,7 @@ var servidor = http.createServer(function (pedido, resposta) {
     return;
   }
 
-  // CATEGORIAS
+  // ========== CATEGORIAS ==========
   if (ehApi && recurso === 'categorias') {
     if (metodo === 'GET') {
       return db.all('SELECT * FROM categoria ORDER BY nome ASC', [], function (erro, lista) {
@@ -100,7 +124,7 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
   }
 
-  // CLIENTES
+  // ========== CLIENTES ==========
   if (ehApi && recurso === 'clientes') {
     if (metodo === 'GET' && !id) {
       return db.all('SELECT * FROM cliente ORDER BY id DESC', [], function (erro, lista) {
@@ -149,7 +173,7 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
   }
 
-  // FORNECEDORES
+  // ========== FORNECEDORES ==========
   if (ehApi && recurso === 'fornecedores') {
     if (metodo === 'GET' && !id) {
       return db.all('SELECT * FROM fornecedor ORDER BY id DESC', [], function (erro, lista) {
@@ -198,7 +222,7 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
   }
 
-  // PRODUTOS
+  // ========== PRODUTOS ==========
   if (ehApi && recurso === 'produtos') {
     if (metodo === 'GET' && !id) {
       return db.all('SELECT * FROM produto ORDER BY id DESC', [], function (erro, lista) {
@@ -247,9 +271,9 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
   }
 
-  // ARQUIVOS ESTÁTICOS
+  // ========== ARQUIVOS ESTÁTICOS ==========
   if (metodo === 'GET' && !ehApi) {
-    return servirArquivo(resposta, pedido.url === '/' ? 'login.html' : pedido.url);
+    return servirArquivo(resposta, url);
   }
 
   recusar(resposta, 404, 'Rota não encontrada.');

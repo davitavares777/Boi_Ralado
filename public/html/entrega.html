@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ordem de Entrega | Boi Ralado</title>
+  <link rel="icon" type="image/png" href="img/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+
+  <style>
+    .entrega-produto-cell { display: flex; align-items: center; gap: 12px; }
+    .entrega-produto-img {
+      width: 44px; height: 44px; border-radius: 8px; object-fit: cover;
+      background: radial-gradient(circle, rgba(232,93,38,.2), #120C08 70%); flex-shrink: 0;
+    }
+    .entrega-produto-nome { font-weight: 600; color: #F1E8D8; }
+    .qtd-input {
+      width: 64px; padding: 6px 8px; text-align: center; border-radius: 6px;
+      background: #120C08; border: 1.5px solid rgba(201,179,147,.25);
+      color: #F1E8D8; font-weight: 600; font-size: 13px;
+    }
+    .qtd-input:focus { outline: 0; border-color: #E85D26; box-shadow: 0 0 0 3px rgba(232,93,38,.18); }
+    .subtotal-cell { font-weight: 600; color: #FF7A3D; }
+
+    .br-toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #2b0a0a; color: #fff;
+      padding: 12px 18px; border-radius: 10px; z-index: 999999;
+      box-shadow: 0 6px 20px rgba(0,0,0,.35);
+      font: 500 14px 'Poppins', sans-serif; max-width: 340px;
+      animation: toastIn .35s cubic-bezier(.22,1,.36,1); white-space: pre-line;
+    }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .br-ov {
+      position: fixed; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center; z-index: 999998; padding: 20px;
+    }
+
+    .br-md.br-md--produtos {
+      width: min(1100px, 96vw) !important; max-height: 80vh;
+      display: flex; flex-direction: column; padding: 22px !important;
+      background: linear-gradient(145deg, #1F1610, #17100A) !important;
+      border: 1px solid rgba(232, 93, 38, 0.45) !important;
+      color: #F1E8D8 !important;
+      box-shadow: 0 20px 50px rgba(0,0,0,.65), 0 0 60px rgba(232,93,38,.2) !important;
+      border-radius: 14px !important;
+    }
+    .br-md.br-md--produtos h3 {
+      color: #F1E8D8 !important; font-family: 'Playfair Display', serif !important;
+      padding-bottom: 12px !important;
+      border-bottom: 1px solid rgba(201,179,147,.12) !important;
+      margin-bottom: 12px !important;
+    }
+    .br-md.br-md--produtos .br-tabela {
+      flex: 1; overflow: auto; border-radius: 10px;
+      border: 1px solid rgba(232, 93, 38, 0.25) !important;
+      background: #120C08 !important; max-height: 55vh;
+    }
+    .br-md.br-md--produtos .br-tabela::-webkit-scrollbar { width: 10px; height: 10px; }
+    .br-md.br-md--produtos .br-tabela::-webkit-scrollbar-thumb { background: rgba(232,93,38,.45); border-radius: 5px; }
+    .br-md.br-md--produtos table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 13.5px; }
+    .br-md.br-md--produtos thead th {
+      padding: 11px 14px; text-align: left; font-size: 10.5px;
+      text-transform: uppercase; letter-spacing: 1.4px; color: #A89078 !important;
+      background: #1F1610 !important; font-weight: 600;
+      position: sticky; top: 0; z-index: 1;
+      border-bottom: 1px solid rgba(232,93,38,.25) !important;
+    }
+    .br-md.br-md--produtos tbody td {
+      padding: 10px 14px; border-top: 1px solid rgba(201,179,147,.12) !important;
+      color: #F1E8D8 !important; vertical-align: middle; white-space: nowrap;
+      background: #120C08 !important;
+    }
+    .br-md.br-md--produtos tbody td.num {
+      text-align: right; font-variant-numeric: tabular-nums;
+      color: #FF7A3D !important; font-weight: 600;
+    }
+    .br-md.br-md--produtos tbody tr { cursor: pointer; transition: background .15s; }
+    .br-md.br-md--produtos tbody tr:hover td { background: rgba(232,93,38,.12) !important; }
+    .br-md.br-md--produtos .br-prod-img {
+      width: 48px; height: 48px; border-radius: 8px; overflow: hidden;
+      background: radial-gradient(circle, rgba(232,93,38,.2), #120C08 70%);
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .br-md.br-md--produtos .br-prod-img img { width: 48px; height: 48px; object-fit: cover; display: block; }
+    .br-md.br-md--produtos .br-prod-nome {
+      display: block; font-weight: 600; color: #F1E8D8 !important;
+      line-height: 1.25; max-width: 230px; overflow: hidden; text-overflow: ellipsis;
+    }
+    .br-md.br-md--produtos .br-prod-estoque { display: block; font-size: 11px; color: #A89078 !important; margin-top: 2px; }
+    .br-md.br-md--produtos .br-add-ico {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, #E85D26, #7A1010) !important;
+      color: #fff !important; font-size: 13px;
+      box-shadow: 0 4px 14px rgba(232,93,38,.5); transition: transform .15s;
+    }
+    .br-md.br-md--produtos tbody tr:hover .br-add-ico { transform: scale(1.1); }
+    .br-md.br-md--produtos .acts {
+      margin-top: 14px !important; padding-top: 12px;
+      border-top: 1px solid rgba(201,179,147,.12) !important;
+      display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;
+    }
+
+    .produto-detalhe {
+      background: linear-gradient(145deg, #1F1610, #17100A);
+      border: 1px solid rgba(232, 93, 38, 0.45);
+      border-radius: 20px; width: min(520px, 94vw); max-height: 92vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0,0,0,.65), 0 0 60px rgba(232,93,38,.25);
+      animation: popIn .35s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes popIn { from { opacity: 0; transform: scale(.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .produto-detalhe__img {
+      width: 100%; height: 220px; overflow: hidden;
+      background: radial-gradient(circle, rgba(232,93,38,.25), #120C08 70%); position: relative;
+    }
+    .produto-detalhe__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .produto-detalhe__close {
+      position: absolute; top: 14px; right: 14px; width: 38px; height: 38px;
+      border-radius: 50%; background: rgba(0,0,0,.65); color: #fff;
+      display: grid; place-items: center; cursor: pointer;
+      transition: background .2s, transform .2s;
+      border: 1px solid rgba(255,255,255,.15); backdrop-filter: blur(6px);
+    }
+    .produto-detalhe__close:hover { background: #E85D26; transform: rotate(90deg); }
+    .produto-detalhe__body { padding: 24px 26px 26px; }
+    .produto-detalhe__tag {
+      display: inline-block; padding: 4px 12px; border-radius: 99px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+      color: #E85D26; background: rgba(232,93,38,.12);
+      border: 1px solid rgba(232,93,38,.3); margin-bottom: 10px;
+    }
+    .produto-detalhe h3 { font: 700 26px 'Playfair Display', serif; color: #fff; margin-bottom: 10px; line-height: 1.2; }
+    .produto-detalhe__desc { color: #A89078; font-size: 14px; line-height: 1.6; margin-bottom: 18px; }
+    .produto-detalhe__info { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .produto-detalhe__info-item {
+      flex: 1; min-width: 120px; padding: 12px 14px; border-radius: 12px;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(201,179,147,.12);
+    }
+    .produto-detalhe__info-label {
+      font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.2px;
+      color: #A89078; font-weight: 600; margin-bottom: 4px;
+    }
+    .produto-detalhe__info-valor {
+      font-size: 18px; font-weight: 700; color: #FF7A3D; font-family: 'Playfair Display', serif;
+    }
+    .produto-detalhe__qtd-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .produto-detalhe__qtd-label {
+      font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1.2px; color: #A89078;
+    }
+    .qtd-picker {
+      display: flex; align-items: center; border-radius: 10px; overflow: hidden;
+      border: 1.5px solid rgba(201,179,147,.25); background: #120C08;
+    }
+    .qtd-picker button {
+      width: 38px; height: 38px; background: transparent; color: #F1E8D8;
+      font-size: 16px; font-weight: 700; transition: background .15s;
+    }
+    .qtd-picker button:hover { background: rgba(232,93,38,.18); color: #E85D26; }
+    .qtd-picker input {
+      width: 50px; height: 38px; text-align: center; border: none;
+      background: transparent; color: #F1E8D8; font-weight: 700; font-size: 15px;
+    }
+    .qtd-picker input:focus { outline: 0; }
+    .qtd-picker input::-webkit-outer-spin-button,
+    .qtd-picker input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .produto-detalhe__total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 0; margin-bottom: 18px;
+      border-top: 1px solid rgba(201,179,147,.12);
+      border-bottom: 1px solid rgba(201,179,147,.12);
+    }
+    .produto-detalhe__total-label {
+      font-size: 13px; color: #A89078; text-transform: uppercase;
+      letter-spacing: 1.2px; font-weight: 600;
+    }
+    .produto-detalhe__total-valor {
+      font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 800; color: #fff;
+    }
+    .produto-detalhe__btn {
+      width: 100%; padding: 15px; border-radius: 12px;
+      background: linear-gradient(135deg, #E85D26, #7A1010); color: #fff;
+      font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px;
+      border: none; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; gap: 10px;
+      box-shadow: 0 6px 20px rgba(232,93,38,.4);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .produto-detalhe__btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(232,93,38,.55); }
+    .produto-detalhe__btn:active { transform: translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__brand">
+        <img src="img/logo.png" alt="Logo Boi Ralado" />
+        <div class="sidebar__brand-text">
+          <span class="sidebar__brand-title">Boi Ralado</span>
+          <span class="sidebar__brand-sub">Restaurante</span>
+        </div>
+      </div>
+      
+      <div class="sidebar__search-wrap">
+          <label class="top-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="topSearch" placeholder="Buscar...">
+          </label>
+          <div class="top-search__results" id="topSearchResults" style="display:none;"></div>
+      </div>
+
+      <nav class="sidebar__nav">
+        <a href="index.html"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="cadastro.html"><i class="fa-solid fa-id-card-clip"></i> Cadastro</a>
+        <a href="movimento.html"><i class="fa-solid fa-arrow-right-arrow-left"></i> Movimento</a>
+        <a href="relatorios.html"><i class="fa-solid fa-chart-column"></i> Relatórios</a>
+        <a href="cliente.html" class="tn-sep"><i class="fa-solid fa-users"></i> Clientes</a>
+        <a href="produto.html"><i class="fa-solid fa-burger"></i> Produtos</a>
+        <a href="fornecedor.html"><i class="fa-solid fa-truck-field"></i> Fornecedores</a>
+        <a href="pedido.html"><i class="fa-solid fa-receipt"></i> Pedidos</a>
+        <a href="entrega.html" class="active"><i class="fa-solid fa-motorcycle"></i> Delivery</a>
+      </nav>
+      <button class="tn-burger" aria-label="Abrir menu"><i class="fa-solid fa-bars"></i></button>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div class="header__actions">
+          <a href="login.html" class="header__user" title="Login / Sair">
+            <div class="header__user-avatar">BR</div>
+            <div class="header__user-info">
+              <span class="header__user-name">Usuário</span>
+              <span class="header__user-role">Sistema</span>
+            </div>
+          </a>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <div class="breadcrumbs"><a href="index.html"><i class="fa-solid fa-house"></i> Início</a> <i class="fa-solid fa-chevron-right"></i> <a href="movimento.html">Movimento</a> <i class="fa-solid fa-chevron-right"></i> <span class="current">Ordem de Entrega</span></div>
+            <h2 class="page-head__title">Ordem de Entrega</h2>
+            <p class="page-head__subtitle">Gere uma nova ordem de entrega para delivery.</p>
+          </div>
+        </div>
+
+        <form class="form-card" autocomplete="off" onsubmit="return false;">
+          <div class="form-card__head">
+            <div class="form-card__head-icon"><i class="fa-solid fa-motorcycle"></i></div>
+            <div>
+              <h2>Dados da Entrega</h2>
+              <p>Informações do cliente e endereço de entrega.</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group col-6">
+              <label>Nome do Cliente <span class="required">*</span></label>
+              <input type="text" id="entregaCliente" placeholder="Nome do cliente..." />
+            </div>
+            <div class="form-group col-3">
+              <label>Telefone <span class="required">*</span></label>
+              <input type="tel" id="entregaTelefone" placeholder="(00) 00000-0000" />
+            </div>
+            <div class="form-group col-3">
+              <label>Número do Pedido</label>
+              <input type="text" id="entregaNumero" value="#1001" readonly />
+            </div>
+            <div class="form-group col-9">
+              <label>Endereço de Entrega</label>
+              <input type="text" id="entregaEndereco" placeholder="Rua, Avenida, Bairro..." />
+            </div>
+            <div class="form-group col-3">
+              <label>Número</label>
+              <input type="text" id="entregaNumeroCasa" placeholder="123" />
+            </div>
+          </div>
+        </form>
+
+        <div class="table-wrap">
+          <div class="table-actions">
+            <h3><i class="fa-solid fa-box" style="color:var(--color-red);"></i> Itens da Entrega</h3>
+            <div style="display:flex; gap:8px;">
+              <button type="button" class="btn btn--primary btn--sm" id="btnAdicionarItem" onclick="window.__brAbrirProdutosEntrega && window.__brAbrirProdutosEntrega()">
+                <i class="fa-solid fa-plus"></i> Adicionar Item
+              </button>
+              <button type="button" class="btn btn--danger-outline btn--sm" id="btnRemoverItem">
+                <i class="fa-solid fa-trash"></i> Remover Item
+              </button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:40px;"><input type="checkbox" id="chkTodos" /></th>
+                <th>Produto</th>
+                <th class="num" style="width:110px;">Quantidade</th>
+                <th class="num">Valor Unitário</th>
+                <th class="num">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyEntrega">
+              <tr id="linhaVazia">
+                <td colspan="5" class="text-center">Nenhum item na entrega ainda. Clique em <strong>"Adicionar Item"</strong> para começar.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <form class="form-card form-resumo-entrega">
+          <div class="form-grid">
+            <div class="form-group col-3">
+              <label>Subtotal</label>
+              <input type="text" id="entregaSubtotal" value="R$ 0,00" readonly />
+            </div>
+            <div class="form-group col-3">
+              <label>Taxa de Entrega</label>
+              <input type="text" id="entregaTaxa" value="R$ 0,00" />
+            </div>
+            <div class="form-group col-3">
+              <label>Total</label>
+              <input type="text" id="entregaTotal" value="R$ 0,00" readonly
+                style="font-weight:700; color:var(--color-red); font-size:17px;" />
+            </div>
+            <div class="form-group col-3">
+              <label>Forma de Pagamento</label>
+              <select id="entregaPagamento">
+                <option>Dinheiro</option>
+                <option>Cartão de Crédito</option>
+                <option>Cartão de Débito</option>
+                <option selected>PIX</option>
+                <option>Vale Refeição</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <a href="movimento.html" class="btn btn--outline"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
+            <button type="button" class="btn btn--ghost" id="btnLimparEntrega"><i class="fa-solid fa-eraser"></i> Limpar</button>
+            <button type="button" class="btn btn--brown" id="btnImprimirEntrega"><i class="fa-solid fa-print"></i> Imprimir</button>
+            <button type="button" class="btn btn--primary" id="btnGerarOrdem"><i class="fa-solid fa-paper-plane"></i> Gerar Ordem</button>
+          </div>
+        </form>
+      </main>
+
+      <footer class="footer pz">
+        <div class="pz__grid">
+          <div>
+            <div class="pz__brand"><img src="img/logo-puzles.png" alt="Puzles Softwares"><b>Boi Ralado</b></div>
+            <p>Tradição, sabor de fogo e carne de verdade. Do boi ralado ao prato executivo, feito com carinho todos os dias.</p>
+          </div>
+          <div>
+            <h5>Navegação</h5>
+            <a href="index.html">Dashboard</a>
+            <a href="cadastro.html">Cadastro</a>
+            <a href="movimento.html">Movimento</a>
+            <a href="relatorios.html">Relatórios</a>
+          </div>
+          <div>
+            <h5>Contato</h5>
+            <span><i class="fa-solid fa-location-dot"></i> Rua Exemplo, 123 — Centro</span>
+            <span><i class="fa-solid fa-phone"></i> (00) 0000-0000</span>
+            <span><i class="fa-brands fa-whatsapp"></i> (00) 90000-0000</span>
+            <span><i class="fa-solid fa-envelope"></i> contato@boiralado.com.br</span>
+          </div>
+          <div>
+            <h5>Redes Sociais</h5>
+            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank"><i class="fa-brands fa-instagram"></i> Instagram</a>
+          </div>
+        </div>
+        <div class="pz__bar">
+          <span>© 2026 Boi Ralado. Todos os direitos reservados.</span>
+          <span class="pz__by">Desenvolvido com <i class="fa-solid fa-fire"></i> por <a href="#" class="pz__logo"><i class="fa-solid fa-puzzle-piece"></i> Puzles</a></span>
+          <span class="pz__soc">
+            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          </span>
+        </div>
+      </footer>
+    </div>
+  </div>
+  <script src="../js/app.js"></script>
+  <script src="../js/entrega.js"></script>
+</body>
+</html>
