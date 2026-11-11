@@ -31,11 +31,16 @@ var TIPOS = {
   '.js': 'application/javascript; charset=utf-8',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
-  '.webp': 'image/webp'
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.svg': 'image/svg+xml'
 };
 
 function servirArquivo(res, caminhoRelativo) {
   var caminho = path.join(__dirname, 'public', caminhoRelativo);
+  if (!fs.existsSync(caminho)) {
+    caminho = path.join(__dirname, caminhoRelativo);
+  }
   if (!fs.existsSync(caminho)) {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     return res.end('Arquivo nao encontrado: ' + caminhoRelativo);
@@ -52,9 +57,50 @@ var servidor = http.createServer(function (pedido, resposta) {
   var id = partes[3];
   var metodo = pedido.method;
 
-  // ===========================================================
+  // UPLOAD DE IMAGEM
+  if (ehApi && recurso === 'upload' && metodo === 'POST') {
+    lerDados(pedido, function (d) {
+      if (!d.imagem || !d.nome) return recusar(resposta, 400, 'Dados incompletos.');
+      try {
+        var base64Data = d.imagem.replace(/^data:image\/\w+;base64,/, "");
+        var buffer = Buffer.from(base64Data, 'base64');
+        var nomeArquivo = Date.now() + '-' + d.nome.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
+        var caminhoArquivo = path.join(__dirname, 'img', 'produtos', nomeArquivo);
+        
+        if (!fs.existsSync(path.join(__dirname, 'img', 'produtos'))) {
+          fs.mkdirSync(path.join(__dirname, 'img', 'produtos'), { recursive: true });
+        }
+
+        fs.writeFileSync(caminhoArquivo, buffer);
+        responder(resposta, 200, { url: 'img/produtos/' + nomeArquivo });
+      } catch (e) {
+        recusar(resposta, 500, 'Erro ao salvar imagem.');
+      }
+    });
+    return;
+  }
+
+  // CATEGORIAS
+  if (ehApi && recurso === 'categorias') {
+    if (metodo === 'GET') {
+      return db.all('SELECT * FROM categoria ORDER BY nome ASC', [], function (erro, lista) {
+        if (erro) return recusar(resposta, 500, erro.message);
+        responder(resposta, 200, lista);
+      });
+    }
+    if (metodo === 'POST') {
+      lerDados(pedido, function (d) {
+        if (!d.nome) return recusar(resposta, 400, 'Nome é obrigatório.');
+        db.run('INSERT INTO categoria (nome) VALUES (?)', [d.nome], function (erro) {
+          if (erro) return recusar(resposta, 400, erro.message);
+          responder(resposta, 201, { id: this.lastID });
+        });
+      });
+      return;
+    }
+  }
+
   // CLIENTES
-  // ===========================================================
   if (ehApi && recurso === 'clientes') {
     if (metodo === 'GET' && !id) {
       return db.all('SELECT * FROM cliente ORDER BY id DESC', [], function (erro, lista) {
@@ -103,9 +149,7 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
   }
 
-  // ===========================================================
   // FORNECEDORES
-  // ===========================================================
   if (ehApi && recurso === 'fornecedores') {
     if (metodo === 'GET' && !id) {
       return db.all('SELECT * FROM fornecedor ORDER BY id DESC', [], function (erro, lista) {
@@ -154,9 +198,7 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
   }
 
-  // ===========================================================
   // PRODUTOS
-  // ===========================================================
   if (ehApi && recurso === 'produtos') {
     if (metodo === 'GET' && !id) {
       return db.all('SELECT * FROM produto ORDER BY id DESC', [], function (erro, lista) {
@@ -174,8 +216,8 @@ var servidor = http.createServer(function (pedido, resposta) {
     if (metodo === 'POST') {
       lerDados(pedido, function (d) {
         if (!d.nome) return recusar(resposta, 400, 'Nome é obrigatório.');
-        var sql = 'INSERT INTO produto (codigo, nome, categoria, fornecedor, descricao, preco, estoque, unidade, validade, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        var val = [d.codigo || null, d.nome, d.categoria || null, d.fornecedor || null, d.descricao || null, Number(d.preco) || 0, Number(d.estoque) || 0, d.unidade || null, d.validade || null, new Date().toISOString()];
+        var sql = 'INSERT INTO produto (codigo, nome, categoria, fornecedor, descricao, preco, estoque, unidade, validade, imagem, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        var val = [d.codigo || null, d.nome, d.categoria || null, d.fornecedor || null, d.descricao || null, Number(d.preco) || 0, Number(d.estoque) || 0, d.unidade || null, d.validade || null, d.imagem || null, new Date().toISOString()];
         db.run(sql, val, function (erro) {
           if (erro) return recusar(resposta, 400, erro.message);
           responder(resposta, 201, { id: this.lastID });
@@ -185,8 +227,8 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
     if (metodo === 'PUT' && id) {
       lerDados(pedido, function (d) {
-        var sql = 'UPDATE produto SET codigo=?, nome=?, categoria=?, fornecedor=?, descricao=?, preco=?, estoque=?, unidade=?, validade=? WHERE id=?';
-        var val = [d.codigo || null, d.nome, d.categoria || null, d.fornecedor || null, d.descricao || null, Number(d.preco) || 0, Number(d.estoque) || 0, d.unidade || null, d.validade || null, id];
+        var sql = 'UPDATE produto SET codigo=?, nome=?, categoria=?, fornecedor=?, descricao=?, preco=?, estoque=?, unidade=?, validade=?, imagem=? WHERE id=?';
+        var val = [d.codigo || null, d.nome, d.categoria || null, d.fornecedor || null, d.descricao || null, Number(d.preco) || 0, Number(d.estoque) || 0, d.unidade || null, d.validade || null, d.imagem || null, id];
         db.run(sql, val, function (erro) {
           if (erro) return recusar(resposta, 400, erro.message);
           if (this.changes === 0) return recusar(resposta, 404, 'Produto não encontrado.');
@@ -205,9 +247,7 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
   }
 
-  // ===========================================================
   // ARQUIVOS ESTÁTICOS
-  // ===========================================================
   if (metodo === 'GET' && !ehApi) {
     return servirArquivo(resposta, pedido.url === '/' ? 'login.html' : pedido.url);
   }

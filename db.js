@@ -52,6 +52,23 @@ db.serialize(function () {
   `);
 
   db.run(`
+    CREATE TABLE IF NOT EXISTS categoria (
+      id   INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome TEXT NOT NULL
+    )
+  `);
+
+  // Insere categorias de exemplo se a tabela estiver vazia
+  db.get('SELECT COUNT(*) as count FROM categoria', [], function(err, row) {
+      if (row && row.count === 0) {
+          var cats = ['Lanches', 'Pratos Executivos', 'Marmitas', 'Bebidas', 'Sobremesas', 'Acompanhamentos', 'Insumos'];
+          cats.forEach(function(c) {
+              db.run('INSERT INTO categoria (nome) VALUES (?)', [c]);
+          });
+      }
+  });
+
+  db.run(`
     CREATE TABLE IF NOT EXISTS produto (
       id            INTEGER PRIMARY KEY AUTOINCREMENT,
       codigo        TEXT,
@@ -63,6 +80,7 @@ db.serialize(function () {
       estoque       INTEGER DEFAULT 0,
       unidade       TEXT,
       validade      TEXT,
+      imagem        TEXT,
       data_cadastro TEXT
     )
   `);

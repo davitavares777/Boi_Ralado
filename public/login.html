@@ -12,114 +12,42 @@
   <link rel="stylesheet" href="style.css" />
 
   <style>
-    /* ---------- Bloco "Já logado" ---------- */
-    .logged-box {
-      display: none;
-      text-align: center;
-      padding: 20px 0 8px;
+    /* Estilos específicos do seletor de tipo de usuário */
+    .user-type-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 24px;
+        background: var(--void-2);
+        padding: 6px;
+        border-radius: var(--r-sm);
+        border: 1px solid var(--border);
     }
-    .logged-box.show { display: block; }
-    .logged-box__avatar {
-      width: 72px; height: 72px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #E85D26, #7A1010);
-      color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Playfair Display', serif;
-      font-size: 28px; font-weight: 700;
-      margin: 0 auto 12px;
-      box-shadow: 0 0 30px rgba(232,93,38,.55);
+    .user-type-selector button {
+        flex: 1;
+        padding: 10px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        color: var(--text-muted);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
     }
-    .logged-box__name {
-      font-family: 'Poppins', sans-serif;
-      font-size: 17px; font-weight: 600;
-      margin-bottom: 4px;
-      color: #fff;
+    .user-type-selector button.active {
+        background: var(--surface-2);
+        color: var(--ember-light);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
-    .logged-box__email {
-      font-size: 13px; color: #A89078;
-      margin-bottom: 20px;
-    }
-    .btn-sair {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 12px 28px;
-      background: #e74c3c; color: #fff;
-      border: none; border-radius: 10px;
-      font-family: 'Poppins', sans-serif;
-      font-size: 14px; font-weight: 600;
-      cursor: pointer; transition: all 0.25s ease;
-    }
-    .btn-sair:hover {
-      background: #c0392b;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(231, 76, 60, 0.35);
-    }
-    .btn-ir-dashboard {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 12px 28px;
-      background: transparent; color: #e74c3c;
-      border: 1px solid #e74c3c; border-radius: 10px;
-      font-family: 'Poppins', sans-serif;
-      font-size: 14px; font-weight: 600;
-      cursor: pointer; transition: all 0.25s ease;
-      margin-top: 10px;
-      text-decoration: none;
-    }
-    .btn-ir-dashboard:hover { background: #e74c3c; color: #fff; }
-
-    /* ---------- Modal de logout ---------- */
-    .logout-modal {
-      background: linear-gradient(145deg, #1F1610, #17100A);
-      border: 1px solid rgba(232, 93, 38, 0.45);
-      border-radius: 20px;
-      padding: 32px 28px;
-      width: min(420px, 92vw);
-      text-align: center;
-      box-shadow: 0 20px 50px rgba(0,0,0,.65), 0 0 60px rgba(232,93,38,.25);
-      animation: logoutPop .35s cubic-bezier(.22,1,.36,1);
-    }
-    @keyframes logoutPop {
-      from { opacity: 0; transform: scale(.85) translateY(20px); }
-      to   { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .logout-modal__icon {
-      width: 64px; height: 64px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #E85D26, #7A1010);
-      color: #fff;
-      font-size: 26px;
-      display: grid;
-      place-items: center;
-      margin: 0 auto 18px;
-      box-shadow: 0 0 30px rgba(232,93,38,.55);
-    }
-    .logout-modal h3 {
-      font: 700 22px 'Playfair Display', serif;
-      color: #fff;
-      margin-bottom: 8px;
-    }
-    .logout-modal p {
-      color: #A89078;
-      font-size: 14px;
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-    .logout-modal__acts {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .logout-modal__acts .btn { flex: 1; justify-content: center; min-width: 120px; }
-
-    /* ---------- Fade out ---------- */
-    body { transition: opacity .3s; }
-    body.br-fade-out { opacity: 0; }
+    /* Esconde o botão de voltar ao dashboard */
+    .login-card__back { display: none !important; }
   </style>
 </head>
 <body>
   <div class="login-page">
     <div class="login-card">
+      <!-- Lado Esquerdo (Branding) -->
       <div class="login-card__side">
         <div class="login-card__brand">
           <img src="img/logo.png" alt="Logo Boi Ralado" />
@@ -137,24 +65,17 @@
         </div>
       </div>
 
+      <!-- Lado Direito (Formulário) -->
       <div class="login-card__form">
-
-        <!-- ===== BLOCO "JÁ LOGADO" ===== -->
-        <div class="logged-box" id="loggedBox">
-          <div class="logged-box__avatar" id="loggedAvatar">BR</div>
-          <div class="logged-box__name" id="loggedName">Usuário</div>
-          <div class="logged-box__email" id="loggedEmail">email@exemplo.com</div>
-          <button type="button" class="btn-sair" id="btnSair">
-            <i class="fa-solid fa-right-from-bracket"></i> Sair da conta
-          </button>
-          <br />
-          <a href="index.html" class="btn-ir-dashboard">
-            <i class="fa-solid fa-house"></i> Ir para o Dashboard
-          </a>
+        
+        <!-- SELETOR DE TIPO DE USUÁRIO -->
+        <div class="user-type-selector" id="userTypeSelector">
+            <button type="button" class="active" data-type="funcionario"><i class="fa-solid fa-user-tie"></i> Funcionário</button>
+            <button type="button" data-type="cliente"><i class="fa-solid fa-user"></i> Cliente</button>
         </div>
 
-        <!-- ===== FORMULÁRIO NORMAL ===== -->
         <div id="authBox">
+          <!-- Abas de Login e Cadastro -->
           <div class="auth-tabs">
             <button type="button" class="auth-tab active" data-tab="login">
               <i class="fa-solid fa-right-to-bracket"></i> Entrar
@@ -164,7 +85,7 @@
             </button>
           </div>
 
-          <!-- LOGIN -->
+          <!-- PAINEL DE LOGIN -->
           <div class="auth-panel active" id="panelLogin">
             <div class="login-card__form-head">
               <h1>Acesse sua conta</h1>
@@ -198,7 +119,7 @@
             </form>
           </div>
 
-          <!-- CADASTRO -->
+          <!-- PAINEL DE CADASTRO -->
           <div class="auth-panel" id="panelRegister">
             <div class="login-card__form-head">
               <h1>Criar conta</h1>
@@ -269,19 +190,27 @@
             </form>
           </div>
         </div>
-
-        <a href="index.html" class="login-card__back">
-          <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
-        </a>
       </div>
     </div>
   </div>
 
+  <!-- SCRIPT EXCLUSIVO DA PÁGINA DE LOGIN (Não usa app.js para não conflitar) -->
   <script>
   (function () {
     'use strict';
 
-    /* ---------- helpers ---------- */
+    // --- 1. SELETOR DE TIPO DE USUÁRIO ---
+    var tipoUsuario = 'funcionario'; // Padrão
+    var botoesTipo = document.querySelectorAll('.user-type-selector button');
+    botoesTipo.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            botoesTipo.forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            tipoUsuario = this.dataset.type;
+        });
+    });
+
+    // --- 2. UTILITÁRIOS DE VALIDAÇÃO ---
     function soDigitos(v) { return String(v || '').replace(/\D/g, ''); }
     function validaEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim()); }
     function validaCPF(cpf) {
@@ -309,92 +238,14 @@
       return true;
     }
 
-    /* ---------- storage ---------- */
+    // --- 3. GERENCIAMENTO DE USUÁRIOS (LocalStorage) ---
     function lerUsuarios() {
       try { return JSON.parse(localStorage.getItem('br_usuarios')) || []; }
       catch (e) { return []; }
     }
     function salvarUsuarios(lista) { localStorage.setItem('br_usuarios', JSON.stringify(lista)); }
 
-    /* ---------- TOAST ---------- */
-    function toast(msg) {
-      var t = document.createElement('div');
-      t.className = 'br-toast';
-      t.textContent = msg;
-      document.body.appendChild(t);
-      setTimeout(function () { t.remove(); }, 2800);
-    }
-
-    /* ---------- VERIFICA SE JÁ ESTÁ LOGADO ---------- */
-    function atualizarEstadoLogin() {
-      var usuario = null;
-      try { usuario = JSON.parse(localStorage.getItem('br_usuario_atual')); } catch (e) {}
-
-      var loggedBox = document.getElementById('loggedBox');
-      var authBox = document.getElementById('authBox');
-
-      if (usuario) {
-        loggedBox.classList.add('show');
-        authBox.style.display = 'none';
-
-        document.getElementById('loggedName').textContent = usuario.nome || 'Usuário';
-        document.getElementById('loggedEmail').textContent = usuario.email || '';
-
-        var elAvatar = document.getElementById('loggedAvatar');
-        if (usuario.nome) {
-          var partes = usuario.nome.trim().split(/\s+/);
-          var iniciais = (partes[0] ? partes[0][0] : '') + (partes.length > 1 ? partes[partes.length - 1][0] : '');
-          elAvatar.textContent = iniciais.toUpperCase();
-        }
-      } else {
-        loggedBox.classList.remove('show');
-        authBox.style.display = '';
-      }
-    }
-    atualizarEstadoLogin();
-
-    /* ---------- MODAL DE LOGOUT + FADE OUT ---------- */
-    var btnSair = document.getElementById('btnSair');
-    if (btnSair) {
-      btnSair.addEventListener('click', function () {
-        var ov = document.createElement('div');
-        ov.className = 'br-ov';
-        ov.innerHTML =
-          '<div class="logout-modal">' +
-            '<div class="logout-modal__icon"><i class="fa-solid fa-right-from-bracket"></i></div>' +
-            '<h3>Sair da conta?</h3>' +
-            '<p>Você vai precisar fazer login novamente para acessar o sistema.</p>' +
-            '<div class="logout-modal__acts">' +
-              '<button type="button" class="btn btn--outline" id="btnCancelarLogout">Cancelar</button>' +
-              '<button type="button" class="btn btn--primary" id="btnConfirmarLogout">' +
-                '<i class="fa-solid fa-right-from-bracket"></i> Sair' +
-              '</button>' +
-            '</div>' +
-          '</div>';
-        document.body.appendChild(ov);
-
-        function fechar() { ov.remove(); }
-
-        ov.querySelector('#btnCancelarLogout').addEventListener('click', fechar);
-        ov.querySelector('#btnConfirmarLogout').addEventListener('click', function () {
-          fechar();
-          document.body.classList.add('br-fade-out');
-          setTimeout(function () {
-            localStorage.removeItem('br_usuario_atual');
-            document.body.classList.remove('br-fade-out');
-            atualizarEstadoLogin();
-            toast('Você saiu da conta. Até logo! 👋');
-          }, 320);
-        });
-
-        ov.addEventListener('click', function (e) { if (e.target === ov) fechar(); });
-        document.addEventListener('keydown', function esc(e) {
-          if (e.key === 'Escape') { fechar(); document.removeEventListener('keydown', esc); }
-        });
-      });
-    }
-
-    /* ---------- UI: TABS ---------- */
+    // --- 4. TROCA DE ABAS (LOGIN / CADASTRO) ---
     var tabs = document.querySelectorAll('.auth-tab');
     var panels = {
       login: document.getElementById('panelLogin'),
@@ -410,7 +261,7 @@
       t.addEventListener('click', function () { switchTab(t.dataset.tab); });
     });
 
-    /* mostrar/ocultar senha */
+    // --- 5. MOSTRAR/OCULTAR SENHA ---
     document.querySelectorAll('.toggle-pass').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var input = document.getElementById(btn.dataset.target);
@@ -421,7 +272,7 @@
       });
     });
 
-    /* máscaras */
+    // --- 6. MÁSCARAS ---
     var cpfInput = document.getElementById('regCpf');
     if (cpfInput) {
       cpfInput.addEventListener('input', function () {
@@ -442,7 +293,7 @@
       });
     }
 
-    /* ---------- LOGIN ---------- */
+    // --- 7. LÓGICA DE LOGIN ---
     var loginForm = document.getElementById('loginForm');
     var loginError = document.getElementById('loginError');
 
@@ -468,6 +319,7 @@
         if (!usuarios.length) return mostrarErroLogin('Nenhum usuário cadastrado. Use a aba "Cadastrar" primeiro.');
 
         var userDigits = soDigitos(user);
+        // Procura usuário por email ou cpf
         var encontrado = usuarios.filter(function (u) {
           var bateUser = (u.email === user) || (u.cpf === userDigits);
           return bateUser && u.senha === pass;
@@ -475,19 +327,21 @@
 
         if (!encontrado) return mostrarErroLogin('Usuário ou senha inválidos.');
 
+        // Define o papel (Funcionário ou Cliente) baseado no que foi selecionado
+        var papel = tipoUsuario === 'funcionario' ? 'Funcionário' : 'Cliente';
+        
         localStorage.setItem('br_usuario_atual', JSON.stringify({
           nome: encontrado.nome,
           email: encontrado.email,
-          papel: 'Cliente'
+          papel: papel
         }));
 
-        atualizarEstadoLogin();
-        loginForm.reset();
-        toast('Bem-vindo(a), ' + encontrado.nome.split(' ')[0] + '! 🔥');
+        // Redireciona para o dashboard
+        window.location.href = 'index.html';
       });
     }
 
-    /* ---------- CADASTRO ---------- */
+    // --- 8. LÓGICA DE CADASTRO ---
     var registerForm = document.getElementById('registerForm');
     var registerError = document.getElementById('registerError');
     var registerSuccess = document.getElementById('registerSuccess');
@@ -511,8 +365,8 @@
         var senha2 = document.getElementById('regSenhaConfirma').value;
         var termos = document.getElementById('regTermos').checked;
 
-        if (!nomeValido(nome)) return mostrarErroCad('Informe um nome válido (mínimo 3 letras, sem ser só números).');
-        if (!validaCPF(cpf)) return mostrarErroCad('CPF inválido. Confira os números.');
+        if (!nomeValido(nome)) return mostrarErroCad('Informe um nome válido (mínimo 3 letras).');
+        if (!validaCPF(cpf)) return mostrarErroCad('CPF inválido.');
         if (!validaEmail(email)) return mostrarErroCad('E-mail inválido.');
         if (!validaTelefone(telefone)) return mostrarErroCad('Telefone inválido (DDD + número).');
         if (senha.length < 6) return mostrarErroCad('A senha deve ter no mínimo 6 caracteres.');
@@ -531,13 +385,15 @@
           cpf: cpfDigits,
           email: email,
           telefone: soDigitos(telefone),
-          senha: senha
+          senha: senha,
+          papel: tipoUsuario === 'funcionario' ? 'Funcionário' : 'Cliente'
         });
         salvarUsuarios(usuarios);
 
         registerSuccess.classList.add('show');
         registerForm.reset();
 
+        // Após 1.4s, muda para a aba de login com o email preenchido
         setTimeout(function () {
           registerSuccess.classList.remove('show');
           switchTab('login');
@@ -545,7 +401,6 @@
           if (loginUser) loginUser.value = email;
           var loginPass = document.getElementById('loginPass');
           if (loginPass) { loginPass.value = ''; loginPass.focus(); }
-          toast('Cadastro realizado! Faça login para continuar.');
         }, 1400);
       });
     }

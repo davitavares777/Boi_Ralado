@@ -1,4 +1,4 @@
-/* ===== BOI RALADO — style.css ===== */
+/* ===== BOI RALADO — style.css (Completo e Atualizado) ===== */
 :root{
   --ember:#E85D26;--ember-light:#FF7A3D;--ember-dark:#B33E0F;
   --brand-red:#A61B1B;--brand-red-dark:#7A1010;--brand-red-light:#C93636;
@@ -81,6 +81,59 @@ img{max-width:100%;display:block}
   background:var(--surface-2);border:1px solid var(--border);
   color:var(--text);flex-shrink:0
 }
+
+/* --- NOVOS ELEMENTOS NO ASIDE (BARRA DE PESQUISA E LOGIN) --- */
+.sidebar__search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 280px;
+  margin: 0 10px;
+}
+.sidebar__search-wrap .top-search {
+  display: flex;
+  align-items: center;
+  background: var(--void-2);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 0 12px;
+  height: 36px;
+}
+.sidebar__search-wrap .top-search i {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-right: 8px;
+}
+.sidebar__search-wrap .top-search input {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 13px;
+  width: 100%;
+  padding: 0;
+}
+.sidebar__search-wrap .top-search input:focus {
+  outline: none;
+}
+.sidebar__login-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.sidebar__login-btn:hover {
+  background: var(--ember);
+  color: #fff;
+  border-color: var(--ember);
+}
+/* --- FIM DOS NOVOS ELEMENTOS --- */
 
 @media(max-width:1100px){
   .sidebar__nav a.tn-sep{border-left:0;padding-left:14px;margin-left:0}
@@ -282,6 +335,27 @@ select option{background:var(--void-2)}
 input[type=checkbox]{width:auto;accent-color:var(--ember)}
 input[type=date]{color-scheme:dark}
 .br-bad{border-color:var(--danger)!important}
+/* Ajuste para o input de arquivo (upload de imagem) */
+input[type="file"] {
+    padding: 8px;
+    background: var(--void-3);
+    border: 1px dashed var(--border-strong);
+    cursor: pointer;
+}
+input[type="file"]::file-selector-button {
+    background: var(--surface-2);
+    color: var(--text);
+    border: none;
+    padding: 6px 12px;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    margin-right: 10px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+input[type="file"]::file-selector-button:hover {
+    background: var(--ember);
+}
 
 /* ---------- TABELAS ---------- */
 .table-wrap{
@@ -427,4 +501,75 @@ input[type=date]{color-scheme:dark}
     transition:width .15s,height .15s
   }
   .cursor-dot.is-hover{width:12px;height:12px}
+}
+
+/* ============================================================
+   FOOTER ATUALIZADO (com logo Puzles e Instagram)
+   ============================================================ */
+.footer.pz{
+  margin-top:48px;padding:0;text-align:left;
+  border-top:1px solid rgba(232,93,38,.3);
+  background:linear-gradient(180deg,rgba(26,18,12,.9),#0A0705);
+  position:relative;overflow:hidden;color:var(--text-muted);
+  grid-column:1/-1
+}
+.footer.pz::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--ember),var(--brand-red),transparent);
+  background-size:200% auto;animation:shine 4s linear infinite
+}
+@keyframes shine{to{background-position:200% center}}
+.pz__grid{
+  display:grid;grid-template-columns:1.6fr 1fr 1.4fr 1.2fr;
+  gap:36px;max-width:1400px;margin:0 auto;padding:48px 32px 32px
+}
+@media(max-width:900px){.pz__grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.pz__grid{grid-template-columns:1fr}}
+.pz__brand{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.pz__brand img{
+  width:46px;height:46px;border-radius:50%;
+  border:2px solid rgba(232,93,38,.5);
+  background: #fff; /* Fundo branco para a logo Puzles aparecer bem */
+  padding: 4px;
+}
+.pz__brand b{font:800 22px var(--font-display);color:#fff}
+.pz__grid p{font-size:13.5px;line-height:1.7}
+.pz__grid h5{
+  font:700 15px var(--font-display);color:#fff;
+  margin-bottom:14px;position:relative;padding-bottom:8px
+}
+.pz__grid h5::after{
+  content:'';position:absolute;left:0;bottom:0;width:30px;height:2px;background:var(--ember)
+}
+.pz__grid a,.pz__grid span{
+  display:block;font-size:13.5px;margin-bottom:9px;color:var(--text-muted);
+  transition:color .2s,transform .2s
+}
+.pz__grid a:hover{color:var(--ember-light);transform:translateX(5px)}
+.pz__grid span i{color:var(--ember);width:20px}
+.pz__bar{
+  display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;
+  gap:14px;max-width:1400px;margin:0 auto;padding:20px 32px;
+  border-top:1px solid var(--border);font-size:13px
+}
+.pz__by i.fa-fire{color:var(--ember);animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.6}}
+.pz__logo{
+  display:inline-flex !important;align-items:center;gap:6px;
+  margin:0 !important;padding:4px 12px;border-radius:99px;
+  font-weight:700;color:#fff !important;
+  background:linear-gradient(135deg,#7C3AED,#EC4899);
+  box-shadow:0 0 18px rgba(168,85,247,.5)
+}
+.pz__soc{display:flex;gap:10px}
+.pz__soc a{
+  display:grid !important;place-items:center;width:38px;height:38px;
+  margin:0 !important;border-radius:50%;
+  background:var(--surface-2);border:1px solid var(--border);
+  color:var(--ink-100) !important;transition:all .25s var(--ease)
+}
+.pz__soc a:hover{
+  background:var(--ember);border-color:var(--ember);
+  transform:translateY(-4px) rotate(10deg) !important;
+  box-shadow:0 8px 22px rgba(232,93,38,.5)
 }

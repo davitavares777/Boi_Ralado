@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,13 +7,10 @@
   <link rel="icon" type="image/png" href="img/logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
   <div class="app">
     <aside class="sidebar" id="sidebar">
@@ -25,6 +21,15 @@
           <span class="sidebar__brand-sub">Restaurante</span>
         </div>
       </div>
+      
+      <div class="sidebar__search-wrap">
+          <label class="top-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="topSearch" placeholder="Buscar...">
+          </label>
+          <div class="top-search__results" id="topSearchResults" style="display:none;"></div>
+      </div>
+
       <nav class="sidebar__nav">
         <a href="index.html"><i class="fa-solid fa-house"></i> Dashboard</a>
         <a href="cadastro.html" class="active"><i class="fa-solid fa-id-card-clip"></i> Cadastro</a>
@@ -42,14 +47,7 @@
     <div class="main">
       <header class="header">
         <div class="header__actions">
-          <div class="top-search-wrap">
-            <label class="top-search">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="topSearch" placeholder="Buscar...">
-            </label>
-            <div class="top-search__results" id="topSearchResults" style="display:none;"></div>
-          </div>
-          <a href="login.html" class="header__user" title="Sair / Trocar de conta">
+          <a href="login.html" class="header__user" title="Login / Sair">
             <div class="header__user-avatar">BR</div>
             <div class="header__user-info">
               <span class="header__user-name">Usuário</span>
@@ -62,8 +60,7 @@
       <main class="content">
         <div class="page-head">
           <div>
-            <div class="breadcrumbs"><a href="index.html"><i class="fa-solid fa-house"></i> Início</a> <i
-                class="fa-solid fa-chevron-right"></i> <span class="current">Cadastro</span></div>
+            <div class="breadcrumbs"><a href="index.html"><i class="fa-solid fa-house"></i> Início</a> <i class="fa-solid fa-chevron-right"></i> <span class="current">Cadastro</span></div>
             <h2 class="page-head__title">Módulo de Cadastro</h2>
             <p class="page-head__subtitle">Selecione o tipo de cadastro que deseja realizar.</p>
           </div>
@@ -108,18 +105,49 @@
                 <th>Ações</th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+              <!-- Preenchido via app.js -->
+            </tbody>
           </table>
         </div>
       </main>
 
-      <footer class="footer">
-        <strong>Boi Ralado</strong> — Sistema de Gestão Interna <i class="fa-solid fa-fire"></i> © 2026
+      <footer class="footer pz">
+        <div class="pz__grid">
+          <div>
+            <div class="pz__brand"><img src="img/logo-puzles.png" alt="Puzles Softwares"><b>Boi Ralado</b></div>
+            <p>Tradição, sabor de fogo e carne de verdade. Do boi ralado ao prato executivo, feito com carinho todos os dias.</p>
+          </div>
+          <div>
+            <h5>Navegação</h5>
+            <a href="index.html">Dashboard</a>
+            <a href="cadastro.html">Cadastro</a>
+            <a href="movimento.html">Movimento</a>
+            <a href="relatorios.html">Relatórios</a>
+          </div>
+          <div>
+            <h5>Contato</h5>
+            <span><i class="fa-solid fa-location-dot"></i> Rua Exemplo, 123 — Centro</span>
+            <span><i class="fa-solid fa-phone"></i> (00) 0000-0000</span>
+            <span><i class="fa-brands fa-whatsapp"></i> (00) 90000-0000</span>
+            <span><i class="fa-solid fa-envelope"></i> contato@boiralado.com.br</span>
+          </div>
+          <div>
+            <h5>Redes Sociais</h5>
+            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank"><i class="fa-brands fa-instagram"></i> Instagram</a>
+          </div>
+        </div>
+        <div class="pz__bar">
+          <span>© 2026 Boi Ralado. Todos os direitos reservados.</span>
+          <span class="pz__by">Desenvolvido com <i class="fa-solid fa-fire"></i> por <a href="#" class="pz__logo"><i class="fa-solid fa-puzzle-piece"></i> Puzles</a></span>
+          <span class="pz__soc">
+            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          </span>
+        </div>
       </footer>
     </div>
   </div>
   <script src="app.js"></script>
-  <script src="cursor.js"></script>
+  <script src="cadastro.js"></script>
 </body>
-
 </html>

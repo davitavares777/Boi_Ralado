@@ -28,6 +28,15 @@
           <span class="sidebar__brand-sub">Restaurante</span>
         </div>
       </div>
+      
+      <div class="sidebar__search-wrap">
+          <label class="top-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="topSearch" placeholder="Buscar...">
+          </label>
+          <div class="top-search__results" id="topSearchResults" style="display:none;"></div>
+      </div>
+
       <nav class="sidebar__nav">
         <a href="index.html"><i class="fa-solid fa-house"></i> Dashboard</a>
         <a href="cadastro.html"><i class="fa-solid fa-id-card-clip"></i> Cadastro</a>
@@ -45,14 +54,7 @@
     <div class="main">
       <header class="header">
         <div class="header__actions">
-          <div class="top-search-wrap">
-            <label class="top-search">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="topSearch" placeholder="Buscar...">
-            </label>
-            <div class="top-search__results" id="topSearchResults" style="display:none;"></div>
-          </div>
-          <a href="login.html" class="header__user">
+          <a href="login.html" class="header__user" title="Login / Sair">
             <div class="header__user-avatar">BR</div>
             <div class="header__user-info">
               <span class="header__user-name">Usuário</span>
@@ -92,7 +94,6 @@
         </div>
 
         <!-- INDICADORES (TOTAIS) -->
-        <!-- Os IDs desses cards são lidos pelo JavaScript para gerar o gráfico -->
         <div class="totals-grid">
           <div class="total-cell">
             <div class="total-cell__label">Total Geral</div>
@@ -124,15 +125,12 @@
         <section class="charts" style="grid-template-columns:1fr 1fr;">
           <div class="chart-card">
             <h3>Formas de pagamento — Delivery</h3>
-            <!-- SVG vazio: o JS preenche as fatias -->
             <svg class="pie" viewBox="0 0 42 42" style="width:200px;height:200px; margin: 0 auto 14px; transform: rotate(-90deg);"></svg>
-            <!-- Div vazia: o JS preenche a legenda -->
             <div class="lg" id="legendas-grafico"></div>
           </div>
 
           <div class="chart-card">
             <h3>Itens mais pedidos no delivery</h3>
-            <!-- Dados de exemplo de itens mais vendidos -->
             <div class="hb"><span>Hambúrguer</span><div><i style="--w:100%; background:linear-gradient(90deg,#E85D26,#FFB36B);"></i></div><b>68</b></div>
             <div class="hb"><span>Pastel</span><div><i style="--w:81%; background:linear-gradient(90deg,#38BDF8,#7DD3FC);"></i></div><b>55</b></div>
             <div class="hb"><span>Boi Ralado</span><div><i style="--w:65%; background:linear-gradient(90deg,#4ADE80,#86EFAC);"></i></div><b>44</b></div>
@@ -161,12 +159,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr><td><strong>#D1052</strong></td><td>18:40</td><td>Maria Oliveira</td><td>Rua das Flores, 120</td><td><span class="pill" style="background:rgba(232,93,38,.18);color:#FF9A6B;">PIX</span></td><td class="num">R$ 6,00</td><td class="num">R$ 68,80</td><td class="num">R$ 74,80</td><td><span class="pill pill--paid">Entregue</span></td></tr>
-              <tr><td><strong>#D1051</strong></td><td>19:12</td><td>Carlos Souza</td><td>Av. Brasil, 845</td><td><span class="pill" style="background:rgba(56,189,248,.18);color:#7DD3FC;">Cartão</span></td><td class="num">R$ 6,00</td><td class="num">R$ 96,40</td><td class="num">R$ 102,40</td><td><span class="pill pill--paid">Entregue</span></td></tr>
-              <tr><td><strong>#D1050</strong></td><td>19:35</td><td>Ana Silva</td><td>Rua Paraná, 33</td><td><span class="pill" style="background:rgba(74,222,128,.18);color:#86EFAC;">Dinheiro</span></td><td class="num">R$ 6,00</td><td class="num">R$ 52,10</td><td class="num">R$ 58,10</td><td><span class="pill pill--paid">Entregue</span></td></tr>
-              <tr><td><strong>#D1049</strong></td><td>19:58</td><td>Bruno Costa</td><td>Rua XV, 560</td><td><span class="pill" style="background:rgba(232,93,38,.18);color:#FF9A6B;">PIX</span></td><td class="num">R$ 6,00</td><td class="num">R$ 124,90</td><td class="num">R$ 130,90</td><td><span class="pill pill--paid">Entregue</span></td></tr>
-              <tr><td><strong>#D1048</strong></td><td>20:15</td><td>Fernanda Lima</td><td>Rua das Flores, 120</td><td><span class="pill" style="background:rgba(56,189,248,.18);color:#7DD3FC;">Cartão</span></td><td class="num">R$ 6,00</td><td class="num">R$ 78,50</td><td class="num">R$ 84,50</td><td><span class="pill pill--paid">Entregue</span></td></tr>
-              <tr><td><strong>#D1047</strong></td><td>20:42</td><td>Rafael Dias</td><td>Av. Brasil, 845</td><td><span class="pill" style="background:rgba(232,93,38,.18);color:#FF9A6B;">PIX</span></td><td class="num">R$ 6,00</td><td class="num">R$ 145,70</td><td class="num">R$ 151,70</td><td><span class="pill pill--paid">Entregue</span></td></tr>
+              <!-- Preenchido via app.js -->
             </tbody>
           </table>
         </div>
@@ -175,7 +168,7 @@
       <footer class="footer pz">
         <div class="pz__grid">
           <div>
-            <div class="pz__brand"><img src="img/logo.png" alt="Boi Ralado"><b>Boi Ralado</b></div>
+            <div class="pz__brand"><img src="img/logo-puzles.png" alt="Puzles Softwares"><b>Boi Ralado</b></div>
             <p>Tradição, sabor de fogo e carne de verdade. Do boi ralado ao prato executivo, feito com carinho todos os dias.</p>
           </div>
           <div>
@@ -193,92 +186,21 @@
             <span><i class="fa-solid fa-envelope"></i> contato@boiralado.com.br</span>
           </div>
           <div>
-            <h5>Horário</h5>
-            <span>Seg a Sex: 11h às 15h e 18h às 23h</span>
-            <span>Sáb e Dom: 11h às 23h</span>
+            <h5>Redes Sociais</h5>
+            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank"><i class="fa-brands fa-instagram"></i> Instagram</a>
           </div>
         </div>
         <div class="pz__bar">
           <span>© 2026 Boi Ralado. Todos os direitos reservados.</span>
           <span class="pz__by">Desenvolvido com <i class="fa-solid fa-fire"></i> por <a href="#" class="pz__logo"><i class="fa-solid fa-puzzle-piece"></i> Puzles</a></span>
           <span class="pz__soc">
-            <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
-            <a href="#" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-            <a href="#" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-            <a href="#" title="GitHub"><i class="fa-brands fa-github"></i></a>
-            <a href="#" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
           </span>
         </div>
       </footer>
     </div>
   </div>
-
-  <!-- SCRIPT DO GRÁFICO DINÂMICO -->
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      // 1. Função para limpar o valor (ex: "R$ 1.842,90" -> 1842.90)
-      function limparValor(texto) {
-        let limpo = texto.replace(/[^\d,]/g, '').replace(',', '.');
-        return parseFloat(limpo) || 0;
-      }
-
-      // 2. Lendo os valores dos cards do Delivery
-      let valorPix = limparValor(document.getElementById('val-pix').innerText);
-      let valorCartao = limparValor(document.getElementById('val-cartao').innerText);
-      let valorDinheiro = limparValor(document.getElementById('val-dinheiro').innerText);
-      
-      // No delivery, temos 3 formas de pagamento principais
-      let total = valorPix + valorCartao + valorDinheiro;
-
-      // 3. Calcular porcentagens
-      let pctPix = total > 0 ? (valorPix / total) * 100 : 0;
-      let pctCartao = total > 0 ? (valorCartao / total) * 100 : 0;
-      let pctDinheiro = total > 0 ? (valorDinheiro / total) * 100 : 0;
-
-      // 4. Configurar os itens (Cores e Porcentagens)
-      const dadosGrafico = [
-        { cor: '#E85D26', nome: 'PIX', pct: pctPix },         // Laranja
-        { cor: '#38BDF8', nome: 'Cartão', pct: pctCartao },   // Azul
-        { cor: '#4ADE80', nome: 'Dinheiro', pct: pctDinheiro } // Verde
-      ];
-
-      // 5. Desenhar o SVG
-      const svg = document.querySelector('.pie');
-      const legendasContainer = document.getElementById('legendas-grafico');
-      
-      svg.innerHTML = '';
-      legendasContainer.innerHTML = '';
-
-      let deslocamento = 0; 
-
-      dadosGrafico.forEach(item => {
-        if (item.pct > 0) {
-          let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-          circle.setAttribute("pathLength", "100"); 
-          circle.setAttribute("r", "10.5");
-          circle.setAttribute("cx", "21");
-          circle.setAttribute("cy", "21");
-          circle.setAttribute("fill", "none");
-          circle.setAttribute("stroke", item.cor);
-          circle.setAttribute("stroke-width", "21");
-          
-          let pctFormatada = item.pct.toFixed(1);
-          circle.setAttribute("stroke-dasharray", `${pctFormatada} ${100 - pctFormatada}`);
-          circle.setAttribute("stroke-dashoffset", -deslocamento);
-          
-          svg.appendChild(circle);
-
-          let legenda = document.createElement('span');
-          legenda.innerHTML = `<i style="background:${item.cor};"></i>${item.nome} ${pctFormatada}%`;
-          legendasContainer.appendChild(legenda);
-
-          deslocamento += item.pct;
-        }
-      });
-    });
-  </script>
-
   <script src="app.js"></script>
-  <script src="cursor.js"></script>
+  <script src="relatorio_delivery.js"></script>
 </body>
 </html>

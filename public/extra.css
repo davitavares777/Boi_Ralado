@@ -421,3 +421,11 @@
   display: flex; flex-direction: column; align-items: center; gap: 12px;
 }
 .br-md.br-md--produtos .br-vazio i { font-size: 40px; color: #FF7A3D !important; opacity: .6; }
+.pz__brand img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: contain;
+  background: #fff; /* Fundo branco para a logo do Puzles aparecer bem */
+  padding: 4px;
+}

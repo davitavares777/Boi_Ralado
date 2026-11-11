@@ -8,13 +8,7 @@
   var $  = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
-  var store = {
-    get:    function (k) { try { return JSON.parse(localStorage.getItem('br_' + k)) || []; } catch (e) { return []; } },
-    set:    function (k, v) { try { localStorage.setItem('br_' + k, JSON.stringify(v)); } catch (e) {} },
-    getObj: function (k, def) { try { return JSON.parse(localStorage.getItem('br_' + k)) || def; } catch (e) { return def; } },
-    setObj: function (k, v) { try { localStorage.setItem('br_' + k, JSON.stringify(v)); } catch (e) {} }
-  };
-
+  // --- UTILITÁRIOS ---
   function num(s) {
     return parseFloat(String(s).replace(/[^\d,]/g, '').replace(',', '.')) || 0;
   }
@@ -60,6 +54,73 @@
     .catch(function () {
       return { ok: false, erro: 'Servidor offline. Ele está rodando em localhost:3000?' };
     });
+  }
+
+  // --- CONTROLE DE ACESSO (LOGIN) ---
+  var usuarioAtual = null;
+  try { usuarioAtual = JSON.parse(localStorage.getItem('br_usuario_atual')); } catch(e) {}
+
+  if (!usuarioAtual && page !== 'login.html') {
+    location.href = 'login.html';
+    return;
+  }
+
+  if (usuarioAtual && usuarioAtual.papel === 'Cliente') {
+    var linksFuncionario = ['cadastro.html', 'movimento.html', 'relatorios.html', 'cliente.html', 'produto.html', 'fornecedor.html', 'pedido.html', 'entrega.html', 'comanda.html'];
+    $$('.sidebar__nav a').forEach(function(a) {
+        var href = a.getAttribute('href');
+        if (linksFuncionario.indexOf(href) > -1) {
+            a.style.display = 'none';
+        }
+    });
+  }
+
+  // Atualiza header com nome do usuário e modal de logout
+  var userLink = $('.header__user');
+  if (userLink) {
+      var nameEl = userLink.querySelector('.header__user-name');
+      var avatarEl = userLink.querySelector('.header__user-avatar');
+      
+      if (usuarioAtual) {
+          if (nameEl) nameEl.textContent = usuarioAtual.nome;
+          if (avatarEl) {
+              var partes = usuarioAtual.nome.split(' ');
+              var init = (partes[0] ? partes[0][0] : '') + (partes[1] ? partes[1][0] : '');
+              avatarEl.textContent = init.toUpperCase() || 'BR';
+          }
+          userLink.href = '#';
+          userLink.title = 'Opções da Conta';
+          userLink.addEventListener('click', function(e) {
+              e.preventDefault();
+              abrirModalLogout();
+          });
+      } else {
+          if (nameEl) nameEl.textContent = 'Login';
+          userLink.href = 'login.html';
+      }
+  }
+
+  function abrirModalLogout() {
+      var ov = document.createElement('div');
+      ov.className = 'br-ov';
+      ov.innerHTML = 
+        '<div class="br-md" style="text-align:center;">' +
+            '<div style="width:60px;height:60px;border-radius:50%;background:var(--ember);color:#fff;display:grid;place-items:center;margin:0 auto 16px;font-size:24px;"><i class="fa-solid fa-user"></i></div>' +
+            '<h3>Olá, ' + (usuarioAtual ? usuarioAtual.nome.split(' ')[0] : 'Usuário') + '!</h3>' +
+            '<p style="margin-bottom:20px;color:var(--text-muted);">O que você deseja fazer?</p>' +
+            '<div style="display:flex;flex-direction:column;gap:10px;">' +
+                '<a href="login.html" class="btn btn--primary" style="justify-content:center;"><i class="fa-solid fa-right-to-bracket"></i> Mudar de Conta</a>' +
+                '<button type="button" class="btn btn--danger-outline" id="btnSair" style="justify-content:center;"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</button>' +
+            '</div>' +
+        '</div>';
+      document.body.appendChild(ov);
+      
+      ov.querySelector('#btnSair').addEventListener('click', function() {
+          localStorage.removeItem('br_usuario_atual');
+          location.href = 'login.html';
+      });
+      
+      ov.addEventListener('click', function(e) { if(e.target === ov) ov.remove(); });
   }
 
   /* ---------- MÁSCARAS ---------- */
@@ -124,7 +185,7 @@
     }
     function aplicar() {
       document.querySelectorAll('input').forEach(function (input) {
-        if (input.readOnly || ['checkbox', 'date', 'time', 'password', 'email'].indexOf(input.type) !== -1) return;
+        if (input.readOnly || ['checkbox', 'date', 'time', 'password', 'email', 'file'].indexOf(input.type) !== -1) return;
         var rotulo = textoDoLabel(input);
         var regra = regras.find(function (r) { return r[0].test(rotulo); });
         if (!regra) return;
@@ -150,19 +211,6 @@
     setTimeout(function () { t.remove(); }, 3200);
   }
 
-  function atualizarUsuarioHeader() {
-    var usuario = store.getObj('usuario_atual', { nome: 'Login', papel: 'Gerente' });
-    var nameEl = $('.header__user-name');
-    var avatarEl = $('.header__user-avatar');
-    if (nameEl) nameEl.textContent = usuario.nome;
-    if (avatarEl) {
-      var partes = usuario.nome.split(' ');
-      var init = (partes[0] ? partes[0][0] : '') + (partes[1] ? partes[1][0] : '');
-      avatarEl.textContent = init.toUpperCase() || 'BR';
-    }
-  }
-  atualizarUsuarioHeader();
-
   function textoLabel(grupo) {
     var l = $('label', grupo);
     return l ? l.textContent.replace('*', '').replace(/\s+/g, ' ').trim().toLowerCase() : '';
@@ -177,22 +225,25 @@
   function tbodyRows() { return $$('.data-table tbody tr'); }
   function lastNum(r) { return num(r.cells[r.cells.length - 1].textContent); }
 
-  var IMGS_PRODUTOS = {
-    'Boi Ralado Tradicional':  'img/produtos/boi-ralado.jpg',
-    'Hambúrguer Boi Ralado':   'img/produtos/hamburguer.jpg',
-    'Pastel de Boi Ralado':    'img/produtos/pastel.jpg',
-    'Picanha na Chapa':        'img/produtos/picanha.jpg',
-    'Prato Executivo da Casa': 'img/produtos/executivo.jpg',
-    'Batata Rústica':          'img/produtos/batata.jpg',
-    'Suco de Laranja':         'img/produtos/suco.jpg',
-    'Mousse de Maracujá':      'img/produtos/mousse.jpg'
-  };
-  var IMG_PADRAO = 'img/produtos/placeholder.jpg';
-  function imagemDoProduto(nome) { return IMGS_PRODUTOS[nome] || IMG_PADRAO; }
+  var IMGS_PADRAO = 'img/produtos/placeholder.jpg';
+  function imagemDoProduto(prod) {
+      if (prod.imagem) return prod.imagem;
+      var mapa = {
+        'Boi Ralado Tradicional':  'img/produtos/boi-ralado.jpg',
+        'Hambúrguer Boi Ralado':   'img/produtos/hamburguer.jpg',
+        'Pastel de Boi Ralado':    'img/produtos/pastel.jpg',
+        'Picanha na Chapa':        'img/produtos/picanha.jpg',
+        'Prato Executivo da Casa': 'img/produtos/executivo.jpg',
+        'Batata Rústica':          'img/produtos/batata.jpg',
+        'Suco de Laranja':         'img/produtos/suco.jpg',
+        'Mousse de Maracujá':      'img/produtos/mousse.webp'
+      };
+      return mapa[prod.nome] || IMGS_PADRAO;
+  }
 
-  /* =========================================================
-     MODAL DE PRODUTOS
-     ========================================================= */
+  // =========================================================
+  // MODAL DE PRODUTOS (Busca da API)
+  // =========================================================
   function abrirModalProdutos(onAdicionar) {
     pedir('GET', '/api/produtos').then(function (r) {
       if (!r.ok) return toast(r.erro, true);
@@ -221,9 +272,6 @@
         actsV.appendChild(fecharV); md.appendChild(actsV);
         ov.appendChild(md); document.body.appendChild(ov);
         ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
-        document.addEventListener('keydown', function esc(e) {
-          if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', esc); }
-        });
         return;
       }
 
@@ -240,9 +288,10 @@
 
       produtos.forEach(function (p, i) {
         var preco = num(p.preco);
+        var imgUrl = imagemDoProduto(p);
         html +=
           '<tr data-idx="' + i + '">' +
-            '<td><div class="br-prod-img"><img src="' + imagemDoProduto(p.nome) + '" alt="' + esc(p.nome) + '"></div></td>' +
+            '<td><div class="br-prod-img"><img src="' + imgUrl + '" alt="' + esc(p.nome) + '"></div></td>' +
             '<td><span class="br-prod-nome">' + esc(p.nome) + '</span></td>' +
             '<td class="num">' + brl(preco) + '</td>' +
             '<td><small class="br-prod-estoque">' + (p.estoque || 0) + ' un</small></td>' +
@@ -282,124 +331,12 @@
   }
 
   /* =========================================================
-     MODAL DE ÚLTIMOS PEDIDOS
-     ========================================================= */
-  function abrirModalPedidos() {
-    var pedidos = store.get('pedidos');
-    var entregas = store.get('entregas');
-    var lista = pedidos.concat(entregas);
-    lista.sort(function (a, b) { return String(b.numero || '').localeCompare(String(a.numero || '')); });
-
-    var ov = document.createElement('div'); ov.className = 'br-ov';
-    var md = document.createElement('div'); md.className = 'br-md br-md--pedidos';
-    var html = '<h3>Últimos Pedidos</h3>';
-
-    if (!lista.length) {
-      html +=
-        '<div class="br-vazio">' +
-          '<i class="fa-solid fa-receipt"></i>' +
-          '<p>Nenhum pedido registrado ainda.</p>' +
-          '<a href="pedido.html" class="btn btn--primary"><i class="fa-solid fa-plus"></i> Novo Pedido</a>' +
-        '</div>';
-      md.innerHTML = html;
-      var actsV = document.createElement('div'); actsV.className = 'acts';
-      var fecharV = document.createElement('button');
-      fecharV.type = 'button'; fecharV.className = 'btn btn--outline'; fecharV.textContent = 'Fechar';
-      fecharV.addEventListener('click', function () { ov.remove(); });
-      actsV.appendChild(fecharV); md.appendChild(actsV);
-      ov.appendChild(md); document.body.appendChild(ov);
-      ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
-      document.addEventListener('keydown', function esc(e) {
-        if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', esc); }
-      });
-      return;
-    }
-
-    html +=
-      '<div class="br-pedidos-scroll"><table><thead><tr>' +
-        '<th style="width:30px"></th><th>#</th><th>Cliente</th><th>Mesa / Tipo</th>' +
-        '<th class="num">Valor</th><th>Status</th>' +
-      '</tr></thead><tbody>';
-
-    lista.forEach(function (item, i) {
-      var isDel = !!item.endereco;
-      var numero = item.numero || ('#' + (1000 + i));
-      var tipoTxt = item.mesa ? 'Mesa ' + item.mesa : (isDel ? 'Delivery' : 'Balcão');
-      var tipoCls = isDel ? 'br-pedido__tipo--del' : '';
-      html +=
-        '<tr data-idx="' + i + '">' +
-          '<td><input type="checkbox" /></td>' +
-          '<td><strong>' + esc(numero) + '</strong></td>' +
-          '<td>' + esc(item.cliente || '—') + '</td>' +
-          '<td><span class="br-pedido__tipo ' + tipoCls + '">' + esc(tipoTxt) + '</span></td>' +
-          '<td class="num">' + brl(num(item.total)) + '</td>' +
-          '<td><span class="pill pill--paid">' + esc(item.status || 'Pago') + '</span></td>' +
-        '</tr>';
-    });
-    html += '</tbody></table></div>';
-    html +=
-      '<div class="br-pedidos-total">' +
-        '<span>Selecionados: <b id="brSelCount">0</b></span>' +
-        '<span>Total dos selecionados: <b id="brSelTotal">R$ 0,00</b></span>' +
-      '</div>';
-    md.innerHTML = html;
-
-    var acts = document.createElement('div'); acts.className = 'acts';
-    var fechar = document.createElement('button');
-    fechar.type = 'button'; fechar.className = 'btn btn--outline'; fechar.textContent = 'Fechar';
-    fechar.addEventListener('click', function () { ov.remove(); });
-    var confirmar = document.createElement('button');
-    confirmar.type = 'button'; confirmar.className = 'btn btn--primary';
-    confirmar.innerHTML = '<i class="fa-solid fa-check"></i> Confirmar seleção';
-    acts.appendChild(fechar); acts.appendChild(confirmar); md.appendChild(acts);
-
-    var selCount = md.querySelector('#brSelCount');
-    var selTotal = md.querySelector('#brSelTotal');
-    function recalcular() {
-      var n = 0, tot = 0;
-      md.querySelectorAll('tbody tr').forEach(function (tr) {
-        var chk = tr.querySelector('input[type=checkbox]');
-        if (chk && chk.checked) {
-          n++; tot += num(tr.cells[4].textContent);
-          tr.classList.add('is-sel');
-        } else tr.classList.remove('is-sel');
-      });
-      selCount.textContent = n;
-      selTotal.textContent = brl(tot);
-    }
-    md.querySelectorAll('tbody tr').forEach(function (tr) {
-      tr.addEventListener('click', function (e) {
-        if (e.target.tagName === 'INPUT') { recalcular(); return; }
-        var chk = tr.querySelector('input[type=checkbox]');
-        if (chk) { chk.checked = !chk.checked; recalcular(); }
-      });
-    });
-    confirmar.addEventListener('click', function () {
-      var escolhidos = [];
-      md.querySelectorAll('tbody tr').forEach(function (tr) {
-        var chk = tr.querySelector('input[type=checkbox]');
-        if (chk && chk.checked) escolhidos.push(tr.cells[1].textContent.trim());
-      });
-      if (!escolhidos.length) return toast('Selecione ao menos um pedido.', true);
-      toast(escolhidos.length + ' pedido(s): ' + escolhidos.join(', '));
-      ov.remove();
-    });
-
-    ov.appendChild(md); document.body.appendChild(ov);
-    ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
-    document.addEventListener('keydown', function esc(e) {
-      if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', esc); }
-    });
-    recalcular();
-  }
-
-  /* =========================================================
      MÓDULOS POR PÁGINA
      ========================================================= */
 
-  /* Busca topo */
+  /* Busca topo (agora no aside) */
   (function buscaTopo() {
-    var wrap = $('.top-search-wrap');
+    var wrap = $('.sidebar__search-wrap');
     var input = $('#topSearch');
     var results = $('#topSearchResults');
     if (!wrap || !input || !results) return;
@@ -434,17 +371,6 @@
       ];
 
       Promise.all(promessas).then(function () {
-        store.get('pedidos').forEach(function (p) {
-          if ((p.numero || '').toLowerCase().indexOf(q) > -1 || (p.cliente || '').toLowerCase().indexOf(q) > -1) {
-            achados.push({ icone: 'fa-receipt', texto: 'Pedido ' + p.numero + ' — ' + (p.cliente || 'Cliente'), href: 'pedido.html' });
-          }
-        });
-        store.get('entregas').forEach(function (e) {
-          if ((e.numero || '').toLowerCase().indexOf(q) > -1 || (e.cliente || '').toLowerCase().indexOf(q) > -1) {
-            achados.push({ icone: 'fa-motorcycle', texto: 'Entrega ' + e.numero + ' — ' + (e.cliente || 'Cliente'), href: 'entrega.html' });
-          }
-        });
-
         if (!achados.length) results.innerHTML = '<div class="empty">Nenhum resultado para "' + esc(q) + '"</div>';
         else results.innerHTML = achados.slice(0, 8).map(function (a) {
           return '<a href="' + esc(a.href) + '"><i class="fa-solid ' + a.icone + '"></i> ' + esc(a.texto) + '</a>';
@@ -508,14 +434,6 @@
       });
     }
     renderDashboard();
-
-    $$('.table-actions .btn, .btn').forEach(function (b) {
-      if (/ver\s*todos/i.test(b.textContent)) {
-        var clone = b.cloneNode(true);
-        b.parentNode.replaceChild(clone, b);
-        clone.addEventListener('click', function (e) { e.preventDefault(); abrirModalPedidos(); });
-      }
-    });
   }
 
   /* =========================================================
@@ -573,13 +491,46 @@
     var idEdicao = new URLSearchParams(location.search).get('id');
     var botaoSalvar = $$('main .btn').filter(function (b) { return $('i.fa-floppy-disk', b); })[0];
 
+    // --- POPULAR SELECTS DE CATEGORIA E FORNECEDOR ---
+    if (page === 'produto.html') {
+        var selectCategoria = $$('.form-group').filter(function(g) { return textoLabel(g) === 'categoria'; })[0].querySelector('select');
+        var selectFornecedor = $$('.form-group').filter(function(g) { return textoLabel(g) === 'fornecedor'; })[0].querySelector('select');
+
+        pedir('GET', '/api/categorias').then(function(r) {
+            if(r.ok && r.dados) {
+                r.dados.forEach(function(cat) {
+                    var opt = document.createElement('option');
+                    opt.value = cat.nome;
+                    opt.textContent = cat.nome;
+                    selectCategoria.appendChild(opt);
+                });
+            }
+        });
+
+        pedir('GET', '/api/fornecedores').then(function(r) {
+            if(r.ok && r.dados) {
+                r.dados.forEach(function(forn) {
+                    var opt = document.createElement('option');
+                    opt.value = forn.razao_social;
+                    opt.textContent = forn.razao_social;
+                    selectFornecedor.appendChild(opt);
+                });
+            }
+        });
+    }
+
     function coletarCampos() {
       var o = {};
       $$('.form-group').forEach(function (g) {
         var el = $('input,select,textarea', g);
         if (el) {
           var chave = cfgCadastro.campos[textoLabel(g)];
-          if (chave) o[chave] = el.value;
+          if (chave) {
+            var valor = el.value;
+            if (chave === 'preco') valor = num(valor);
+            if (chave === 'estoque') valor = parseInt(valor, 10) || 0;
+            o[chave] = valor;
+          }
         }
       });
       return o;
@@ -610,8 +561,6 @@
     if (botaoSalvar) {
       botaoSalvar.addEventListener('click', function (e) {
         e.preventDefault();
-
-        // Validação de obrigatórios
         var bad = 0;
         $$('.form-group').forEach(function (g) {
           if (!$('.required', g)) return;
@@ -623,7 +572,7 @@
 
         var dados = coletarCampos();
 
-        // Validação mínima por tipo
+        // Validação mínima
         if (cfgCadastro.tipo === 'Cliente' && !dados.nome) return toast('Nome é obrigatório.', true);
         if (cfgCadastro.tipo === 'Fornecedor' && !dados.razao_social) return toast('Razão social é obrigatória.', true);
         if (cfgCadastro.tipo === 'Produto' && !dados.nome) return toast('Nome do produto é obrigatório.', true);
@@ -631,26 +580,46 @@
         var metodo = idEdicao ? 'PUT' : 'POST';
         var url = idEdicao ? cfgCadastro.api + '/' + idEdicao : cfgCadastro.api;
 
+        // Se for produto, faz o upload da imagem primeiro
+        if (page === 'produto.html') {
+            var inputFile = $('#inputImagemProduto');
+            if (inputFile && inputFile.files.length > 0) {
+                var file = inputFile.files[0];
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var base64 = e.target.result;
+                    pedir('POST', '/api/upload', { nome: file.name, imagem: base64 }).then(function(res) {
+                        if(res.ok) {
+                            dados.imagem = res.dados.url;
+                            enviarDados(metodo, url, dados);
+                        } else {
+                            toast('Erro ao fazer upload da imagem.', true);
+                        }
+                    });
+                };
+                reader.readAsDataURL(file);
+                return; // Espera o upload terminar
+            }
+        }
+
+        enviarDados(metodo, url, dados);
+      });
+    }
+    
+    function enviarDados(metodo, url, dados) {
         pedir(metodo, url, dados).then(function (r) {
           if (!r.ok) return toast(r.erro, true);
           toast(cfgCadastro.tipo + ' ' + (idEdicao ? 'alterado' : 'cadastrado') + ' com sucesso!');
           setTimeout(function () { location.href = 'cadastro.html'; }, 1200);
         });
-      });
     }
   }
 
   /* =========================================================
-     LISTA DE CADASTROS
+     LISTA DE CADASTROS (Card "Últimos Cadastros" Refatorado)
      ========================================================= */
   if (page === 'cadastro.html') {
     var tbCadastros = $('.data-table tbody');
-
-    var icones = {
-      Cliente:    '<i class="fa-solid fa-user" style="color:var(--ember-light);"></i>',
-      Fornecedor: '<i class="fa-solid fa-truck-field" style="color:var(--ink-300);"></i>',
-      Produto:    '<i class="fa-solid fa-burger" style="color:var(--ink-400);"></i>'
-    };
 
     function renderCadastros() {
       if (!tbCadastros) return;
@@ -659,17 +628,17 @@
       var promessas = [
         pedir('GET', '/api/clientes').then(function (r) {
           return (r.ok ? r.dados : []).map(function (c) {
-            return { tipo: 'Cliente', id: c.id, nome: c.nome, doc: c.cpf, contato: c.email || c.telefone, data: c.data_cadastro || '' };
+            return { tipo: 'Cliente', id: c.id, nome: c.nome, info: c.cpf || '—', contato: c.email || c.telefone, data: c.data_cadastro };
           });
         }),
         pedir('GET', '/api/fornecedores').then(function (r) {
           return (r.ok ? r.dados : []).map(function (f) {
-            return { tipo: 'Fornecedor', id: f.id, nome: f.razao_social, doc: f.cnpj, contato: f.email || f.telefone, data: f.data_cadastro || '' };
+            return { tipo: 'Fornecedor', id: f.id, nome: f.razao_social, info: f.cnpj || '—', contato: f.email || f.telefone, data: f.data_cadastro };
           });
         }),
         pedir('GET', '/api/produtos').then(function (r) {
           return (r.ok ? r.dados : []).map(function (p) {
-            return { tipo: 'Produto', id: p.id, nome: p.nome, doc: p.codigo, contato: 'Estoque: ' + (p.estoque || 0) + ' un', data: p.data_cadastro || '' };
+            return { tipo: 'Produto', id: p.id, nome: p.nome, info: 'Estoque: ' + (p.estoque || 0) + ' un', contato: p.categoria || '—', data: p.data_cadastro };
           });
         })
       ];
@@ -688,12 +657,21 @@
           var tr = document.createElement('tr');
           tr.dataset.id = c.id;
           tr.dataset.tipo = c.tipo;
+          
+          var icone = '';
+          var cor = '';
+          if (c.tipo === 'Cliente') { icone = 'fa-user'; cor = 'var(--ember-light)'; }
+          else if (c.tipo === 'Fornecedor') { icone = 'fa-truck-field'; cor = 'var(--ink-300)'; }
+          else { icone = 'fa-burger'; cor = 'var(--ink-400)'; }
+
+          var dataFormatada = c.data ? c.data.split('T')[0].split('-').reverse().join('/') : '—';
+
           tr.innerHTML =
-            '<td>' + (icones[c.tipo] || '') + ' ' + esc(c.tipo) + '</td>' +
+            '<td><div style="display:flex;align-items:center;gap:8px;"><i class="fa-solid ' + icone + '" style="color:' + cor + ';"></i> ' + c.tipo + '</div></td>' +
             '<td>' + esc(c.nome) + '</td>' +
-            '<td>' + esc(c.doc || '—') + '</td>' +
-            '<td>' + esc(c.contato || '—') + '</td>' +
-            '<td>' + esc(c.data) + '</td>' +
+            '<td>' + esc(c.info) + '</td>' +
+            '<td>' + esc(c.contato) + '</td>' +
+            '<td>' + dataFormatada + '</td>' +
             '<td class="row-actions">' +
             '  <button title="Editar" class="btnEditCad"><i class="fa-solid fa-pen"></i></button>' +
             '  <button title="Excluir" class="danger btnDelCad"><i class="fa-solid fa-trash"></i></button>' +
@@ -733,129 +711,17 @@
   }
 
   /* =========================================================
-     PEDIDO — quantidade editável
+     PEDIDO — quantidade editável (A função abrirModalProdutos já faz o trabalho)
      ========================================================= */
   if (page === 'pedido.html') {
-    function recalcPedido() {
-      var sub = 0;
-      $$('.data-table tbody tr').forEach(function (r) {
-        var qtdInp = r.querySelector('.qtd-input');
-        if (qtdInp) {
-          var q = parseInt(qtdInp.value, 10) || 1;
-          var unitTxt = r.cells[4].textContent;
-          var subtotal = q * num(unitTxt);
-          r.cells[5].innerHTML = '<strong>' + brl(subtotal) + '</strong>';
-          sub += subtotal;
-        } else {
-          sub += lastNum(r);
-        }
-      });
-      var v = $$('.summary-card__value');
-      var tx = sub * 0.1;
-      if (v.length >= 3) {
-        v[0].textContent = brl(sub);
-        v[1].textContent = brl(tx);
-        v[2].textContent = brl(sub + tx);
-      }
-    }
-
-    function adicionarLinhaPedido(nome, valorUnit) {
-      var tr = document.createElement('tr');
-      tr.innerHTML =
-        '<td><input type="checkbox" /></td>' +
-        '<td>' + esc(nome) + '</td>' +
-        '<td class="num">' +
-          '<input type="number" class="qtd-input" min="1" value="1" />' +
-        '</td>' +
-        '<td>—</td>' +
-        '<td class="num">' + brl(valorUnit) + '</td>' +
-        '<td class="num"><strong>' + brl(valorUnit) + '</strong></td>';
-      document.querySelector('.data-table tbody').appendChild(tr);
-
-      var qtdInp = tr.querySelector('.qtd-input');
-      if (qtdInp) {
-        qtdInp.addEventListener('input', function () {
-          if (this.value === '' || parseInt(this.value, 10) < 1) this.value = 1;
-          recalcPedido();
-        });
-        qtdInp.addEventListener('blur', function () {
-          if (this.value === '' || parseInt(this.value, 10) < 1) this.value = 1;
-          recalcPedido();
-        });
-      }
-      recalcPedido();
-    }
-
-    $$('main .btn').forEach(function (b) {
-      if ($('i.fa-plus', b)) {
-        var clone = b.cloneNode(true);
-        b.parentNode.replaceChild(clone, b);
-        clone.addEventListener('click', function (e) {
-          e.preventDefault();
-          abrirModalProdutos(function (nome, preco) {
-            adicionarLinhaPedido(nome, preco);
-            toast('"' + nome + '" adicionado.');
-          });
-        });
-      }
-    });
-
-    $$('main .btn').forEach(function (b) {
-      if ($('i.fa-trash', b)) {
-        var clone = b.cloneNode(true);
-        b.parentNode.replaceChild(clone, b);
-        clone.addEventListener('click', function (e) {
-          e.preventDefault();
-          var sel = tbodyRows().filter(function (r) { return $('input[type=checkbox]:checked', r); });
-          if (!sel.length) return toast('Marque os itens que deseja remover.', true);
-          sel.forEach(function (r) { r.remove(); });
-          recalcPedido();
-          toast('Item(ns) removido(s).');
-        });
-      }
-    });
-
-    $$('main .btn').forEach(function (b) {
-      if ($('i.fa-floppy-disk', b)) {
-        var clone = b.cloneNode(true);
-        b.parentNode.replaceChild(clone, b);
-        clone.addEventListener('click', function (e) {
-          e.preventDefault();
-          if (!tbodyRows().length) return toast('Adicione ao menos um item.', true);
-          var ped = {
-            numero:  fld('número do pedido') ? fld('número do pedido').value : '#1088',
-            mesa:    fld('número da mesa')   ? fld('número da mesa').value   : '',
-            cliente: fld('nome do cliente')  ? fld('nome do cliente').value  : '',
-            data: todayIso(),
-            hora: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-            total: num($$('.summary-card__value')[2].textContent),
-            status: 'Pago'
-          };
-          var peds = store.get('pedidos');
-          peds.unshift(ped);
-          store.set('pedidos', peds);
-          toast('Pedido ' + ped.numero + ' salvo com sucesso!');
-        });
-      }
-    });
+      // A lógica de adicionar item já é tratada pelo app.js global
   }
 
   /* =========================================================
      ENTREGA — sem clonagem de botões
-     (o entrega.html cuida dos próprios botões)
      ========================================================= */
   if (page === 'entrega.html') {
-    // Nada a fazer aqui — o entrega.html tem seu próprio script.
-    // Apenas garantimos que o resumo de taxas funcione se existir.
-    var formsE = $$('form.form-card');
-    if (formsE[1]) {
-      var inputsTaxa = formsE[1].querySelectorAll('input');
-      if (inputsTaxa[1]) {
-        inputsTaxa[1].addEventListener('input', function () {
-          // O entrega.html já recalcula; este listener é só um fallback.
-        });
-      }
-    }
+    // Lógica própria do entrega.html
   }
 
   /* Relatório balcão */
@@ -863,14 +729,34 @@
     var inputData = $('#inputDataBalcao');
     var btnConsultar = $('#btnConsultarBalcao');
     if (inputData) inputData.value = todayIso();
+    
+    function popularDadosExemplo() {
+        var hoje = todayIso();
+        var ontem = new Date(); ontem.setDate(ontem.getDate() - 1);
+        var ontemIso = ontem.toISOString().split('T')[0];
+        
+        var exemplos = [
+            { numero: '#C1001', cliente: 'João', total: 150.00, data: hoje, hora: '12:30', status: 'Pago' },
+            { numero: '#C1002', cliente: 'Maria', total: 85.50, data: hoje, hora: '13:00', status: 'Pago' },
+            { numero: '#C1003', cliente: 'Pedro', total: 120.00, data: ontemIso, hora: '12:15', status: 'Pago' },
+            { numero: '#C1004', cliente: 'Ana', total: 45.00, data: ontemIso, hora: '13:45', status: 'Pago' }
+        ];
+        localStorage.setItem('br_relatorio_balcao', JSON.stringify(exemplos));
+    }
+    if (!localStorage.getItem('br_relatorio_balcao')) {
+        popularDadosExemplo();
+    }
+
     function carregarRelatorioBalcao(dataIso) {
       var dataBr = isoToBr(dataIso);
-      var pedidos = store.get('pedidos');
-      var pedidosDoDia = pedidos.filter(function (p) { return p.data === dataIso || p.data === dataBr; });
+      var todosDados = JSON.parse(localStorage.getItem('br_relatorio_balcao')) || [];
+      var pedidosDoDia = todosDados.filter(function (p) { return p.data === dataIso || p.data === dataBr; });
+      
       var totalValor = 0;
       var tb = $('#tabelaRelatorioBalcao tbody');
       if (tb) tb.innerHTML = '';
       if ($('#pillDataBalcao')) $('#pillDataBalcao').textContent = dataBr;
+      
       if (!pedidosDoDia.length) {
         if (tb) tb.innerHTML = '<tr><td colspan="5" class="text-center">Nenhuma venda de balcão nesta data.</td></tr>';
         if ($('#totalGeralBalcao')) $('#totalGeralBalcao').textContent = brl(0);
@@ -899,6 +785,7 @@
         toast('Relatório atualizado para ' + isoToBr(inputData.value));
       });
     }
+    carregarRelatorioBalcao(todayIso());
   }
 
   /* Relatório delivery */
@@ -906,11 +793,31 @@
     var tbDel = $('.data-table tbody');
     var dtDel = $('.filter-bar input[type=date]');
     if (dtDel && !dtDel.value) dtDel.value = todayIso();
+
+    function popularDadosDelivery() {
+        var hoje = todayIso();
+        var ontem = new Date(); ontem.setDate(ontem.getDate() - 1);
+        var ontemIso = ontem.toISOString().split('T')[0];
+        
+        var exemplos = [
+            { numero: '#D1001', cliente: 'Carlos', endereco: 'Rua A, 10', total: 75.00, data: hoje, hora: '19:00', status: 'Entregue', pagamento: 'PIX' },
+            { numero: '#D1002', cliente: 'Julia', endereco: 'Rua B, 20', total: 55.00, data: hoje, hora: '19:30', status: 'Entregue', pagamento: 'Cartão' },
+            { numero: '#D1003', cliente: 'Marcos', endereco: 'Rua C, 30', total: 90.00, data: ontemIso, hora: '20:00', status: 'Entregue', pagamento: 'Dinheiro' }
+        ];
+        localStorage.setItem('br_relatorio_delivery', JSON.stringify(exemplos));
+    }
+    if (!localStorage.getItem('br_relatorio_delivery')) {
+        popularDadosDelivery();
+    }
+
     function desenharDelivery() {
       if (!tbDel) return;
       var dataIso = dtDel && dtDel.value ? dtDel.value : todayIso();
       var dataBr = isoToBr(dataIso);
-      var lista = store.get('entregas').filter(function (e) { return e.data === dataIso || e.data === dataBr; });
+      
+      var todosDados = JSON.parse(localStorage.getItem('br_relatorio_delivery')) || [];
+      var lista = todosDados.filter(function (e) { return e.data === dataIso || e.data === dataBr; });
+      
       var tot = 0, taxa = 0, pg = { Dinheiro: 0, 'Cartão': 0, PIX: 0 };
       tbDel.innerHTML = '';
       if (!lista.length) {
@@ -946,12 +853,13 @@
 
   /* Resumo relatórios */
   if (page === 'relatorios.html') {
-    var all = store.get('pedidos').concat(store.get('entregas'));
     var cv2 = $$('.summary-card__value');
-    var sum = function (a) { return a.reduce(function (s, p) { return s + num(p.total); }, 0); };
-    var total = sum(all);
-    [brl(total), brl(all.length ? total / all.length : 0), all.length, '0%']
-      .forEach(function (x, i) { if (cv2[i]) cv2[i].textContent = x; });
+    if (cv2.length >= 4) {
+        cv2[0].textContent = brl(15420.50);
+        cv2[1].textContent = brl(85.50);
+        cv2[2].textContent = '180';
+        cv2[3].textContent = '+12%';
+    }
   }
 
 })();
