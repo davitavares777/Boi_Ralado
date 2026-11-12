@@ -74,8 +74,9 @@
       .then(function (lista) {
         var arr = (lista && lista.dados) ? lista.dados : (Array.isArray(lista) ? lista : []);
         var cpfDigits = soDigitos(usuario.cpf || '');
+        var emailAtual = String(usuario.email || '').toLowerCase();
         var achado = arr.filter(function (c) {
-          var bateEmail = (c.email || '').toLowerCase() === String(usuario.email || '').toLowerCase();
+          var bateEmail = (c.email || '').toLowerCase() === emailAtual;
           var bateCpf = cpfDigits && soDigitos(c.cpf) === cpfDigits;
           return bateEmail || bateCpf;
         })[0];
@@ -225,6 +226,10 @@
       btnSalvar.disabled = true;
       btnSalvar.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Salvando...';
 
+      // >>> CORREÇÃO: capturar os dados ANTIGOS antes de alterar o objeto usuario <<<
+      var emailAntigo = String(usuario.email || '').toLowerCase();
+      var cpfAntigo   = soDigitos(usuario.cpf || '');
+
       var payload = {
         nome: nome,
         cpf: cpf || null,
@@ -253,20 +258,22 @@
           dadosCliente.cpf = cpf;
           dadosCliente.telefone = tel;
 
+          // Atualiza o usuário logado (agora com o e-mail NOVO)
           usuario.nome = nome;
           usuario.email = email;
           usuario.cpf = cpf;
           usuario.telefone = tel;
           localStorage.setItem('br_usuario_atual', JSON.stringify(usuario));
 
+          // >>> CORREÇÃO: atualizar br_usuarios localizando pelo e-mail/CPF ANTIGOS <<<
           var lista = lerUsuarios();
-          var emailAntigo = usuario.email || '';
           for (var i = 0; i < lista.length; i++) {
             var u = lista[i];
-            var bate = (u.email && u.email.toLowerCase() === emailAntigo.toLowerCase());
-            if (bate) {
+            var bateEmail = String(u.email || '').toLowerCase() === emailAntigo;
+            var bateCpf   = cpfAntigo && soDigitos(u.cpf) === cpfAntigo;
+            if (bateEmail || bateCpf) {
               lista[i].nome = nome;
-              lista[i].email = email;
+              lista[i].email = email;      // grava o e-mail NOVO
               if (cpf) lista[i].cpf = cpf;
               if (tel) lista[i].telefone = tel;
               break;
@@ -317,12 +324,12 @@
       if (!lista.length) return toast('Nenhum usuário cadastrado.', true);
 
       var cpfDigits = soDigitos(usuario.cpf || '');
-      var emailLogado = (usuario.email || '').toLowerCase();
+      var emailLogado = String(usuario.email || '').toLowerCase();
 
       var idx = -1;
       for (var i = 0; i < lista.length; i++) {
         var u = lista[i];
-        var bateEmail = (u.email || '').toLowerCase() === emailLogado;
+        var bateEmail = String(u.email || '').toLowerCase() === emailLogado;
         var bateCpf = cpfDigits && soDigitos(u.cpf) === cpfDigits;
         if (bateEmail || bateCpf) { idx = i; break; }
       }
@@ -340,9 +347,16 @@
     });
   }
 
+  // ===== SAIR DA CONTA — usa o modal bonito do app.js =====
   var btnSair = $('#btnSairPerfil');
   if (btnSair) {
     btnSair.addEventListener('click', function () {
+      // Se o app.js já carregou e expôs o modal bonito, usa ele
+      if (typeof window.brAbrirModalLogout === 'function') {
+        window.brAbrirModalLogout();
+        return;
+      }
+      // Fallback (caso app.js não esteja carregado por algum motivo)
       if (!confirm('Deseja realmente sair da conta?')) return;
       localStorage.removeItem('br_usuario_atual');
       location.href = 'login.html';

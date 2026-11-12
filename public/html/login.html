@@ -208,16 +208,36 @@
         if (!validaEmail(user) && !validaCPF(user)) return mostrarErroLogin('Informe um e-mail válido ou um CPF válido.');
         if (!pass) return mostrarErroLogin('Informe sua senha.');
         if (pass.length < 6) return mostrarErroLogin('A senha deve ter no mínimo 6 caracteres.');
+
         var usuarios = lerUsuarios();
         if (!usuarios.length) return mostrarErroLogin('Nenhum usuário cadastrado. Use a aba "Cadastrar" primeiro.');
+
         var userDigits = soDigitos(user);
+        var userLower = user.toLowerCase();
+
         var encontrado = usuarios.filter(function (u) {
-          return ((u.email === user) || (u.cpf === userDigits)) && u.senha === pass;
+          var bateEmail = String(u.email || '').toLowerCase() === userLower;
+          var bateCpf   = soDigitos(u.cpf) === userDigits && userDigits.length === 11;
+          return (bateEmail || bateCpf) && u.senha === pass;
         })[0];
+
         if (!encontrado) return mostrarErroLogin('Usuário ou senha inválidos.');
-        var papel = tipoUsuario === 'funcionario' ? 'Funcionário' : 'Cliente';
-        localStorage.setItem('br_usuario_atual', JSON.stringify({ nome: encontrado.nome, email: encontrado.email, papel: papel }));
-        window.location.href = 'index.html';
+
+        var papelReal = encontrado.papel || (tipoUsuario === 'funcionario' ? 'Funcionário' : 'Cliente');
+
+        localStorage.setItem('br_usuario_atual', JSON.stringify({
+          nome: encontrado.nome,
+          email: encontrado.email,
+          cpf: encontrado.cpf,
+          telefone: encontrado.telefone,
+          papel: papelReal
+        }));
+
+        if (papelReal === 'Cliente') {
+          window.location.href = 'dashboard_cliente.html';
+        } else {
+          window.location.href = 'index.html';
+        }
       });
     }
 
@@ -238,6 +258,7 @@
         var senha = document.getElementById('regSenha').value;
         var senha2 = document.getElementById('regSenhaConfirma').value;
         var termos = document.getElementById('regTermos').checked;
+
         if (!nomeValido(nome)) return mostrarErroCad('Informe um nome válido (mínimo 3 letras).');
         if (!validaCPF(cpf)) return mostrarErroCad('CPF inválido.');
         if (!validaEmail(email)) return mostrarErroCad('E-mail inválido.');
@@ -245,22 +266,54 @@
         if (senha.length < 6) return mostrarErroCad('A senha deve ter no mínimo 6 caracteres.');
         if (senha !== senha2) return mostrarErroCad('As senhas não coincidem.');
         if (!termos) return mostrarErroCad('Você precisa aceitar os termos de uso.');
+
         var usuarios = lerUsuarios();
         var cpfDigits = soDigitos(cpf);
-        var duplicado = usuarios.some(function (u) { return u.email === email || u.cpf === cpfDigits; });
+        var duplicado = usuarios.some(function (u) {
+          var mesmoEmail = String(u.email || '').toLowerCase() === email.toLowerCase();
+          var mesmoCpf = soDigitos(u.cpf) === cpfDigits;
+          return mesmoEmail || mesmoCpf;
+        });
         if (duplicado) return mostrarErroCad('E-mail ou CPF já cadastrado.');
-        usuarios.push({ nome: nome, cpf: cpfDigits, email: email, telefone: soDigitos(telefone), senha: senha, papel: tipoUsuario === 'funcionario' ? 'Funcionário' : 'Cliente' });
+
+        var papelCadastro = tipoUsuario === 'funcionario' ? 'Funcionário' : 'Cliente';
+
+        var novoUsuario = {
+          nome: nome,
+          cpf: cpfDigits,
+          email: email,
+          telefone: soDigitos(telefone),
+          senha: senha,
+          papel: papelCadastro
+        };
+
+        usuarios.push(novoUsuario);
         salvarUsuarios(usuarios);
+
         registerSuccess.classList.add('show');
         registerForm.reset();
-        setTimeout(function () {
-          registerSuccess.classList.remove('show');
-          switchTab('login');
-          var loginUser = document.getElementById('loginUser');
-          if (loginUser) loginUser.value = email;
-          var loginPass = document.getElementById('loginPass');
-          if (loginPass) { loginPass.value = ''; loginPass.focus(); }
-        }, 1400);
+
+        // CORREÇÃO: Se for Cliente, já loga e redireciona direto para o Dashboard do Cliente
+        if (papelCadastro === 'Cliente') {
+          localStorage.setItem('br_usuario_atual', JSON.stringify({
+            nome: novoUsuario.nome,
+            email: novoUsuario.email,
+            cpf: novoUsuario.cpf,
+            telefone: novoUsuario.telefone,
+            papel: novoUsuario.papel
+          }));
+          setTimeout(function () { window.location.href = 'dashboard_cliente.html'; }, 1000);
+        } else {
+          // Se for funcionário, volta para o login
+          setTimeout(function () {
+            registerSuccess.classList.remove('show');
+            switchTab('login');
+            var loginUser = document.getElementById('loginUser');
+            if (loginUser) loginUser.value = email;
+            var loginPass = document.getElementById('loginPass');
+            if (loginPass) { loginPass.value = ''; loginPass.focus(); }
+          }, 1400);
+        }
       });
     }
   })();
