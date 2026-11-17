@@ -71,15 +71,13 @@
           <a href="cliente.html" class="access-card">
             <div class="access-card__icon"><i class="fa-solid fa-user-plus"></i></div>
             <h4 class="access-card__title">Cliente</h4>
-            <p class="access-card__desc">Cadastre informações pessoais, contato e endereço dos clientes do restaurante.
-            </p>
+            <p class="access-card__desc">Cadastre informações pessoais, contato e endereço dos clientes do restaurante.</p>
             <span class="access-card__link">Cadastrar Cliente <i class="fa-solid fa-arrow-right"></i></span>
           </a>
           <a href="fornecedor.html" class="access-card">
             <div class="access-card__icon brown"><i class="fa-solid fa-truck-field"></i></div>
             <h4 class="access-card__title">Fornecedor</h4>
-            <p class="access-card__desc">Registre empresas fornecedoras, dados fiscais e informações de contato
-              comercial.</p>
+            <p class="access-card__desc">Registre empresas fornecedoras, dados fiscais e informações de contato comercial.</p>
             <span class="access-card__link">Cadastrar Fornecedor <i class="fa-solid fa-arrow-right"></i></span>
           </a>
           <a href="produto.html" class="access-card">
@@ -90,23 +88,23 @@
           </a>
         </section>
 
+        <!-- TABELA COM AÇÕES RESTAURADAS -->
         <div class="table-wrap mt-4">
           <div class="table-actions">
-            <h3><i class="fa-solid fa-clock-rotate-left" style="color:var(--color-red);"></i> Últimos Cadastros</h3>
+            <h3><i class="fa-solid fa-clock-rotate-left" style="color:var(--color-red);"></i> Últimos Registros</h3>
           </div>
           <table class="data-table">
             <thead>
               <tr>
                 <th>Tipo</th>
-                <th>Nome / Razão Social</th>
-                <th>Documento</th>
-                <th>Contato</th>
+                <th>Descrição / Nome</th>
+                <th>Detalhes / Valor</th>
                 <th>Data</th>
-                <th>Ações</th>
+                <th style="width:120px; text-align:center;">Ações</th>
               </tr>
             </thead>
-            <tbody>
-              <!-- Preenchido via app.js -->
+            <tbody id="tbodyCadastros">
+              <tr><td colspan="5" class="text-center">Carregando...</td></tr>
             </tbody>
           </table>
         </div>

@@ -46,6 +46,7 @@
   var tbody = document.getElementById('tbodyComanda');
   if (!tbody) return;
 
+  // ---------- Linha vazia ----------
   function atualizarLinhaVazia() {
     var linhas = tbody.querySelectorAll('tr[data-produto]');
     var vazia = document.getElementById('linhaVazia');
@@ -61,6 +62,7 @@
     }
   }
 
+  // ---------- Cálculo dinâmico (SEM Taxa de Serviço) ----------
   function recalcular() {
     var subtotal = 0;
     tbody.querySelectorAll('tr[data-produto]').forEach(function (tr) {
@@ -70,26 +72,27 @@
       tr.querySelector('.subtotal-cell').textContent = brl(sub);
       subtotal += sub;
     });
-    var taxa = subtotal * 0.10;
-    var total = subtotal + taxa;
+    // TAXA DE SERVIÇO REMOVIDA — apenas Subtotal e Total a Pagar
     document.getElementById('subtotal').textContent = brl(subtotal);
-    document.getElementById('taxaServico').textContent = brl(taxa);
-    document.getElementById('totalPagar').textContent = brl(total);
+    document.getElementById('totalPagar').textContent = brl(subtotal);
   }
 
-  function adicionarLinha(produto) {
+  // ---------- Adicionar linha na tabela ----------
+  function adicionarLinha(produto, qtdInicial) {
+    qtdInicial = qtdInicial || 1;
     var tr = document.createElement('tr');
     tr.dataset.produto = produto.nome;
     tr.dataset.preco = produto.preco;
+    tr.dataset.img = produto.img || '';
     tr.innerHTML =
       '<td><input type="checkbox" /></td>' +
       '<td><div class="comanda-produto-cell">' +
         '<img src="' + (produto.img || '') + '" alt="' + esc(produto.nome) + '" class="comanda-produto-img" onerror="this.style.display=\'none\'">' +
         '<span class="comanda-produto-nome">' + esc(produto.nome) + '</span>' +
       '</div></td>' +
-      '<td class="num"><input type="number" class="qtd-input" min="1" value="1"></td>' +
+      '<td class="num"><input type="number" class="qtd-input" min="1" value="' + qtdInicial + '"></td>' +
       '<td class="num">' + brl(produto.preco) + '</td>' +
-      '<td class="num subtotal-cell">' + brl(produto.preco) + '</td>';
+      '<td class="num subtotal-cell">' + brl(produto.preco * qtdInicial) + '</td>';
 
     tbody.appendChild(tr);
 
@@ -107,15 +110,122 @@
     recalcular();
   }
 
-  function abrirModalProdutos(onAdicionar) {
+  // ---------- Modal de detalhe (mesmo padrão de pedido/entrega) ----------
+  function abrirDetalheProduto(produto, onAdicionar) {
+    var ov = document.createElement('div');
+    ov.className = 'br-ov';
+    ov.innerHTML =
+      '<div class="produto-detalhe">' +
+        '<div class="produto-detalhe__img">' +
+          '<img src="' + (produto.img || '') + '" onerror="this.style.display=\'none\'">' +
+          '<div class="produto-detalhe__close" id="fecharDetalhe"><i class="fa-solid fa-xmark"></i></div>' +
+        '</div>' +
+        '<div class="produto-detalhe__body">' +
+          '<span class="produto-detalhe__tag">' + esc(produto.categoria || 'Produto') + '</span>' +
+          '<h3>' + esc(produto.nome) + '</h3>' +
+          '<p class="produto-detalhe__desc">' + esc(produto.descricao || '') + '</p>' +
+          '<div class="produto-detalhe__info">' +
+            '<div class="produto-detalhe__info-item"><div class="produto-detalhe__info-label">Preço Unitário</div><div class="produto-detalhe__info-valor">' + brl(produto.preco) + '</div></div>' +
+            '<div class="produto-detalhe__info-item"><div class="produto-detalhe__info-label">Estoque</div><div class="produto-detalhe__info-valor">' + (produto.estoque || 0) + ' un</div></div>' +
+          '</div>' +
+          '<div class="produto-detalhe__qtd-row">' +
+            '<span class="produto-detalhe__qtd-label">Quantidade:</span>' +
+            '<div class="qtd-picker">' +
+              '<button type="button" id="btnMenos"><i class="fa-solid fa-minus"></i></button>' +
+              '<input type="number" id="qtdDetalhe" min="1" value="1">' +
+              '<button type="button" id="btnMais"><i class="fa-solid fa-plus"></i></button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="produto-detalhe__total">' +
+            '<span class="produto-detalhe__total-label">Total</span>' +
+            '<span class="produto-detalhe__total-valor" id="totalDetalhe">' + brl(produto.preco) + '</span>' +
+          '</div>' +
+          '<button type="button" class="produto-detalhe__btn" id="btnAdicionarComanda"><i class="fa-solid fa-cart-plus"></i> Adicionar à Comanda</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+
+    var qtdInput = ov.querySelector('#qtdDetalhe');
+    var totalEl = ov.querySelector('#totalDetalhe');
+    function recalc() {
+      var q = parseInt(qtdInput.value, 10) || 1;
+      if (q < 1) { q = 1; qtdInput.value = 1; }
+      totalEl.textContent = brl(produto.preco * q);
+    }
+    ov.querySelector('#btnMenos').addEventListener('click', function () {
+      var q = parseInt(qtdInput.value, 10) || 1;
+      if (q > 1) qtdInput.value = q - 1; recalc();
+    });
+    ov.querySelector('#btnMais').addEventListener('click', function () {
+      var q = parseInt(qtdInput.value, 10) || 1;
+      qtdInput.value = q + 1; recalc();
+    });
+    qtdInput.addEventListener('input', recalc);
+
+    function fechar() { ov.remove(); }
+    ov.querySelector('#fecharDetalhe').addEventListener('click', fechar);
+    ov.addEventListener('click', function (e) { if (e.target === ov) fechar(); });
+    document.addEventListener('keydown', function esc(e) {
+      if (e.key === 'Escape') { fechar(); document.removeEventListener('keydown', esc); }
+    });
+    ov.querySelector('#btnAdicionarComanda').addEventListener('click', function () {
+      onAdicionar(produto, parseInt(qtdInput.value, 10) || 1);
+      fechar();
+    });
+  }
+
+  // ---------- Adicionar item (com soma de quantidade se já existir) ----------
+  function adicionarItemNaComanda(produto, qtd) {
+    var existente = null;
+    tbody.querySelectorAll('tr[data-produto]').forEach(function (tr) {
+      if (tr.dataset.produto === produto.nome) existente = tr;
+    });
+    if (existente) {
+      var inp = existente.querySelector('.qtd-input');
+      inp.value = (parseInt(inp.value, 10) || 1) + qtd;
+      recalcular();
+      toast('"' + produto.nome + '" +' + qtd + ' un.');
+      return;
+    }
+    adicionarLinha(produto, qtd);
+    toast('"' + produto.nome + '" adicionado (' + qtd + ' un).');
+  }
+
+  // ---------- Modal de produtos (API + exemplos) ----------
+  function abrirModalProdutos() {
     pedir('GET', '/api/produtos').then(function (r) {
-      var produtos = (r.ok ? r.dados : []).map(function (p) {
-        return {
+      var produtosApi = (r.ok ? r.dados : []) || [];
+
+      // Produtos de exemplo (mesmos do dashboard do funcionário)
+      var PRODUTOS_EXEMPLO = [
+        { nome: 'Boi Ralado Tradicional', preco: 34.90, categoria: 'Prato Principal', descricao: 'O clássico da casa!', estoque: 50, img: '../img/produtos/boi-ralado.jpg' },
+        { nome: 'Hambúrguer Boi Ralado', preco: 32.00, categoria: 'Lanches', descricao: 'Blend especial de 180g', estoque: 40, img: '../img/produtos/hamburguer.jpg' },
+        { nome: 'Pastel de Boi Ralado', preco: 14.00, categoria: 'Salgados', descricao: 'Pastel grande e crocante', estoque: 80, img: '../img/produtos/pastel.jpg' },
+        { nome: 'Picanha na Chapa', preco: 68.90, categoria: 'Prato Principal', descricao: 'Picanha nobre fatiada', estoque: 25, img: '../img/produtos/picanha.jpg' },
+        { nome: 'Prato Executivo da Casa', preco: 29.90, categoria: 'Executivo', descricao: 'A refeição completa', estoque: 60, img: '../img/produtos/executivo.jpg' },
+        { nome: 'Batata Rústica', preco: 24.90, categoria: 'Acompanhamento', descricao: 'Batatas com casca', estoque: 90, img: '../img/produtos/batata.jpg' },
+        { nome: 'Suco de Laranja', preco: 9.00, categoria: 'Bebida', descricao: 'Suco 100% natural', estoque: 100, img: '../img/produtos/suco.jpg' },
+        { nome: 'Mousse de Maracujá', preco: 12.00, categoria: 'Sobremesa', descricao: 'Mousse cremosa', estoque: 45, img: '../img/produtos/mousse.webp' }
+      ];
+
+      // Combina API + exemplos, sem duplicar por nome
+      var produtos = [];
+      var nomesVistos = {};
+
+      produtosApi.forEach(function (p) {
+        produtos.push({
           nome: p.nome,
           preco: Number(p.preco) || 0,
           img: imagemDoProduto(p),
-          estoque: p.estoque || 0
-        };
+          estoque: p.estoque || 0,
+          categoria: p.categoria,
+          descricao: p.descricao
+        });
+        nomesVistos[p.nome] = true;
+      });
+
+      PRODUTOS_EXEMPLO.forEach(function (p) {
+        if (!nomesVistos[p.nome]) produtos.push(p);
       });
 
       var ov = document.createElement('div');
@@ -146,7 +256,7 @@
           '<td><span class="br-prod-nome">' + esc(p.nome) + '</span></td>' +
           '<td class="num">' + brl(p.preco) + '</td>' +
           '<td><small class="br-prod-estoque">' + p.estoque + ' un</small></td>' +
-          '<td><span class="br-add-ico"><i class="fa-solid fa-plus"></i></span></td>' +
+          '<td><span class="br-add-ico"><i class="fa-solid fa-eye"></i></span></td>' +
         '</tr>';
       });
       html += '</tbody></table></div>';
@@ -163,12 +273,10 @@
           var idx = parseInt(tr.dataset.idx, 10);
           var p = produtos[idx];
           if (!p) return;
-          onAdicionar(p);
-          var ico = tr.querySelector('.br-add-ico');
-          if (ico) {
-            ico.innerHTML = '<i class="fa-solid fa-check"></i>';
-            setTimeout(function () { ico.innerHTML = '<i class="fa-solid fa-plus"></i>'; }, 600);
-          }
+          abrirDetalheProduto(p, function (produto, qtd) {
+            adicionarItemNaComanda(produto, qtd);
+            ov.remove();
+          });
         });
       });
 
@@ -177,112 +285,109 @@
     });
   }
 
-  document.getElementById('btnAdicionarItem').addEventListener('click', function () {
-    abrirModalProdutos(function (produto) {
-      var existente = null;
-      tbody.querySelectorAll('tr[data-produto]').forEach(function (tr) {
-        if (tr.dataset.produto === produto.nome) existente = tr;
-      });
-      if (existente) {
-        var inp = existente.querySelector('.qtd-input');
-        inp.value = (parseInt(inp.value, 10) || 1) + 1;
-        recalcular();
-        toast('"' + produto.nome + '" +1 unidade.');
-        return;
-      }
-      adicionarLinha(produto);
-      toast('"' + produto.nome + '" adicionado à comanda.');
-    });
-  });
+  // Expõe globalmente (mesmo padrão de pedido.js/entrega.js)
+  window.__brAbrirProdutosComanda = abrirModalProdutos;
 
-  document.getElementById('btnRemoverItem').addEventListener('click', function () {
-    var selecionados = tbody.querySelectorAll('tr[data-produto] input[type="checkbox"]:checked');
-    if (!selecionados.length) return toast('Marque os itens que deseja remover.', true);
-    selecionados.forEach(function (chk) {
-      var tr = chk.closest('tr');
-      if (tr) tr.remove();
+  // ---------- Bind do botão Adicionar Item (fallback) ----------
+  var btnAdicionar = document.getElementById('btnAdicionarItem');
+  if (btnAdicionar) {
+    btnAdicionar.addEventListener('click', function (e) {
+      e.preventDefault();
+      abrirModalProdutos();
     });
-    atualizarLinhaVazia();
-    recalcular();
-    toast('Item(ns) removido(s).');
-  });
-
-  document.getElementById('chkTodos').addEventListener('change', function () {
-    var marcado = this.checked;
-    tbody.querySelectorAll('tr[data-produto] input[type="checkbox"]').forEach(function (chk) {
-      chk.checked = marcado;
-    });
-  });
-
-  function modal(title, msg, iconClass, btnLabel, btnClass, onConfirm) {
-    var ov = document.createElement('div');
-    ov.className = 'br-ov';
-    ov.innerHTML =
-      '<div class="print-modal">' +
-        '<div class="print-modal__icon"><i class="' + iconClass + '"></i></div>' +
-        '<h3>' + title + '</h3>' +
-        '<p>' + msg + '</p>' +
-        '<div class="print-modal__acts">' +
-          '<button type="button" class="btn btn--outline" id="modalCancelar">Cancelar</button>' +
-          '<button type="button" class="btn ' + btnClass + '" id="modalConfirmar">' + btnLabel + '</button>' +
-        '</div>' +
-      '</div>';
-    document.body.appendChild(ov);
-    function fechar() { ov.remove(); }
-    ov.querySelector('#modalCancelar').addEventListener('click', fechar);
-    ov.querySelector('#modalConfirmar').addEventListener('click', function () {
-      fechar();
-      if (onConfirm) onConfirm();
-    });
-    ov.addEventListener('click', function (e) { if (e.target === ov) fechar(); });
   }
 
-  document.getElementById('btnImprimir').addEventListener('click', function () {
-    modal('Imprimir Comanda?', 'A comanda será enviada para a impressora padrão do sistema.',
-      'fa-solid fa-print', '<i class="fa-solid fa-print"></i> Imprimir', 'btn--brown',
-      function () { toast('Comanda enviada para impressão! 🖨️'); window.print(); });
-  });
-
-  document.getElementById('btnCancelar').addEventListener('click', function () {
-    modal('Cancelar Comanda?', 'A comanda será cancelada e o status mudará para "Cancelado".',
-      'fa-solid fa-ban', '<i class="fa-solid fa-ban"></i> Cancelar Comanda', 'btn--danger-outline',
-      function () {
-        document.getElementById('statusPagamento').value = 'Cancelado';
-        toast('Comanda cancelada.', true);
+  // ---------- Remover itens marcados ----------
+  var btnRemoverItem = document.getElementById('btnRemoverItem');
+  if (btnRemoverItem) {
+    btnRemoverItem.addEventListener('click', function (e) {
+      e.preventDefault();
+      var selecionados = tbody.querySelectorAll('tr[data-produto] input[type="checkbox"]:checked');
+      if (!selecionados.length) return toast('Marque os itens que deseja remover.', true);
+      selecionados.forEach(function (chk) {
+        var tr = chk.closest('tr');
+        if (tr) tr.remove();
       });
-  });
+      atualizarLinhaVazia();
+      recalcular();
+      toast('Item(ns) removido(s).');
+    });
+  }
 
-  document.getElementById('btnEmitir').addEventListener('click', function () {
-    var linhas = tbody.querySelectorAll('tr[data-produto]');
-    if (!linhas.length) {
-      toast('Adicione pelo menos 1 item antes de emitir.', true);
-      return;
-    }
-    modal('Emitir Comanda?', 'A comanda será emitida e registrada no sistema.',
-      'fa-solid fa-paper-plane', '<i class="fa-solid fa-paper-plane"></i> Emitir', 'btn--primary',
-      function () {
-        var comanda = {
-          numero: document.getElementById('numComanda').value,
-          mesa: document.getElementById('numMesa').value,
-          hora: document.getElementById('horaComanda').value,
-          status: document.getElementById('statusPagamento').value,
-          total: document.getElementById('totalPagar').textContent,
-          itens: []
-        };
-        linhas.forEach(function (tr) {
-          comanda.itens.push({
-            nome: tr.dataset.produto,
-            qtd: parseInt(tr.querySelector('.qtd-input').value, 10) || 1,
-            preco: parseFloat(tr.dataset.preco) || 0
-          });
+  // ---------- Marcar/desmarcar todos ----------
+  var chkTodos = document.getElementById('chkTodos');
+  if (chkTodos) {
+    chkTodos.addEventListener('change', function () {
+      var marcado = this.checked;
+      tbody.querySelectorAll('tr[data-produto] input[type="checkbox"]').forEach(function (chk) {
+        chk.checked = marcado;
+      });
+    });
+  }
+
+  // ---------- Cancelar comanda ----------
+  var btnCancelar = document.getElementById('btnCancelar');
+  if (btnCancelar) {
+    btnCancelar.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (!confirm('Cancelar e limpar todos os itens da comanda?')) return;
+      tbody.querySelectorAll('tr[data-produto]').forEach(function (tr) { tr.remove(); });
+      atualizarLinhaVazia();
+      recalcular();
+      toast('Comanda cancelada.');
+    });
+  }
+
+  // ---------- Imprimir ----------
+  var btnImprimir = document.getElementById('btnImprimir');
+  if (btnImprimir) {
+    btnImprimir.addEventListener('click', function (e) {
+      e.preventDefault();
+      toast('Comanda enviada para impressão! 🖨️');
+      window.print();
+    });
+  }
+
+  // ---------- Emitir comanda ----------
+  var btnEmitir = document.getElementById('btnEmitir');
+  if (btnEmitir) {
+    btnEmitir.addEventListener('click', function (e) {
+      e.preventDefault();
+      var linhas = tbody.querySelectorAll('tr[data-produto]');
+      if (!linhas.length) return toast('Adicione pelo menos 1 item antes de emitir.', true);
+
+      var comanda = {
+        numero: document.getElementById('numComanda').value,
+        mesa: document.getElementById('numMesa').value || '—',
+        hora: document.getElementById('horaComanda').value || '',
+        status: document.getElementById('statusPagamento').value,
+        subtotal: document.getElementById('subtotal').textContent,
+        total: document.getElementById('totalPagar').textContent,
+        data: new Date().toISOString().split('T')[0],
+        itens: []
+      };
+      linhas.forEach(function (tr) {
+        comanda.itens.push({
+          nome: tr.dataset.produto,
+          qtd: parseInt(tr.querySelector('.qtd-input').value, 10) || 1,
+          preco: parseFloat(tr.dataset.preco) || 0
         });
-        var comandas = [];
-        try { comandas = JSON.parse(localStorage.getItem('br_comandas')) || []; } catch (e) {}
-        comandas.unshift(comanda);
-        try { localStorage.setItem('br_comandas', JSON.stringify(comandas)); } catch (e) {}
-        toast('Comanda ' + comanda.numero + ' emitida com sucesso! 🎉');
       });
-  });
 
+      var comandas = [];
+      try { comandas = JSON.parse(localStorage.getItem('br_comandas')) || []; } catch (e2) {}
+      comandas.unshift(comanda);
+      try { localStorage.setItem('br_comandas', JSON.stringify(comandas)); } catch (e2) {}
+
+      toast('Comanda ' + comanda.numero + ' emitida com sucesso! 🧾');
+      setTimeout(function () {
+        tbody.querySelectorAll('tr[data-produto]').forEach(function (tr) { tr.remove(); });
+        atualizarLinhaVazia();
+        recalcular();
+      }, 1000);
+    });
+  }
+
+  // Cálculo inicial
   recalcular();
 })();

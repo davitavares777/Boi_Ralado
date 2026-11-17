@@ -195,6 +195,46 @@
     }
     .produto-detalhe__btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(232,93,38,.55); }
     .produto-detalhe__btn:active { transform: translateY(0); }
+
+    /* --- CSS ADICIONADO PARA OS CARDS DE TOTAIS --- */
+    .comanda-totais {
+      display: flex;
+      gap: 16px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .comanda-total-card {
+      flex: 1;
+      min-width: 200px;
+      padding: 20px 24px;
+      border-radius: 12px;
+      background: #1F1610;
+      border: 1px solid rgba(201,179,147,.12);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .comanda-total-card--highlight {
+      background: linear-gradient(135deg, #E85D26, #7A1010);
+      border-color: transparent;
+      box-shadow: 0 8px 24px rgba(232,93,38,.25);
+    }
+    .comanda-total-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #A89078;
+    }
+    .comanda-total-card--highlight .comanda-total-label {
+      color: rgba(255,255,255,.8);
+    }
+    .comanda-total-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -290,8 +330,8 @@
           <div class="table-actions">
             <h3><i class="fa-solid fa-list-check" style="color:var(--color-red);"></i> Itens da Comanda</h3>
             <div style="display:flex;gap:8px;">
-              <button class="btn btn--primary btn--sm" id="btnAdicionarItem"><i class="fa-solid fa-plus"></i> Adicionar Item</button>
-              <button class="btn btn--danger-outline btn--sm" id="btnRemoverItem"><i class="fa-solid fa-trash"></i> Remover Item</button>
+              <button type="button" class="btn btn--primary btn--sm" id="btnAdicionarItem" onclick="window.__brAbrirProdutosComanda && window.__brAbrirProdutosComanda()"><i class="fa-solid fa-plus"></i> Adicionar Item</button>
+              <button type="button" class="btn btn--danger-outline btn--sm" id="btnRemoverItem"><i class="fa-solid fa-trash"></i> Remover Item</button>
             </div>
           </div>
           <table class="data-table">
@@ -317,10 +357,7 @@
             <span class="comanda-total-label">Subtotal</span>
             <span class="comanda-total-value" id="subtotal">R$ 0,00</span>
           </div>
-          <div class="comanda-total-card">
-            <span class="comanda-total-label">Taxa de Serviço (10%)</span>
-            <span class="comanda-total-value" id="taxaServico">R$ 0,00</span>
-          </div>
+          <!-- TAXA DE SERVIÇO REMOVIDA — apenas Subtotal e Total a Pagar -->
           <div class="comanda-total-card comanda-total-card--highlight">
             <span class="comanda-total-label">Total a Pagar</span>
             <span class="comanda-total-value" id="totalPagar">R$ 0,00</span>

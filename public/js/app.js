@@ -1,5 +1,5 @@
 /* =====================================================================
-   BOI RALADO — app.js (Corrigido com Proteção de Rotas e Menu)
+   BOI RALADO — app.js
    ===================================================================== */
 (function () {
   'use strict';
@@ -16,20 +16,17 @@
   // =========================================================================
   var paginasPublicas = ['login.html'];
   
-  // Páginas restritas EXCLUSIVAS para funcionários
   var paginasRestritasFuncionario = [
     'index.html', '', 'cadastro.html', 'movimento.html', 'relatorios.html', 
     'cliente.html', 'produto.html', 'fornecedor.html', 'pedido.html', 
     'entrega.html', 'comanda.html', 'relatorio_balcao.html', 'relatorio_delivery.html'
   ];
 
-  // Se não estiver logado e não for página pública, vai para o login
   if (!usuarioAtual && paginasPublicas.indexOf(page) === -1) {
     location.href = 'login.html';
     return;
   }
 
-  // Se for Cliente e tentar acessar página de funcionário, expulsa para o dashboard dele
   if (usuarioAtual && usuarioAtual.papel === 'Cliente') {
     if (paginasRestritasFuncionario.indexOf(page) > -1) {
       console.warn('Acesso negado: Cliente tentou acessar página de funcionário. Redirecionando...');
@@ -39,9 +36,8 @@
   }
 
   // =========================================================================
-  // 2. LIMPEZA DO MENU LATERAL (BLINDAGEM VISUAL E DE CACHE)
+  // 2. LIMPEZA DO MENU LATERAL
   // =========================================================================
-  // Se o usuário for Cliente, remove QUALQUER link de funcionário do menu
   if (usuarioAtual && usuarioAtual.papel === 'Cliente') {
     var linksProibidos = [
       'index.html', 'cadastro.html', 'movimento.html', 'relatorios.html', 
@@ -49,17 +45,16 @@
       'entrega.html', 'comanda.html'
     ];
     
-    // Remove os links forçadamente do DOM
     $$('.sidebar__nav a').forEach(function(a) {
       var href = a.getAttribute('href');
       if (linksProibidos.indexOf(href) > -1) {
-        a.remove(); // Remove o elemento pai (o link)
+        a.remove();
       }
     });
   }
 
   // =========================================================================
-  // 3. UTILITÁRIOS E HEADER (Mantidos)
+  // 3. UTILITÁRIOS E HEADER
   // =========================================================================
   function num(s) {
     if (typeof s === 'number') return isFinite(s) ? s : 0;
@@ -110,7 +105,6 @@
     });
   }
 
-  // HEADER
   var userLink = $('.header__user');
   if (userLink) {
       var nameEl = userLink.querySelector('.header__user-name');
@@ -219,7 +213,7 @@
       ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
   }
 
-  // Máscaras e restante da lógica (mantidos como estavam)
+  // Máscaras
   (function mascaras() {
     function soDigitos(v) { return v.replace(/\D/g, ''); }
     function soLetras(v) { return v.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s'.-]/g, '').replace(/\s{2,}/g, ' '); }
@@ -388,14 +382,75 @@
     renderDashboard();
   }
 
+  // =========================================================================
+  // MAPEAMENTO DE CAMPOS (AGORA COM ENDEREÇO E OUTROS CAMPOS DO CLIENTE)
+  // =========================================================================
   var cfgCadastro = {
-    'cliente.html': { tipo: 'Cliente', api: '/api/clientes', nome: 'nome completo', doc: 'cpf', campos: { 'nome completo': 'nome', 'cpf': 'cpf', 'data de nascimento': 'data_nasc', 'telefone': 'telefone', 'e-mail': 'email', 'whatsapp': 'whatsapp' } },
-    'fornecedor.html': { tipo: 'Fornecedor', api: '/api/fornecedores', nome: 'razão social', doc: 'cnpj', campos: { 'razão social': 'razao_social', 'nome fantasia': 'nome_fantasia', 'cnpj': 'cnpj', 'inscrição estadual': 'inscricao_est', 'telefone': 'telefone', 'e-mail': 'email' } },
-    'produto.html': { tipo: 'Produto', api: '/api/produtos', nome: 'nome do produto', doc: 'código do produto', campos: { 'código do produto': 'codigo', 'nome do produto': 'nome', 'categoria': 'categoria', 'fornecedor': 'fornecedor', 'descrição': 'descricao', 'preço unitário (r$)': 'preco', 'qtd. em estoque': 'estoque', 'unidade de medida': 'unidade', 'data de validade': 'validade' } }
+    'cliente.html': { 
+      tipo: 'Cliente', 
+      api: '/api/clientes', 
+      nome: 'nome completo', 
+      doc: 'cpf', 
+      campos: { 
+        'nome completo': 'nome', 
+        'cpf': 'cpf', 
+        'data de nascimento': 'data_nasc', 
+        'telefone': 'telefone', 
+        'whatsapp': 'whatsapp',
+        'e-mail': 'email',
+        'cep': 'cep',
+        'endereço': 'endereco',
+        'número': 'numero',
+        'complemento': 'complemento',
+        'bairro': 'bairro',
+        'cidade': 'cidade',
+        'estado': 'estado'
+      } 
+    },
+    'fornecedor.html': { 
+      tipo: 'Fornecedor', 
+      api: '/api/fornecedores', 
+      nome: 'razão social', 
+      doc: 'cnpj', 
+      campos: { 
+        'razão social': 'razao_social', 
+        'nome fantasia': 'nome_fantasia', 
+        'cnpj': 'cnpj', 
+        'inscrição estadual': 'inscricao_est', 
+        'telefone': 'telefone', 
+        'whatsapp': 'whatsapp',
+        'e-mail': 'email',
+        'cep': 'cep',
+        'endereço': 'endereco',
+        'número': 'numero',
+        'complemento': 'complemento',
+        'bairro': 'bairro',
+        'cidade': 'cidade',
+        'estado': 'estado'
+      } 
+    },
+    'produto.html': { 
+      tipo: 'Produto', 
+      api: '/api/produtos', 
+      nome: 'nome do produto', 
+      doc: 'código do produto', 
+      campos: { 
+        'código do produto': 'codigo', 
+        'nome do produto': 'nome', 
+        'categoria': 'categoria', 
+        'fornecedor': 'fornecedor', 
+        'descrição': 'descricao', 
+        'preço unitário (r$)': 'preco', 
+        'qtd. em estoque': 'estoque', 
+        'unidade de medida': 'unidade', 
+        'data de validade': 'validade' 
+      } 
+    }
   }[page];
 
   if (cfgCadastro) {
     var idEdicao = new URLSearchParams(location.search).get('id');
+    var registroAtual = null; 
     var botaoSalvar = $$('main .btn').filter(function (b) { return $('i.fa-floppy-disk', b); })[0];
 
     if (page === 'produto.html') {
@@ -482,18 +537,39 @@
       return o;
     }
 
-    if (idEdicao) {
-      pedir('GET', cfgCadastro.api + '/' + idEdicao).then(function (r) {
-        if (!r.ok) return toast(r.erro, true);
-        var item = r.dados;
+    function preencherFormulario(item) {
         if (!item) return toast('Cadastro não encontrado.', true);
+        registroAtual = item;
         var titulo = $('.page-head__title'); if (titulo) titulo.textContent = 'Editar ' + cfgCadastro.tipo;
         if (botaoSalvar) botaoSalvar.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar alteração';
+        
         $$('.form-group').forEach(function (g) {
           var el = $('input,select,textarea', g);
           var chave = cfgCadastro.campos[textoLabel(g)];
-          if (el && chave && item[chave] !== undefined && item[chave] !== null) el.value = item[chave];
+          
+          if (el && chave && item[chave] !== undefined && item[chave] !== null) {
+             var val = item[chave];
+             if (chave === 'preco' && typeof val === 'number') {
+                 val = val.toFixed(2).replace('.', ',');
+             }
+             el.value = val;
+          }
         });
+    }
+
+    if (idEdicao) {
+      pedir('GET', cfgCadastro.api + '/' + idEdicao).then(function (r) {
+        if (r.ok && r.dados && !Array.isArray(r.dados)) {
+            preencherFormulario(r.dados);
+        } else {
+            pedir('GET', cfgCadastro.api).then(function(resAll) {
+                var item = null;
+                if (resAll.ok && resAll.dados) {
+                    item = resAll.dados.find(function(x) { return String(x.id) === String(idEdicao); });
+                }
+                preencherFormulario(item);
+            });
+        }
       });
     }
 
@@ -514,6 +590,14 @@
         if (cfgCadastro.tipo === 'Fornecedor' && !dados.razao_social) return toast('Razão social é obrigatória.', true);
         if (cfgCadastro.tipo === 'Produto' && !dados.nome) return toast('Nome do produto é obrigatório.', true);
 
+        if (idEdicao && registroAtual) {
+            for (var k in registroAtual) {
+                if (dados[k] === undefined || dados[k] === null) {
+                    dados[k] = registroAtual[k];
+                }
+            }
+        }
+
         var metodo = idEdicao ? 'PUT' : 'POST';
         var url = idEdicao ? cfgCadastro.api + '/' + idEdicao : cfgCadastro.api;
 
@@ -524,7 +608,8 @@
                 var reader = new FileReader();
                 reader.onload = function(e) {
                     pedir('POST', '/api/upload', { nome: file.name, imagem: e.target.result }).then(function(res) {
-                        if(res.ok && res.dados) { dados.imagem = res.dados.url; enviarDados(metodo, url, dados); } else { toast('Erro ao fazer upload da imagem.', true); }
+                        if(res.ok && res.dados) { dados.imagem = res.dados.url; enviarDados(metodo, url, dados); } 
+                        else { toast('Erro ao fazer upload da imagem.', true); }
                     });
                 };
                 reader.readAsDataURL(file);
@@ -544,47 +629,115 @@
     }
   }
 
+  // =========================================================================
+  // MÓDULO: CADASTRO.HTML (TABELA DE ÚLTIMOS CADASTROS COM BOTÕES)
+  // =========================================================================
   if (page === 'cadastro.html') {
-    var tbCadastros = $('.data-table tbody');
+    var tbCadastros = $('#tbodyCadastros');
+
     function renderCadastros() {
       if (!tbCadastros) return;
-      tbCadastros.innerHTML = '<tr><td colspan="6" class="text-center">Carregando...</td></tr>';
+      tbCadastros.innerHTML = '<tr><td colspan="5" class="text-center">Carregando...</td></tr>';
+      
       var promessas = [
-        pedir('GET', '/api/clientes').then(function (r) { return (r.ok && r.dados ? r.dados : []).map(function (c) { return { tipo: 'Cliente', id: c.id, nome: c.nome, info: c.cpf || '—', contato: c.email || c.telefone, data: c.data_cadastro }; }); }),
-        pedir('GET', '/api/fornecedores').then(function (r) { return (r.ok && r.dados ? r.dados : []).map(function (f) { return { tipo: 'Fornecedor', id: f.id, nome: f.razao_social, info: f.cnpj || '—', contato: f.email || f.telefone, data: f.data_cadastro }; }); }),
-        pedir('GET', '/api/produtos').then(function (r) { return (r.ok && r.dados ? r.dados : []).map(function (p) { return { tipo: 'Produto', id: p.id, nome: p.nome, info: 'Estoque: ' + (p.estoque || 0) + ' un', contato: p.categoria || '—', data: p.data_cadastro }; }); })
+        pedir('GET', '/api/clientes').then(function (r) { 
+          return (r.ok && r.dados ? r.dados : []).map(function (c) { 
+            return { tipo: 'Cliente', id: c.id, nome: c.nome, detalhe: c.cpf || c.email, data: c.data_cadastro, editUrl: 'cliente.html?id=' + c.id, api: '/api/clientes' }; 
+          }); 
+        }),
+        pedir('GET', '/api/fornecedores').then(function (r) { 
+          return (r.ok && r.dados ? r.dados : []).map(function (f) { 
+            return { tipo: 'Fornecedor', id: f.id, nome: f.razao_social, detalhe: f.cnpj || f.telefone, data: f.data_cadastro, editUrl: 'fornecedor.html?id=' + f.id, api: '/api/fornecedores' }; 
+          }); 
+        }),
+        pedir('GET', '/api/produtos').then(function (r) { 
+          return (r.ok && r.dados ? r.dados : []).map(function (p) { 
+            return { tipo: 'Produto', id: p.id, nome: p.nome, detalhe: 'R$ ' + (p.preco || '0,00'), data: p.data_cadastro, editUrl: 'produto.html?id=' + p.id, api: '/api/produtos' }; 
+          }); 
+        })
       ];
+
       Promise.all(promessas).then(function (listas) {
-        var lista = listas[0].concat(listas[1]).concat(listas[2]);
-        lista.sort(function (a, b) { return String(b.id).localeCompare(String(a.id)); });
-        if (!lista.length) { tbCadastros.innerHTML = '<tr><td colspan="6" class="text-center">Nenhum cadastro realizado ainda.</td></tr>'; return; }
+        var listaApi = listas[0].concat(listas[1]).concat(listas[2]);
+        
+        var locais = [];
+        try { 
+          var peds = JSON.parse(localStorage.getItem('br_pedidos')) || [];
+          peds.forEach(function(p, index) { locais.push({ tipo: 'Pedido', id: 'local_pedido_' + index, nome: p.cliente || 'Cliente', detalhe: p.total, data: p.data, isLocal: true, localKey: 'br_pedidos', localIndex: index }); });
+        } catch(e){}
+        try {
+          var coms = JSON.parse(localStorage.getItem('br_comandas')) || [];
+          coms.forEach(function(c, index) { locais.push({ tipo: 'Comanda', id: 'local_comanda_' + index, nome: c.mesa ? 'Mesa ' + c.mesa : 'Comanda', detalhe: c.total, data: c.data, isLocal: true, localKey: 'br_comandas', localIndex: index }); });
+        } catch(e){}
+        try {
+          var ents = JSON.parse(localStorage.getItem('br_entregas')) || [];
+          ents.forEach(function(e, index) { locais.push({ tipo: 'Entrega', id: 'local_entrega_' + index, nome: e.cliente || 'Cliente', detalhe: e.total, data: e.data, isLocal: true, localKey: 'br_entregas', localIndex: index }); });
+        } catch(e){}
+        
+        var lista = listaApi.concat(locais);
+        lista.sort(function (a, b) { return String(b.data || '').localeCompare(String(a.data || '')); });
+
+        if (!lista.length) { tbCadastros.innerHTML = '<tr><td colspan="5" class="text-center">Nenhum registro encontrado.</td></tr>'; return; }
+        
         tbCadastros.innerHTML = '';
-        lista.forEach(function (c) {
-          var tr = document.createElement('tr'); tr.dataset.id = c.id; tr.dataset.tipo = c.tipo;
-          var icone = c.tipo === 'Cliente' ? 'fa-user' : c.tipo === 'Fornecedor' ? 'fa-truck-field' : 'fa-burger';
+        lista.slice(0, 15).forEach(function (c) {
+          var tr = document.createElement('tr');
+          var icone = c.tipo === 'Cliente' ? 'fa-user' : 
+                      c.tipo === 'Fornecedor' ? 'fa-truck-field' : 
+                      c.tipo === 'Produto' ? 'fa-burger' : 
+                      c.tipo === 'Pedido' ? 'fa-receipt' : 
+                      c.tipo === 'Comanda' ? 'fa-file-invoice-dollar' : 'fa-motorcycle';
+          
           var dataFormatada = c.data ? c.data.split('T')[0].split('-').reverse().join('/') : '—';
-          tr.innerHTML = '<td><div style="display:flex;align-items:center;gap:8px;"><i class="fa-solid ' + icone + '"></i> ' + c.tipo + '</div></td><td>' + esc(c.nome) + '</td><td>' + esc(c.info) + '</td><td>' + esc(c.contato) + '</td><td>' + dataFormatada + '</td><td class="row-actions"><button title="Editar" class="btnEditCad"><i class="fa-solid fa-pen"></i></button><button title="Excluir" class="danger btnDelCad"><i class="fa-solid fa-trash"></i></button></td>';
+          
+          var acoesHtml = '<div style="display:flex; justify-content:center; gap:8px;">';
+          if (c.editUrl) {
+            acoesHtml += '<a href="' + c.editUrl + '" class="btn btn--ghost btn--sm" title="Editar"><i class="fa-solid fa-pen"></i></a>';
+          }
+          acoesHtml += '<button type="button" class="btn btn--danger-outline btn--sm btn-excluir" data-api="' + (c.api || '') + '" data-id="' + (c.id || '') + '" data-localkey="' + (c.localKey || '') + '" data-localindex="' + (c.localIndex !== undefined ? c.localIndex : '') + '" title="Excluir"><i class="fa-solid fa-trash"></i></button>';
+          acoesHtml += '</div>';
+
+          tr.innerHTML = '<td><div style="display:flex;align-items:center;gap:8px;"><i class="fa-solid ' + icone + '"></i> ' + c.tipo + '</div></td><td>' + esc(c.nome) + '</td><td>' + esc(c.detalhe) + '</td><td>' + dataFormatada + '</td><td>' + acoesHtml + '</td>';
           tbCadastros.appendChild(tr);
         });
       });
     }
+    
     renderCadastros();
 
+    // Evento de exclusão
     if (tbCadastros) {
       tbCadastros.addEventListener('click', function (e) {
-        var btnEdit = e.target.closest('.btnEditCad'); var btnDel = e.target.closest('.btnDelCad'); var tr = e.target.closest('tr');
-        if (!tr || !tr.dataset.id) return;
-        var id = tr.dataset.id; var tipo = tr.dataset.tipo; var nome = tr.cells[1].textContent;
-        var apis = { Cliente: '/api/clientes', Fornecedor: '/api/fornecedores', Produto: '/api/produtos' };
-        if (btnDel) {
-          if (confirm('Deseja realmente remover "' + nome + '"?')) { pedir('DELETE', apis[tipo] + '/' + id).then(function (r) { if (!r.ok) return toast(r.erro, true); toast('Cadastro removido com sucesso.'); renderCadastros(); }); }
-        } else if (btnEdit) {
-          location.href = (PAGINA_DO_TIPO[tipo] || 'cadastro.html') + '?id=' + encodeURIComponent(id);
+        var btn = e.target.closest('.btn-excluir');
+        if (!btn) return;
+        if (!confirm('Deseja realmente excluir este registro?')) return;
+
+        var api = btn.dataset.api;
+        var id = btn.dataset.id;
+        var localKey = btn.dataset.localkey;
+        var localIndex = btn.dataset.localindex;
+
+        if (api && id) {
+          pedir('DELETE', api + '/' + id).then(function(r) {
+            if (r.ok) { toast('Registro excluído com sucesso.'); renderCadastros(); }
+            else { toast(r.erro || 'Erro ao excluir.', true); }
+          });
+        } else if (localKey && localIndex !== '') {
+          try {
+            var arr = JSON.parse(localStorage.getItem(localKey)) || [];
+            arr.splice(parseInt(localIndex, 10), 1);
+            localStorage.setItem(localKey, JSON.stringify(arr));
+            toast('Registro excluído com sucesso.');
+            renderCadastros();
+          } catch(err) { toast('Erro ao excluir registro local.', true); }
         }
       });
     }
   }
 
+  // =========================================================================
+  // MÓDULO: RELATÓRIOS
+  // =========================================================================
   if (page === 'relatorio_balcao.html') {
     var inputData = $('#inputDataBalcao'); var btnConsultar = $('#btnConsultarBalcao');
     if (inputData) inputData.value = todayIso();
@@ -644,7 +797,6 @@
     if (cv2.length >= 4) { cv2[0].textContent = brl(15420.50); cv2[1].textContent = brl(85.50); cv2[2].textContent = '180'; cv2[3].textContent = '+12%'; }
   }
 
-  // ==== EXPÕE FUNÇÕES PARA OUTRAS PÁGINAS ====
   window.brAbrirModalProdutos = abrirModalProdutos;
   window.brAbrirModalLogout   = abrirModalLogout;
 
