@@ -1,44 +1,21 @@
-// comanda.js — Emitir Comanda (consome /api/produtos)
+// comanda.js
 (function () {
   'use strict';
 
-  function brl(n) {
-    return 'R$ ' + (Number(n) || 0).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  }
-  function num(s) {
-    return parseFloat(String(s).replace(/[^\d,]/g, '').replace(',', '.')) || 0;
-  }
-  function esc(s) {
-    var d = document.createElement('div');
-    d.textContent = s == null ? '' : String(s);
-    return d.innerHTML;
-  }
-  function toast(msg, err) {
-    var t = document.createElement('div');
-    t.className = 'br-toast';
-    t.style.background = err ? '#b3261e' : '#2b0a0a';
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(function () { t.remove(); }, 3000);
-  }
-  function pedir(metodo, endereco) {
-    return fetch(endereco, { method: metodo })
-      .then(function (r) { return r.json(); })
-      .catch(function () { return { ok: false, erro: 'Servidor offline.' }; });
-  }
+  function brl(n) { return 'R$ ' + (Number(n) || 0).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+  function num(s) { return parseFloat(String(s).replace(/[^\d,]/g, '').replace(',', '.')) || 0; }
+  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+  function toast(msg, err) { var t = document.createElement('div'); t.className = 'br-toast'; t.style.background = err ? '#b3261e' : '#2b0a0a'; t.textContent = msg; document.body.appendChild(t); setTimeout(function () { t.remove(); }, 3000); }
+  function pedir(metodo, endereco, dados) { return fetch(endereco, { method: metodo, headers: { 'Content-Type': 'application/json' }, body: dados ? JSON.stringify(dados) : undefined }).then(function (r) { return r.json(); }).catch(function () { return { ok: false, erro: 'Servidor offline.' }; }); }
 
   var IMGS_PADRAO = '../img/produtos/placeholder.jpg';
   function imagemDoProduto(prod) {
     if (prod.imagem) return '../' + prod.imagem;
     var mapa = {
-      'Boi Ralado Tradicional':  '../img/produtos/boi-ralado.jpg',
-      'Hambúrguer Boi Ralado':   '../img/produtos/hamburguer.jpg',
-      'Pastel de Boi Ralado':    '../img/produtos/pastel.jpg',
-      'Picanha na Chapa':        '../img/produtos/picanha.jpg',
-      'Prato Executivo da Casa': '../img/produtos/executivo.jpg',
-      'Batata Rústica':          '../img/produtos/batata.jpg',
-      'Suco de Laranja':         '../img/produtos/suco.jpg',
-      'Mousse de Maracujá':      '../img/produtos/mousse.webp'
+      'Boi Ralado Tradicional':  '../img/produtos/boi-ralado.jpg', 'Hambúrguer Boi Ralado':   '../img/produtos/hamburguer.jpg',
+      'Pastel de Boi Ralado':    '../img/produtos/pastel.jpg', 'Picanha na Chapa':        '../img/produtos/picanha.jpg',
+      'Prato Executivo da Casa': '../img/produtos/executivo.jpg', 'Batata Rústica':          '../img/produtos/batata.jpg',
+      'Suco de Laranja':         '../img/produtos/suco.jpg', 'Mousse de Maracujá':      '../img/produtos/mousse.webp'
     };
     return mapa[prod.nome] || IMGS_PADRAO;
   }
@@ -46,7 +23,6 @@
   var tbody = document.getElementById('tbodyComanda');
   if (!tbody) return;
 
-  // ---------- Linha vazia ----------
   function atualizarLinhaVazia() {
     var linhas = tbody.querySelectorAll('tr[data-produto]');
     var vazia = document.getElementById('linhaVazia');
@@ -62,7 +38,6 @@
     }
   }
 
-  // ---------- Cálculo dinâmico (SEM Taxa de Serviço) ----------
   function recalcular() {
     var subtotal = 0;
     tbody.querySelectorAll('tr[data-produto]').forEach(function (tr) {
@@ -72,12 +47,10 @@
       tr.querySelector('.subtotal-cell').textContent = brl(sub);
       subtotal += sub;
     });
-    // TAXA DE SERVIÇO REMOVIDA — apenas Subtotal e Total a Pagar
     document.getElementById('subtotal').textContent = brl(subtotal);
     document.getElementById('totalPagar').textContent = brl(subtotal);
   }
 
-  // ---------- Adicionar linha na tabela ----------
   function adicionarLinha(produto, qtdInicial) {
     qtdInicial = qtdInicial || 1;
     var tr = document.createElement('tr');
@@ -110,7 +83,6 @@
     recalcular();
   }
 
-  // ---------- Modal de detalhe (mesmo padrão de pedido/entrega) ----------
   function abrirDetalheProduto(produto, onAdicionar) {
     var ov = document.createElement('div');
     ov.className = 'br-ov';
@@ -174,7 +146,6 @@
     });
   }
 
-  // ---------- Adicionar item (com soma de quantidade se já existir) ----------
   function adicionarItemNaComanda(produto, qtd) {
     var existente = null;
     tbody.querySelectorAll('tr[data-produto]').forEach(function (tr) {
@@ -191,12 +162,9 @@
     toast('"' + produto.nome + '" adicionado (' + qtd + ' un).');
   }
 
-  // ---------- Modal de produtos (API + exemplos) ----------
   function abrirModalProdutos() {
     pedir('GET', '/api/produtos').then(function (r) {
       var produtosApi = (r.ok ? r.dados : []) || [];
-
-      // Produtos de exemplo (mesmos do dashboard do funcionário)
       var PRODUTOS_EXEMPLO = [
         { nome: 'Boi Ralado Tradicional', preco: 34.90, categoria: 'Prato Principal', descricao: 'O clássico da casa!', estoque: 50, img: '../img/produtos/boi-ralado.jpg' },
         { nome: 'Hambúrguer Boi Ralado', preco: 32.00, categoria: 'Lanches', descricao: 'Blend especial de 180g', estoque: 40, img: '../img/produtos/hamburguer.jpg' },
@@ -208,19 +176,11 @@
         { nome: 'Mousse de Maracujá', preco: 12.00, categoria: 'Sobremesa', descricao: 'Mousse cremosa', estoque: 45, img: '../img/produtos/mousse.webp' }
       ];
 
-      // Combina API + exemplos, sem duplicar por nome
       var produtos = [];
       var nomesVistos = {};
 
       produtosApi.forEach(function (p) {
-        produtos.push({
-          nome: p.nome,
-          preco: Number(p.preco) || 0,
-          img: imagemDoProduto(p),
-          estoque: p.estoque || 0,
-          categoria: p.categoria,
-          descricao: p.descricao
-        });
+        produtos.push({ nome: p.nome, preco: Number(p.preco) || 0, img: imagemDoProduto(p), estoque: p.estoque || 0, categoria: p.categoria, descricao: p.descricao });
         nomesVistos[p.nome] = true;
       });
 
@@ -251,20 +211,13 @@
         '<th style="width:60px"></th><th>Produto</th><th class="num" style="width:110px">Preço</th><th style="width:120px">Estoque</th><th style="width:50px"></th>' +
         '</tr></thead><tbody>';
       produtos.forEach(function (p, i) {
-        html += '<tr data-idx="' + i + '">' +
-          '<td><div class="br-prod-img"><img src="' + p.img + '" onerror="this.style.display=\'none\'"></div></td>' +
-          '<td><span class="br-prod-nome">' + esc(p.nome) + '</span></td>' +
-          '<td class="num">' + brl(p.preco) + '</td>' +
-          '<td><small class="br-prod-estoque">' + p.estoque + ' un</small></td>' +
-          '<td><span class="br-add-ico"><i class="fa-solid fa-eye"></i></span></td>' +
-        '</tr>';
+        html += '<tr data-idx="' + i + '"><td><div class="br-prod-img"><img src="' + p.img + '" onerror="this.style.display=\'none\'"></div></td><td><span class="br-prod-nome">' + esc(p.nome) + '</span></td><td class="num">' + brl(p.preco) + '</td><td><small class="br-prod-estoque">' + p.estoque + ' un</small></td><td><span class="br-add-ico"><i class="fa-solid fa-eye"></i></span></td></tr>';
       });
       html += '</tbody></table></div>';
       md.innerHTML = html;
 
       var acts = document.createElement('div'); acts.className = 'acts';
-      var fechar = document.createElement('button');
-      fechar.type = 'button'; fechar.className = 'btn btn--outline'; fechar.textContent = 'Fechar';
+      var fechar = document.createElement('button'); fechar.type = 'button'; fechar.className = 'btn btn--outline'; fechar.textContent = 'Fechar';
       fechar.addEventListener('click', function () { ov.remove(); });
       acts.appendChild(fechar); md.appendChild(acts);
 
@@ -285,10 +238,8 @@
     });
   }
 
-  // Expõe globalmente (mesmo padrão de pedido.js/entrega.js)
   window.__brAbrirProdutosComanda = abrirModalProdutos;
 
-  // ---------- Bind do botão Adicionar Item (fallback) ----------
   var btnAdicionar = document.getElementById('btnAdicionarItem');
   if (btnAdicionar) {
     btnAdicionar.addEventListener('click', function (e) {
@@ -297,7 +248,6 @@
     });
   }
 
-  // ---------- Remover itens marcados ----------
   var btnRemoverItem = document.getElementById('btnRemoverItem');
   if (btnRemoverItem) {
     btnRemoverItem.addEventListener('click', function (e) {
@@ -314,7 +264,6 @@
     });
   }
 
-  // ---------- Marcar/desmarcar todos ----------
   var chkTodos = document.getElementById('chkTodos');
   if (chkTodos) {
     chkTodos.addEventListener('change', function () {
@@ -325,7 +274,6 @@
     });
   }
 
-  // ---------- Cancelar comanda ----------
   var btnCancelar = document.getElementById('btnCancelar');
   if (btnCancelar) {
     btnCancelar.addEventListener('click', function (e) {
@@ -338,7 +286,6 @@
     });
   }
 
-  // ---------- Imprimir ----------
   var btnImprimir = document.getElementById('btnImprimir');
   if (btnImprimir) {
     btnImprimir.addEventListener('click', function (e) {
@@ -348,7 +295,6 @@
     });
   }
 
-  // ---------- Emitir comanda ----------
   var btnEmitir = document.getElementById('btnEmitir');
   if (btnEmitir) {
     btnEmitir.addEventListener('click', function (e) {
@@ -356,38 +302,38 @@
       var linhas = tbody.querySelectorAll('tr[data-produto]');
       if (!linhas.length) return toast('Adicione pelo menos 1 item antes de emitir.', true);
 
-      var comanda = {
-        numero: document.getElementById('numComanda').value,
-        mesa: document.getElementById('numMesa').value || '—',
-        hora: document.getElementById('horaComanda').value || '',
-        status: document.getElementById('statusPagamento').value,
-        subtotal: document.getElementById('subtotal').textContent,
-        total: document.getElementById('totalPagar').textContent,
-        data: new Date().toISOString().split('T')[0],
-        itens: []
-      };
+      var itens = [];
       linhas.forEach(function (tr) {
-        comanda.itens.push({
-          nome: tr.dataset.produto,
-          qtd: parseInt(tr.querySelector('.qtd-input').value, 10) || 1,
-          preco: parseFloat(tr.dataset.preco) || 0
-        });
+        itens.push({ nome: tr.dataset.produto, qtd: parseInt(tr.querySelector('.qtd-input').value, 10) || 1, preco: parseFloat(tr.dataset.preco) || 0 });
       });
 
-      var comandas = [];
-      try { comandas = JSON.parse(localStorage.getItem('br_comandas')) || []; } catch (e2) {}
-      comandas.unshift(comanda);
-      try { localStorage.setItem('br_comandas', JSON.stringify(comandas)); } catch (e2) {}
+      var comandaObj = {
+        numero: document.getElementById('numComanda').value,
+        mesa: document.getElementById('numMesa').value || '—',
+        data: new Date().toISOString().split('T')[0],
+        hora: document.getElementById('horaComanda').value || new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        subtotal: num(document.getElementById('subtotal').textContent),
+        taxa: 0,
+        total: num(document.getElementById('totalPagar').textContent),
+        status: document.getElementById('statusPagamento').value,
+        itens: itens
+      };
 
-      toast('Comanda ' + comanda.numero + ' emitida com sucesso! 🧾');
-      setTimeout(function () {
-        tbody.querySelectorAll('tr[data-produto]').forEach(function (tr) { tr.remove(); });
-        atualizarLinhaVazia();
-        recalcular();
-      }, 1000);
+      btnEmitir.disabled = true;
+      btnEmitir.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Emitindo...';
+
+      pedir('POST', '/api/pedidos', comandaObj).then(function(r) {
+        btnEmitir.disabled = false;
+        btnEmitir.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Emitir';
+        if (!r.ok) return toast(r.erro || 'Erro ao emitir.', true);
+        toast('Comanda ' + comandaObj.numero + ' emitida! 🧾');
+        setTimeout(function () {
+          tbody.querySelectorAll('tr[data-produto]').forEach(function (tr) { tr.remove(); });
+          atualizarLinhaVazia(); recalcular();
+        }, 1000);
+      });
     });
   }
 
-  // Cálculo inicial
   recalcular();
 })();
