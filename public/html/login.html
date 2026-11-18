@@ -9,314 +9,725 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  <link rel="stylesheet" href="../css/style.css" />
+  
   <style>
-    .user-type-selector { display:flex;gap:10px;margin-bottom:24px;background:var(--void-2);padding:6px;border-radius:var(--r-sm);border:1px solid var(--border); }
-    .user-type-selector button { flex:1;padding:10px;border-radius:8px;font-weight:600;font-size:13px;color:var(--text-muted);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px; }
-    .user-type-selector button.active { background:var(--surface-2);color:var(--ember-light);box-shadow:0 2px 10px rgba(0,0,0,.2); }
-    .login-card__back { display:none !important; }
+    :root {
+      --bg-dark: #0d0806;
+      --bg-panel: #1a110d;
+      --red-dark: #7A1010;
+      --red-bright: #b91c1c;
+      --orange: #E85D26;
+      --orange-light: #FF7A3D;
+      --gold: #d4af37;
+      --text-main: #F1E8D8;
+      --text-muted: #A89078;
+      --border-color: rgba(232, 93, 38, 0.3);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 30% 50%, rgba(122, 16, 16, 0.4) 0%, transparent 60%),
+                        radial-gradient(circle at 80% 20%, rgba(232, 93, 38, 0.15) 0%, transparent 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 1100px;
+      background: var(--bg-panel);
+      border-radius: 24px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.8), 0 0 40px rgba(232,93,38,0.1);
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Lado Esquerdo - Branding */
+    .brand-side {
+      flex: 1;
+      padding: 60px 40px;
+      background: linear-gradient(135deg, rgba(30, 10, 10, 0.9), rgba(13, 8, 6, 0.9));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border-right: 1px solid rgba(255,255,255,0.05);
+      position: relative;
+    }
+
+    .brand-side::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+      opacity: 0.1;
+      pointer-events: none;
+    }
+
+    .brand-logo {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      border: 4px solid var(--orange);
+      box-shadow: 0 0 30px rgba(232,93,38,0.4);
+      margin-bottom: 30px;
+      object-fit: cover;
+    }
+
+    .brand-quote {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      line-height: 1.3;
+      color: var(--text-main);
+      margin-bottom: 40px;
+    }
+
+    .brand-quote span {
+      color: var(--orange-light);
+      font-style: italic;
+    }
+
+    .brand-footer {
+      font-size: 13px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    /* Lado Direito - Formulário */
+    .form-side {
+      flex: 1.2;
+      padding: 50px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .toggles {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .toggle-group {
+      display: flex;
+      background: rgba(0,0,0,0.3);
+      border-radius: 50px;
+      padding: 5px;
+      flex: 1;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .toggle-btn.active {
+      background: var(--orange);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(232,93,38,0.4);
+    }
+
+    .toggle-group.auth-toggle .toggle-btn.active {
+      background: var(--red-bright);
+      box-shadow: 0 4px 15px rgba(185,28,28,0.4);
+    }
+
+    .form-title {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form-title h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .form-title p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .form-step {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .form-step.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrap i {
+      position: absolute;
+      left: 16px;
+      color: var(--orange);
+      font-size: 16px;
+    }
+
+    .input-wrap input, .input-wrap select {
+      width: 100%;
+      padding: 15px 15px 15px 45px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .input-wrap input:focus, .input-wrap select:focus {
+      outline: none;
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(232,93,38,0.2);
+    }
+
+    .input-wrap .toggle-pass {
+      position: absolute;
+      right: 16px;
+      left: auto;
+      cursor: pointer;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      font-size: 16px;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      font-size: 13px;
+    }
+
+    .form-actions a {
+      color: var(--orange);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .form-actions label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--orange), var(--red-bright));
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 8px 25px rgba(232,93,38,0.3);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(232,93,38,0.5);
+    }
+
+    /* Grid para cadastro */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .form-grid .full-width {
+      grid-column: 1 / -1;
+    }
+
+    /* Roles Grid */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .role-card {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .role-card:hover { border-color: var(--orange); }
+    .role-card.selected { border-color: var(--orange); background: rgba(232,93,38,0.1); }
+
+    .role-card h4 { font-size: 14px; color: #fff; margin-bottom: 4px; }
+    .role-card p { font-size: 11px; color: var(--text-muted); line-height: 1.2; }
+
+    .error-msg {
+      background: rgba(185, 28, 28, 0.2);
+      border: 1px solid var(--red-bright);
+      color: #ffb3b3;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    /* Responsivo */
+    @media (max-width: 900px) {
+      .login-container { flex-direction: column; }
+      .brand-side { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 40px 20px; }
+      .brand-logo { width: 150px; height: 150px; }
+      .brand-quote { font-size: 22px; }
+      .form-side { padding: 30px 20px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .roles-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <div class="login-page">
-    <div class="login-card">
-      <div class="login-card__side">
-        <div class="login-card__brand">
-          <img src="../img/logo.png" alt="Logo Boi Ralado" />
-          <div>
-            <div class="login-card__brand-title">Boi Ralado</div>
-            <div class="login-card__brand-sub">Restaurante</div>
-          </div>
+
+  <div class="login-container">
+    <!-- Lado Esquerdo: Logo e Slogan -->
+    <div class="brand-side">
+      <img src="../img/logo.png" alt="Boi Ralado" class="brand-logo" onerror="this.src='https://via.placeholder.com/220x220/7A1010/E85D26?text=Boi+Ralado'">
+      <div class="brand-quote">Sabor que <span>conquista</span>,<br>gestão que <span>funciona</span>.</div>
+      <div class="brand-footer"><i class="fa-solid fa-fire"></i> Sistema de Gestão Interna — v1.0 © 2026</div>
+    </div>
+
+    <!-- Lado Direito: Formulários -->
+    <div class="form-side">
+      
+      <!-- Seletores Principais -->
+      <div class="toggles">
+        <div class="toggle-group">
+          <button type="button" class="toggle-btn active" data-role="funcionario"><i class="fa-solid fa-user-tie"></i> Funcionário</button>
+          <button type="button" class="toggle-btn" data-role="cliente"><i class="fa-solid fa-user"></i> Cliente</button>
         </div>
-        <div class="login-card__quote">Sabor que <span>conquista</span>,<br />gestão que <span>funciona</span>.</div>
-        <div class="login-card__foot"><i class="fa-solid fa-fire"></i> Sistema de Gestão Interna — v1.0 © 2026</div>
+      </div>
+      
+      <div class="toggles">
+        <div class="toggle-group auth-toggle">
+          <button type="button" class="toggle-btn active" data-auth="login"><i class="fa-solid fa-right-to-bracket"></i> Entrar</button>
+          <button type="button" class="toggle-btn" data-auth="cadastro"><i class="fa-solid fa-user-plus"></i> Cadastrar</button>
+        </div>
       </div>
 
-      <div class="login-card__form">
-        <div class="user-type-selector" id="userTypeSelector">
-          <button type="button" class="active" data-type="funcionario"><i class="fa-solid fa-user-tie"></i> Funcionário</button>
-          <button type="button" data-type="cliente"><i class="fa-solid fa-user"></i> Cliente</button>
+      <div class="error-msg" id="errorMsg"></div>
+
+      <!-- ================= TELA DE LOGIN ================= -->
+      <div class="form-step active" id="stepLogin">
+        <div class="form-title">
+          <h2>Acesse sua conta</h2>
+          <p>Entre com suas credenciais para continuar.</p>
         </div>
-
-        <div id="authBox">
-          <div class="auth-tabs">
-            <button type="button" class="auth-tab active" data-tab="login"><i class="fa-solid fa-right-to-bracket"></i> Entrar</button>
-            <button type="button" class="auth-tab" data-tab="register"><i class="fa-solid fa-user-plus"></i> Cadastrar</button>
-          </div>
-
-          <div class="auth-panel active" id="panelLogin">
-            <div class="login-card__form-head">
-              <h1>Acesse sua conta</h1>
-              <p>Entre com suas credenciais para continuar.</p>
+        <form id="formLogin">
+          <div class="input-group">
+            <label id="lblIdentificador">E-mail</label>
+            <div class="input-wrap">
+              <i class="fa-solid fa-user"></i>
+              <input type="text" id="loginUser" placeholder="seuemail@exemplo.com" required />
             </div>
-            <form class="login-form" id="loginForm" autocomplete="off" novalidate>
-              <div class="login-form__error" id="loginError"><i class="fa-solid fa-circle-exclamation"></i><span>Informe seu e-mail e senha.</span></div>
-              <div class="form-group">
-                <label>E-mail ou CPF</label>
-                <div class="input-wrap">
-                  <i class="fa-solid fa-user"></i>
-                  <input type="text" id="loginUser" placeholder="seuemail@exemplo.com ou CPF" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Senha</label>
-                <div class="input-wrap">
-                  <i class="fa-solid fa-lock"></i>
-                  <input type="password" id="loginPass" placeholder="Digite sua senha" />
-                  <button type="button" class="toggle-pass" data-target="loginPass" title="Mostrar/ocultar senha"><i class="fa-solid fa-eye"></i></button>
-                </div>
-              </div>
-              <button type="submit" class="login-form__submit"><i class="fa-solid fa-right-to-bracket"></i> Entrar</button>
-            </form>
           </div>
-
-          <div class="auth-panel" id="panelRegister">
-            <div class="login-card__form-head">
-              <h1>Criar conta</h1>
-              <p>Preencha seus dados para cadastrar-se no sistema.</p>
+          <div class="input-group">
+            <label>Senha</label>
+            <div class="input-wrap">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="loginPass" placeholder="Sua senha" required />
+              <button type="button" class="toggle-pass" data-target="loginPass"><i class="fa-solid fa-eye"></i></button>
             </div>
-            <form class="login-form" id="registerForm" autocomplete="off" novalidate>
-              <div class="login-form__error" id="registerError"><i class="fa-solid fa-circle-exclamation"></i><span>Preencha todos os campos corretamente.</span></div>
-              <div class="login-form__success" id="registerSuccess"><i class="fa-solid fa-circle-check"></i><span>Cadastro realizado com sucesso! Redirecionando...</span></div>
-              <div class="form-group">
-                <label>Nome Completo <span class="required">*</span></label>
-                <div class="input-wrap"><i class="fa-solid fa-id-card"></i><input type="text" id="regNome" placeholder="Ex: Nome Sobrenome" /></div>
-              </div>
-              <div class="form-group">
-                <label>CPF <span class="required">*</span></label>
-                <div class="input-wrap"><i class="fa-solid fa-address-card"></i><input type="text" id="regCpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" /></div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>E-mail <span class="required">*</span></label>
-                  <div class="input-wrap"><i class="fa-solid fa-envelope"></i><input type="email" id="regEmail" placeholder="seuemail@exemplo.com" /></div>
-                </div>
-                <div class="form-group">
-                  <label>Telefone <span class="required">*</span></label>
-                  <div class="input-wrap"><i class="fa-solid fa-phone"></i><input type="tel" id="regTelefone" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" /></div>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Senha <span class="required">*</span></label>
-                  <div class="input-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="regSenha" placeholder="Mínimo 6 caracteres" /></div>
-                </div>
-                <div class="form-group">
-                  <label>Confirmar Senha <span class="required">*</span></label>
-                  <div class="input-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="regSenhaConfirma" placeholder="Repita a senha" /></div>
-                </div>
-              </div>
-              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted);margin-top:4px;">
-                <input type="checkbox" id="regTermos" style="width:auto;" /> Aceito os termos de uso
-              </label>
-              <button type="submit" class="login-form__submit"><i class="fa-solid fa-user-plus"></i> Concluir Cadastro</button>
-            </form>
           </div>
+          <div class="form-actions">
+            <label><input type="checkbox"> Lembrar-me</label>
+            <a href="#">Esqueceu a senha?</a>
+          </div>
+          <button type="submit" class="btn-submit"><i class="fa-solid fa-right-to-bracket"></i> Entrar</button>
+        </form>
+      </div>
+
+      <!-- ================= TELA DE CADASTRO ================= -->
+      <div class="form-step" id="stepCadastro">
+        <div class="form-title">
+          <h2>Criar conta</h2>
+          <p>Preencha os dados para se cadastrar.</p>
         </div>
+        
+        <!-- CADASTRO FUNCIONÁRIO -->
+        <form id="formCadFuncionario" style="display: none;">
+          <div class="input-group">
+            <label>Nome Completo *</label>
+            <div class="input-wrap"><i class="fa-solid fa-id-card"></i><input type="text" id="funcNome" required /></div>
+          </div>
+          <div class="input-group">
+            <label>E-mail *</label>
+            <div class="input-wrap"><i class="fa-solid fa-envelope"></i><input type="email" id="funcEmail" required /></div>
+          </div>
+          
+          <label style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px; display:block;">Selecione sua função *</label>
+          <div class="roles-grid" id="rolesGrid">
+            <div class="role-card" data-role="Administrador"><h4>Administrador</h4><p>Acesso total ao sistema.</p></div>
+            <div class="role-card" data-role="Gerente"><h4>Gerente</h4><p>Gestão de equipe e relatórios.</p></div>
+            <div class="role-card" data-role="Caixa"><h4>Caixa</h4><p>Frente de caixa e pagamentos.</p></div>
+            <div class="role-card" data-role="Atendente"><h4>Atendente</h4><p>Atendimento e mesas.</p></div>
+            <div class="role-card" data-role="Cozinha"><h4>Cozinha</h4><p>Preparo dos pratos.</p></div>
+            <div class="role-card" data-role="Entregador"><h4>Entregador</h4><p>Entregas de delivery.</p></div>
+            <div class="role-card" data-role="Estoquista"><h4>Estoquista</h4><p>Controle de estoque.</p></div>
+          </div>
+          <input type="hidden" id="funcFuncao" required />
+
+          <div class="input-group">
+            <label>Código de Autorização *</label>
+            <div class="input-wrap"><i class="fa-solid fa-key"></i><input type="password" id="funcCodigo" placeholder="Ex: BOI2026" required /></div>
+          </div>
+          <div class="form-grid">
+            <div class="input-group">
+              <label>Senha *</label>
+              <div class="input-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="funcSenha" required /></div>
+            </div>
+            <div class="input-group">
+              <label>Confirmar Senha *</label>
+              <div class="input-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="funcSenhaConf" required /></div>
+            </div>
+          </div>
+          <button type="submit" class="btn-submit"><i class="fa-solid fa-user-plus"></i> Concluir Cadastro</button>
+        </form>
+
+        <!-- CADASTRO CLIENTE -->
+        <form id="formCadCliente" style="display: none;">
+          <!-- Dados Pessoais -->
+          <div class="input-group">
+            <label>Nome Completo *</label>
+            <div class="input-wrap"><i class="fa-solid fa-id-card"></i><input type="text" id="cliNome" required /></div>
+          </div>
+          <div class="form-grid">
+            <div class="input-group">
+              <label>CPF *</label>
+              <div class="input-wrap"><i class="fa-solid fa-address-card"></i><input type="text" id="cliCpf" maxlength="14" required /></div>
+            </div>
+            <div class="input-group">
+              <label>Telefone *</label>
+              <div class="input-wrap"><i class="fa-solid fa-phone"></i><input type="tel" id="cliTelefone" maxlength="15" required /></div>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>E-mail *</label>
+            <div class="input-wrap"><i class="fa-solid fa-envelope"></i><input type="email" id="cliEmail" required /></div>
+          </div>
+
+          <!-- Endereço -->
+          <div class="form-grid">
+            <div class="input-group">
+              <label>CEP</label>
+              <div class="input-wrap"><i class="fa-solid fa-map-pin"></i><input type="text" id="cliCep" maxlength="9" /></div>
+            </div>
+            <div class="input-group">
+              <label>Número</label>
+              <div class="input-wrap"><i class="fa-solid fa-hashtag"></i><input type="text" id="cliNumero" /></div>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Endereço</label>
+            <div class="input-wrap"><i class="fa-solid fa-road"></i><input type="text" id="cliEndereco" /></div>
+          </div>
+          <div class="input-group">
+            <label>Complemento</label>
+            <div class="input-wrap"><i class="fa-solid fa-building"></i><input type="text" id="cliComplemento" /></div>
+          </div>
+          <div class="form-grid">
+            <div class="input-group">
+              <label>Bairro</label>
+              <div class="input-wrap"><i class="fa-solid fa-map"></i><input type="text" id="cliBairro" /></div>
+            </div>
+            <div class="input-group">
+              <label>Cidade / UF</label>
+              <div class="input-wrap"><i class="fa-solid fa-city"></i><input type="text" id="cliCidade" /></div>
+            </div>
+          </div>
+
+          <!-- Senhas -->
+          <div class="form-grid">
+            <div class="input-group">
+              <label>Senha *</label>
+              <div class="input-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="cliSenha" required /></div>
+            </div>
+            <div class="input-group">
+              <label>Confirmar Senha *</label>
+              <div class="input-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="cliSenhaConf" required /></div>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn-submit"><i class="fa-solid fa-user-plus"></i> Concluir Cadastro</button>
+        </form>
+
       </div>
     </div>
   </div>
 
   <script>
-  (function () {
-    'use strict';
-    var tipoUsuario = 'funcionario';
-    var botoesTipo = document.querySelectorAll('.user-type-selector button');
-    botoesTipo.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            botoesTipo.forEach(function(b) { b.classList.remove('active'); });
-            this.classList.add('active');
-            tipoUsuario = this.dataset.type;
-        });
+    // ==========================================
+    // ESTADO DA TELA
+    // ==========================================
+    let currentRole = 'funcionario'; // 'funcionario' ou 'cliente'
+    let currentAuth = 'login';       // 'login' ou 'cadastro'
+
+    const erroBox = document.getElementById('errorMsg');
+    
+    function showError(msg) {
+      erroBox.textContent = msg;
+      erroBox.style.display = 'block';
+      setTimeout(() => { erroBox.style.display = 'none'; }, 5000);
+    }
+
+    function updateUI() {
+      // Atualiza botões
+      document.querySelectorAll('[data-role]').forEach(b => b.classList.toggle('active', b.dataset.role === currentRole));
+      document.querySelectorAll('[data-auth]').forEach(b => b.classList.toggle('active', b.dataset.auth === currentAuth));
+      
+      // Mostra a tela correta
+      document.getElementById('stepLogin').classList.toggle('active', currentAuth === 'login');
+      document.getElementById('stepCadastro').classList.toggle('active', currentAuth === 'cadastro');
+
+      // Ajusta os formulários de cadastro
+      if (currentAuth === 'cadastro') {
+        document.getElementById('formCadFuncionario').style.display = currentRole === 'funcionario' ? 'block' : 'none';
+        document.getElementById('formCadCliente').style.display = currentRole === 'cliente' ? 'block' : 'none';
+      }
+
+      // Ajusta label do Login
+      document.getElementById('lblIdentificador').textContent = currentRole === 'funcionario' ? 'E-mail' : 'E-mail ou CPF';
+      document.getElementById('loginUser').placeholder = currentRole === 'funcionario' ? 'seuemail@exemplo.com' : 'seuemail@exemplo.com ou CPF';
+    }
+
+    // Eventos dos botões
+    document.querySelectorAll('[data-role]').forEach(btn => {
+      btn.addEventListener('click', () => { currentRole = btn.dataset.role; updateUI(); });
+    });
+    document.querySelectorAll('[data-auth]').forEach(btn => {
+      btn.addEventListener('click', () => { currentAuth = btn.dataset.auth; updateUI(); });
     });
 
-    function soDigitos(v) { return String(v || '').replace(/\D/g, ''); }
-    function validaEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim()); }
-    function validaCPF(cpf) {
-      cpf = soDigitos(cpf);
-      if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
-      var soma = 0, resto, i;
-      for (i = 1; i <= 9; i++) soma += parseInt(cpf.charAt(i - 1), 10) * (11 - i);
-      resto = (soma * 10) % 11;
-      if (resto === 10 || resto === 11) resto = 0;
-      if (resto !== parseInt(cpf.charAt(9), 10)) return false;
-      soma = 0;
-      for (i = 1; i <= 10; i++) soma += parseInt(cpf.charAt(i - 1), 10) * (12 - i);
-      resto = (soma * 10) % 11;
-      if (resto === 10 || resto === 11) resto = 0;
-      if (resto !== parseInt(cpf.charAt(10), 10)) return false;
-      return true;
-    }
-    function validaTelefone(tel) { var d = soDigitos(tel); return d.length >= 10 && d.length <= 11; }
-    function nomeValido(nome) {
-      nome = String(nome || '').trim();
-      if (nome.length < 3) return false;
-      if (/^\d+$/.test(nome)) return false;
-      if (!/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(nome)) return false;
-      if (/\s{2,}/.test(nome)) return false;
-      return true;
-    }
-    function lerUsuarios() { try { return JSON.parse(localStorage.getItem('br_usuarios')) || []; } catch (e) { return []; } }
-    function salvarUsuarios(lista) { localStorage.setItem('br_usuarios', JSON.stringify(lista)); }
-
-    var tabs = document.querySelectorAll('.auth-tab');
-    var panels = { login: document.getElementById('panelLogin'), register: document.getElementById('panelRegister') };
-    function switchTab(t) {
-      tabs.forEach(function (x) { x.classList.toggle('active', x.dataset.tab === t); });
-      Object.keys(panels).forEach(function (k) { if (panels[k]) panels[k].classList.toggle('active', k === t); });
-    }
-    tabs.forEach(function (t) { t.addEventListener('click', function () { switchTab(t.dataset.tab); }); });
-
-    document.querySelectorAll('.toggle-pass').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var input = document.getElementById(btn.dataset.target);
-        if (!input) return;
-        var isPass = input.type === 'password';
-        input.type = isPass ? 'text' : 'password';
-        btn.innerHTML = isPass ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
-      });
-    });
-
-    var cpfInput = document.getElementById('regCpf');
-    if (cpfInput) {
-      cpfInput.addEventListener('input', function () {
-        var v = soDigitos(this.value).slice(0, 11);
-        v = v.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2');
-        this.value = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-      });
-    }
-    var telInput = document.getElementById('regTelefone');
-    if (telInput) {
-      telInput.addEventListener('input', function () {
-        var v = soDigitos(this.value).slice(0, 11);
-        v = v.replace(/^(\d{2})(\d)/, '($1) $2');
-        this.value = v.replace(/(\d{5})(\d{1,4})$/, '$1-$2');
-      });
-    }
-
-    var loginForm = document.getElementById('loginForm');
-    var loginError = document.getElementById('loginError');
-    function mostrarErroLogin(msg) { loginError.querySelector('span').textContent = msg; loginError.classList.add('show'); }
-
-    if (loginForm) {
-      loginForm.addEventListener('submit', function (e) {
+    // Mostrar/ocultar senha
+    document.querySelectorAll('.toggle-pass').forEach(btn => {
+      btn.addEventListener('click', (e) => {
         e.preventDefault();
-        loginError.classList.remove('show');
-        var user = document.getElementById('loginUser').value.trim();
-        var pass = document.getElementById('loginPass').value;
-        if (!user) return mostrarErroLogin('Informe seu e-mail ou CPF.');
-        if (!validaEmail(user) && !validaCPF(user)) return mostrarErroLogin('Informe um e-mail válido ou um CPF válido.');
-        if (!pass) return mostrarErroLogin('Informe sua senha.');
-        if (pass.length < 6) return mostrarErroLogin('A senha deve ter no mínimo 6 caracteres.');
+        const input = document.getElementById(btn.dataset.target);
+        input.type = input.type === 'password' ? 'text' : 'password';
+        btn.innerHTML = input.type === 'password' ? '<i class="fa-solid fa-eye"></i>' : '<i class="fa-solid fa-eye-slash"></i>';
+      });
+    });
 
-        var usuarios = lerUsuarios();
-        if (!usuarios.length) return mostrarErroLogin('Nenhum usuário cadastrado. Use a aba "Cadastrar" primeiro.');
+    // ==========================================
+    // MÁSCARAS E VIACEP
+    // ==========================================
+    // Máscara CPF
+    document.getElementById('cliCpf').addEventListener('input', function(e) {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      e.target.value = v;
+    });
 
-        var userDigits = soDigitos(user);
-        var userLower = user.toLowerCase();
+    // Máscara Telefone
+    document.getElementById('cliTelefone').addEventListener('input', function(e) {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+      v = v.replace(/^(\d{2})(\d)/, '($1) $2');
+      v = v.replace(/(\d{5})(\d{1,4})$/, '$1-$2');
+      e.target.value = v;
+    });
 
-        var encontrado = usuarios.filter(function (u) {
-          var bateEmail = String(u.email || '').toLowerCase() === userLower;
-          var bateCpf   = soDigitos(u.cpf) === userDigits && userDigits.length === 11;
-          return (bateEmail || bateCpf) && u.senha === pass;
-        })[0];
+    // Máscara CEP e Busca ViaCEP
+    document.getElementById('cliCep').addEventListener('input', function(e) {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 8);
+      v = v.replace(/^(\d{5})(\d)/, '$1-$2');
+      e.target.value = v;
 
-        if (!encontrado) return mostrarErroLogin('Usuário ou senha inválidos.');
+      if (v.length === 9) {
+        fetch(`https://viacep.com.br/ws/${v.replace('-', '')}/json/`)
+          .then(r => r.json())
+          .then(dados => {
+            if (!dados.erro) {
+              document.getElementById('cliEndereco').value = dados.logradouro;
+              document.getElementById('cliBairro').value = dados.bairro;
+              document.getElementById('cliCidade').value = dados.localidade + ' / ' + dados.uf;
+            }
+          }).catch(() => console.log('Erro ao buscar CEP'));
+      }
+    });
 
-        var papelReal = encontrado.papel || (tipoUsuario === 'funcionario' ? 'Funcionário' : 'Cliente');
+    // Seleção de Função (Cards)
+    document.querySelectorAll('.role-card').forEach(card => {
+      card.addEventListener('click', function() {
+        document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+        document.getElementById('funcFuncao').value = this.dataset.role;
+      });
+    });
 
-        localStorage.setItem('br_usuario_atual', JSON.stringify({
-          nome: encontrado.nome,
-          email: encontrado.email,
-          cpf: encontrado.cpf,
-          telefone: encontrado.telefone,
-          papel: papelReal
-        }));
+    // ==========================================
+    // ENVIO PARA O BACKEND
+    // ==========================================
+    
+    // 1. LOGIN
+    document.getElementById('formLogin').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const identificador = document.getElementById('loginUser').value.trim();
+      const senha = document.getElementById('loginPass').value;
 
-        if (papelReal === 'Cliente') {
-          window.location.href = 'dashboard_cliente.html';
-        } else {
+      fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo: currentRole, identificador, senha })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(res.erro || 'Erro ao logar');
+        
+        // Salva a sessão no navegador
+        localStorage.setItem('br_usuario_atual', JSON.stringify(res.dados));
+        
+        // Redireciona
+        if (res.dados.tipo === 'funcionario') {
           window.location.href = 'index.html';
-        }
-      });
-    }
-
-    var registerForm = document.getElementById('registerForm');
-    var registerError = document.getElementById('registerError');
-    var registerSuccess = document.getElementById('registerSuccess');
-    function mostrarErroCad(msg) { registerError.querySelector('span').textContent = msg; registerError.classList.add('show'); }
-
-    if (registerForm) {
-      registerForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        registerError.classList.remove('show');
-        registerSuccess.classList.remove('show');
-        var nome = document.getElementById('regNome').value.trim();
-        var cpf = document.getElementById('regCpf').value.trim();
-        var email = document.getElementById('regEmail').value.trim();
-        var telefone = document.getElementById('regTelefone').value.trim();
-        var senha = document.getElementById('regSenha').value;
-        var senha2 = document.getElementById('regSenhaConfirma').value;
-        var termos = document.getElementById('regTermos').checked;
-
-        if (!nomeValido(nome)) return mostrarErroCad('Informe um nome válido (mínimo 3 letras).');
-        if (!validaCPF(cpf)) return mostrarErroCad('CPF inválido.');
-        if (!validaEmail(email)) return mostrarErroCad('E-mail inválido.');
-        if (!validaTelefone(telefone)) return mostrarErroCad('Telefone inválido (DDD + número).');
-        if (senha.length < 6) return mostrarErroCad('A senha deve ter no mínimo 6 caracteres.');
-        if (senha !== senha2) return mostrarErroCad('As senhas não coincidem.');
-        if (!termos) return mostrarErroCad('Você precisa aceitar os termos de uso.');
-
-        var usuarios = lerUsuarios();
-        var cpfDigits = soDigitos(cpf);
-        var duplicado = usuarios.some(function (u) {
-          var mesmoEmail = String(u.email || '').toLowerCase() === email.toLowerCase();
-          var mesmoCpf = soDigitos(u.cpf) === cpfDigits;
-          return mesmoEmail || mesmoCpf;
-        });
-        if (duplicado) return mostrarErroCad('E-mail ou CPF já cadastrado.');
-
-        var papelCadastro = tipoUsuario === 'funcionario' ? 'Funcionário' : 'Cliente';
-
-        var novoUsuario = {
-          nome: nome,
-          cpf: cpfDigits,
-          email: email,
-          telefone: soDigitos(telefone),
-          senha: senha,
-          papel: papelCadastro
-        };
-
-        usuarios.push(novoUsuario);
-        salvarUsuarios(usuarios);
-
-        registerSuccess.classList.add('show');
-        registerForm.reset();
-
-        // CORREÇÃO: Se for Cliente, já loga e redireciona direto para o Dashboard do Cliente
-        if (papelCadastro === 'Cliente') {
-          localStorage.setItem('br_usuario_atual', JSON.stringify({
-            nome: novoUsuario.nome,
-            email: novoUsuario.email,
-            cpf: novoUsuario.cpf,
-            telefone: novoUsuario.telefone,
-            papel: novoUsuario.papel
-          }));
-          setTimeout(function () { window.location.href = 'dashboard_cliente.html'; }, 1000);
         } else {
-          // Se for funcionário, volta para o login
-          setTimeout(function () {
-            registerSuccess.classList.remove('show');
-            switchTab('login');
-            var loginUser = document.getElementById('loginUser');
-            if (loginUser) loginUser.value = email;
-            var loginPass = document.getElementById('loginPass');
-            if (loginPass) { loginPass.value = ''; loginPass.focus(); }
-          }, 1400);
+          window.location.href = 'dashboard_cliente.html';
         }
-      });
-    }
-  })();
+      })
+      .catch(err => showError(err.message));
+    });
+
+    // 2. CADASTRO FUNCIONÁRIO
+    document.getElementById('formCadFuncionario').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const senha = document.getElementById('funcSenha').value;
+      const conf = document.getElementById('funcSenhaConf').value;
+      if (senha !== conf) return showError('As senhas não coincidem.');
+
+      const dados = {
+        nome: document.getElementById('funcNome').value,
+        email: document.getElementById('funcEmail').value,
+        funcao: document.getElementById('funcFuncao').value,
+        codigo_autorizacao: document.getElementById('funcCodigo').value,
+        senha: senha
+      };
+
+      if (!dados.funcao) return showError('Selecione uma função.');
+
+      fetch('/api/cadastro-funcionario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(res.erro || 'Erro ao cadastrar');
+        alert('Funcionário cadastrado com sucesso! Faça login.');
+        document.querySelector('[data-auth="login"]').click();
+      })
+      .catch(err => showError(err.message));
+    });
+
+    // 3. CADASTRO CLIENTE
+    document.getElementById('formCadCliente').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const senha = document.getElementById('cliSenha').value;
+      const conf = document.getElementById('cliSenhaConf').value;
+      if (senha !== conf) return showError('As senhas não coincidem.');
+
+      // Quebra a string "Cidade / UF"
+      const cidadeUf = document.getElementById('cliCidade').value.split('/');
+      
+      const dados = {
+        nome: document.getElementById('cliNome').value,
+        cpf: document.getElementById('cliCpf').value.replace(/\D/g, ''),
+        email: document.getElementById('cliEmail').value,
+        telefone: document.getElementById('cliTelefone').value.replace(/\D/g, ''),
+        cep: document.getElementById('cliCep').value,
+        endereco: document.getElementById('cliEndereco').value,
+        numero: document.getElementById('cliNumero').value,
+        complemento: document.getElementById('cliComplemento').value,
+        bairro: document.getElementById('cliBairro').value,
+        cidade: cidadeUf[0] ? cidadeUf[0].trim() : '',
+        estado: cidadeUf[1] ? cidadeUf[1].trim() : '',
+        senha: senha,
+        confirmar_senha: conf
+      };
+
+      fetch('/api/cadastro-cliente', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(res.erro || 'Erro ao cadastrar');
+        alert('Conta criada com sucesso! Faça login.');
+        document.querySelector('[data-auth="login"]').click();
+      })
+      .catch(err => showError(err.message));
+    });
+
+    // Inicializa
+    updateUI();
   </script>
 </body>
 </html>

@@ -2,258 +2,215 @@
 var http = require('http');
 var fs = require('fs');
 var path = require('path');
+var bcrypt = require('bcrypt');
 var db = require('./db');
 
-var PORTA = 3000;
+var PORTA = process.env.PORT || 3000;
+var RAIZ = path.join(__dirname, 'public');
+var CODIGO_MESTRE = process.env.CODIGO_FUNCIONARIO || 'BOI2026';
 
+// ---------- Helpers ----------
 function responder(res, codigo, dados) {
-  var corpo = JSON.stringify({ ok: true, dados: dados });
-  res.writeHead(codigo, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(corpo) });
-  res.end(corpo);
+  res.writeHead(codigo, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify({ ok: true, dados: dados }));
 }
 
 function recusar(res, codigo, motivo) {
-  var corpo = JSON.stringify({ ok: false, erro: motivo });
-  res.writeHead(codigo, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(corpo) });
-  res.end(corpo);
+  res.writeHead(codigo, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify({ ok: false, erro: motivo }));
 }
 
-function lerDados(pedido, quandoChegar) {
+function lerDados(req, cb) {
   var texto = '';
-  pedido.on('data', function (pedaco) { texto += pedaco; });
-  pedido.on('end', function () {
-    try { quandoChegar(JSON.parse(texto)); }
-    catch (e) { quandoChegar({}); }
+  req.on('data', function (p) { texto += p; });
+  req.on('end', function () {
+    try { cb(JSON.parse(texto || '{}')); }
+    catch (e) { cb({}); }
   });
 }
 
 var TIPOS = {
-  '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
-  '.js': 'application/javascript; charset=utf-8', '.png': 'image/png',
-  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp',
-  '.svg': 'image/svg+xml', '.ico': 'image/x-icon'
+  '.html': 'text/html; charset=utf-8',
+  '.css':  'text/css; charset=utf-8',
+  '.js':   'application/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.png':  'image/png',
+  '.jpg':  'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.svg':  'image/svg+xml',
+  '.ico':  'image/x-icon'
 };
 
-function servirArquivo(res, caminhoRelativo) {
-  if (caminhoRelativo === '/') caminhoRelativo = '/html/login.html';
-  caminhoRelativo = caminhoRelativo.replace(/^\/+/, '');
-  var extensao = path.extname(caminhoRelativo);
-  if (!extensao) caminhoRelativo = 'html/' + caminhoRelativo + '.html';
-
-  var candidatos = [
-    path.join(__dirname, 'public', caminhoRelativo),
-    path.join(__dirname, 'public', 'html', path.basename(caminhoRelativo)),
-    path.join(__dirname, 'public', caminhoRelativo.replace(/^html\//, '')),
-    path.join(__dirname, caminhoRelativo)
-  ];
-
-  var caminho = candidatos.find(function (c) { return fs.existsSync(c); });
-
-  if (!caminho) {
-    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-    return res.end('Arquivo nao encontrado: ' + caminhoRelativo);
-  }
-
-  var tipo = TIPOS[path.extname(caminho)] || 'application/octet-stream';
-  var conteudo = fs.readFileSync(caminho);
-  res.writeHead(200, { 'Content-Type': tipo, 'Content-Length': conteudo.length });
-  res.end(conteudo);
+function servirArquivo(res, caminho) {
+  fs.readFile(caminho, function (erro, conteudo) {
+    if (erro) {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('Arquivo não encontrado: ' + caminho);
+      return;
+    }
+    var ext = path.extname(caminho).toLowerCase();
+    res.writeHead(200, { 'Content-Type': TIPOS[ext] || 'application/octet-stream' });
+    res.end(conteudo);
+  });
 }
 
-var servidor = http.createServer(function (pedido, resposta) {
-  var url = pedido.url.split('?')[0];
+// ---------- Servidor ----------
+var servidor = http.createServer(function (req, res) {
+  var url = req.url.split('?')[0];
   var partes = url.split('/');
   var ehApi = (partes[1] === 'api');
-  var recurso = partes[2];
-  var id = partes[3];
-  var metodo = pedido.method;
+  var recurso = (partes[2] || '').toLowerCase();
+  var metodo = req.method;
 
-  // ========== UPLOADS ==========
-  if (ehApi && (recurso === 'upload' || recurso === 'upload-avatar') && metodo === 'POST') {
-    lerDados(pedido, function (d) {
-      if (!d.imagem || !d.nome) return recusar(resposta, 400, 'Dados incompletos.');
-      try {
-        var base64Data = d.imagem.replace(/^data:image\/\w+;base64,/, "");
-        var buffer = Buffer.from(base64Data, 'base64');
-        var prefixo = recurso === 'upload-avatar' ? 'avatar-' : '';
-        var nomeArquivo = prefixo + Date.now() + '-' + d.nome.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
-        var subPasta = recurso === 'upload-avatar' ? 'avatares' : 'produtos';
-        var pastaUpload = path.join(__dirname, 'public', 'img', subPasta);
-        
-        if (!fs.existsSync(pastaUpload)) fs.mkdirSync(pastaUpload, { recursive: true });
-        fs.writeFileSync(path.join(pastaUpload, nomeArquivo), buffer);
-        responder(resposta, 200, { url: 'img/' + subPasta + '/' + nomeArquivo });
-      } catch (e) { recusar(resposta, 500, 'Erro ao salvar imagem.'); }
+  // LOG DE DIAGNÓSTICO — olhe o terminal ao testar
+  console.log('[REQ]', metodo, url, '| ehApi:', ehApi, '| recurso:', recurso);
+
+  // ============================================================
+  // LOGIN
+  // ============================================================
+  if (ehApi && recurso === 'login' && metodo === 'POST') {
+    return lerDados(req, function (d) {
+      if (!d.tipo || !d.identificador || !d.senha) {
+        return recusar(res, 400, 'Preencha todos os campos.');
+      }
+
+      if (d.tipo === 'funcionario') {
+        db.get('SELECT * FROM funcionario WHERE email = ?', [d.identificador], function (erro, user) {
+          if (erro) return recusar(res, 500, erro.message);
+          if (!user) return recusar(res, 401, 'E-mail ou senha inválidos.');
+          if (!user.ativo) return recusar(res, 403, 'Conta desativada.');
+          bcrypt.compare(d.senha, user.senha, function (err, ok) {
+            if (err || !ok) return recusar(res, 401, 'E-mail ou senha inválidos.');
+            responder(res, 200, { tipo: 'funcionario', id: user.id, nome: user.nome, funcao: user.funcao });
+          });
+        });
+        return;
+      }
+
+      if (d.tipo === 'cliente') {
+        db.get('SELECT * FROM cliente WHERE cpf = ? OR email = ?', [d.identificador, d.identificador], function (erro, user) {
+          if (erro) return recusar(res, 500, erro.message);
+          if (!user) return recusar(res, 401, 'CPF/E-mail ou senha inválidos.');
+          if (!user.senha) return recusar(res, 401, 'Conta sem senha cadastrada.');
+          bcrypt.compare(d.senha, user.senha, function (err, ok) {
+            if (err || !ok) return recusar(res, 401, 'CPF/E-mail ou senha inválidos.');
+            responder(res, 200, { tipo: 'cliente', id: user.id, nome: user.nome });
+          });
+        });
+        return;
+      }
+
+      return recusar(res, 400, 'Tipo inválido.');
     });
-    return;
   }
 
-  // ========== CATEGORIAS ==========
-  if (ehApi && recurso === 'categorias') {
-    if (metodo === 'GET') {
-      db.all('SELECT * FROM categoria ORDER BY nome ASC', [], function (erro, lista) {
-        if (erro) return recusar(resposta, 500, erro.message);
-        responder(resposta, 200, lista);
-      });
-      return;
-    }
-    if (metodo === 'POST') {
-      lerDados(pedido, function (d) {
-        if (!d.nome) return recusar(resposta, 400, 'Nome é obrigatório.');
-        db.run('INSERT INTO categoria (nome) VALUES (?)', [d.nome], function (erro) {
-          if (erro) return recusar(resposta, 400, erro.message);
-          responder(resposta, 201, { id: this.lastID, nome: d.nome });
-        });
-      });
-      return;
-    }
-    if (metodo === 'DELETE' && id) {
-      db.run('DELETE FROM categoria WHERE id = ?', [id], function (erro) {
-        if (erro) return recusar(resposta, 400, erro.message);
-        responder(resposta, 200, { id: Number(id) });
-      });
-      return;
-    }
-  }
+  // ============================================================
+  // CADASTRO FUNCIONÁRIO
+  // ============================================================
+  if (ehApi && recurso === 'cadastro-funcionario' && metodo === 'POST') {
+    return lerDados(req, function (d) {
+      if (!d.nome || !d.email || !d.funcao || !d.senha || !d.codigo_autorizacao) {
+        return recusar(res, 400, 'Preencha todos os campos obrigatórios.');
+      }
+      if (d.codigo_autorizacao !== CODIGO_MESTRE) {
+        return recusar(res, 403, 'Código de autorização inválido.');
+      }
 
-  // ========== CLIENTES ==========
-  if (ehApi && recurso === 'clientes') {
-    if (metodo === 'GET' && !id) {
-      db.all('SELECT c.*, e.cep, e.logradouro as endereco, e.numero, e.complemento, e.bairro, e.cidade, e.uf as estado FROM cliente c LEFT JOIN endereco e ON c.endereco_id = e.id ORDER BY c.id DESC', [], function (erro, lista) {
-        if (erro) return recusar(resposta, 500, erro.message);
-        responder(resposta, 200, lista);
-      });
-      return;
-    }
-    if (metodo === 'POST') {
-      lerDados(pedido, function (d) {
-        if (!d.nome) return recusar(resposta, 400, 'Nome é obrigatório.');
-        var sqlEnd = 'INSERT INTO endereco (cep, logradouro, numero, complemento, bairro, cidade, uf) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        var valEnd = [d.cep || '', d.endereco || 'Não informado', d.numero || '', d.complemento || '', d.bairro || '', d.cidade || 'Não informada', d.estado || 'AC'];
-        db.run(sqlEnd, valEnd, function (errEnd) {
-          if (errEnd) return recusar(resposta, 400, 'Erro no endereço: ' + errEnd.message);
-          var enderecoId = this.lastID;
-          var sqlCli = 'INSERT INTO cliente (nome, cpf, data_nasc, email, telefone, whatsapp, endereco_id, data_cadastro, foto) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-          var valCli = [d.nome, d.cpf || null, d.data_nasc || null, d.email || null, d.telefone || null, d.whatsapp || null, enderecoId, new Date().toISOString(), d.foto || null];
-          db.run(sqlCli, valCli, function (errCli) {
-            if (errCli) return recusar(resposta, 400, 'Erro no cliente: ' + errCli.message);
-            responder(resposta, 201, { id: this.lastID, endereco_id: enderecoId });
-          });
-        });
-      });
-      return;
-    }
-  }
+      db.get('SELECT id FROM funcionario WHERE email = ?', [d.email], function (erro, existente) {
+        if (erro) return recusar(res, 500, erro.message);
+        if (existente) return recusar(res, 400, 'E-mail já cadastrado.');
 
-  // ========== PRODUTOS ==========
-  if (ehApi && recurso === 'produtos') {
-    if (metodo === 'GET') {
-      db.all('SELECT * FROM produto ORDER BY id DESC', [], function (erro, lista) {
-        if (erro) return recusar(resposta, 500, erro.message);
-        responder(resposta, 200, lista);
-      });
-      return;
-    }
-    if (metodo === 'POST') {
-      lerDados(pedido, function (d) {
-        if (!d.nome) return recusar(resposta, 400, 'Nome é obrigatório.');
-        var sql = 'INSERT INTO produto (codigo, nome, categoria, fornecedor, descricao, preco, estoque, unidade, validade, imagem, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        var val = [d.codigo || null, d.nome, d.categoria || null, d.fornecedor || null, d.descricao || null, Number(d.preco) || 0, Number(d.estoque) || 0, d.unidade || null, d.validade || null, d.imagem || null, new Date().toISOString()];
-        db.run(sql, val, function (erro) {
-          if (erro) return recusar(resposta, 400, erro.message);
-          responder(resposta, 201, { id: this.lastID });
-        });
-      });
-      return;
-    }
-  }
+        bcrypt.hash(d.senha, 10, function (errHash, hash) {
+          if (errHash) return recusar(res, 500, 'Erro ao processar senha.');
 
-  // ========== PEDIDOS (BALCÃO) ==========
-  if (ehApi && recurso === 'pedidos') {
-    if (metodo === 'GET') {
-      db.all('SELECT * FROM pedido ORDER BY id DESC', [], function (erro, pedidos) {
-        if (erro) return recusar(resposta, 500, erro.message);
-        if (!pedidos || pedidos.length === 0) return responder(resposta, 200, []);
-        
-        var promessas = pedidos.map(function(p) {
-          return new Promise(function(resolve) {
-            db.all('SELECT * FROM pedido_item WHERE pedido_id = ?', [p.id], function(erroItem, itens) {
-              p.itens = itens || [];
-              resolve(p);
+          db.run('BEGIN IMMEDIATE');
+          db.run('INSERT INTO codigos_utilizados (codigo) VALUES (?)', [d.codigo_autorizacao], function (errReserva) {
+            if (errReserva) {
+              db.run('ROLLBACK');
+              return recusar(res, 403, 'Este código já foi utilizado no sistema.');
+            }
+            var sql = 'INSERT INTO funcionario (nome, email, funcao, senha, ativo, data_cadastro) VALUES (?, ?, ?, ?, 1, ?)';
+            var val = [d.nome, d.email, d.funcao, hash, new Date().toISOString()];
+            db.run(sql, val, function (errInsert) {
+              if (errInsert) {
+                db.run('ROLLBACK');
+                return recusar(res, 400, errInsert.message);
+              }
+              db.run('COMMIT');
+              responder(res, 201, { id: this.lastID, mensagem: 'Funcionário cadastrado com sucesso!' });
             });
           });
         });
-
-        Promise.all(promessas).then(function(pedidosCompletos) {
-          responder(resposta, 200, pedidosCompletos);
-        });
       });
-      return;
-    }
-    if (metodo === 'POST') {
-      lerDados(pedido, function (d) {
-        var sql = 'INSERT INTO pedido (numero, mesa, cliente_id, data, hora, subtotal, taxa, total, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        var val = [d.numero, d.mesa || null, null, d.data, d.hora, Number(d.subtotal) || 0, Number(d.taxa) || 0, Number(d.total) || 0, d.status || 'Pago'];
-        
-        db.run(sql, val, function (erro) {
-          if (erro) return recusar(resposta, 400, erro.message);
-          var pedidoId = this.lastID;
-          if (d.itens && d.itens.length > 0) {
-            var stmt = db.prepare('INSERT INTO pedido_item (pedido_id, nome_item, quantidade, valor_unit, subtotal) VALUES (?, ?, ?, ?, ?)');
-            d.itens.forEach(function(item) { stmt.run(pedidoId, item.nome, item.qtd, item.preco, item.qtd * item.preco); });
-            stmt.finalize();
-          }
-          responder(resposta, 201, { id: pedidoId });
-        });
-      });
-      return;
-    }
+    });
   }
 
-  // ========== ENTREGAS (DELIVERY) ==========
-  if (ehApi && recurso === 'entregas') {
-    if (metodo === 'GET') {
-      db.all('SELECT * FROM entrega ORDER BY id DESC', [], function (erro, entregas) {
-        if (erro) return recusar(resposta, 500, erro.message);
-        if (!entregas || entregas.length === 0) return responder(resposta, 200, []);
-        
-        var promessas = entregas.map(function(e) {
-          return new Promise(function(resolve) {
-            db.all('SELECT * FROM entrega_item WHERE entrega_id = ?', [e.id], function(erroItem, itens) {
-              e.itens = itens || [];
-              resolve(e);
+  // ============================================================
+  // CADASTRO CLIENTE
+  // ============================================================
+  if (ehApi && recurso === 'cadastro-cliente' && metodo === 'POST') {
+    return lerDados(req, function (d) {
+      if (!d.nome || !d.cpf || !d.email || !d.senha) {
+        return recusar(res, 400, 'Nome, CPF, e-mail e senha são obrigatórios.');
+      }
+      if (d.senha !== d.confirmar_senha) {
+        return recusar(res, 400, 'As senhas não coincidem.');
+      }
+
+      db.get('SELECT id FROM cliente WHERE cpf = ?', [d.cpf], function (erro, porCpf) {
+        if (erro) return recusar(res, 500, erro.message);
+        if (porCpf) return recusar(res, 400, 'CPF já cadastrado.');
+
+        db.get('SELECT id FROM cliente WHERE email = ?', [d.email], function (erro2, porEmail) {
+          if (erro2) return recusar(res, 500, erro2.message);
+          if (porEmail) return recusar(res, 400, 'E-mail já cadastrado.');
+
+          bcrypt.hash(d.senha, 10, function (errHash, hash) {
+            if (errHash) return recusar(res, 500, 'Erro ao processar senha.');
+
+            var uf = d.uf || d.estado || 'AC';
+            var sqlEnd = 'INSERT INTO endereco (cep, logradouro, numero, complemento, bairro, cidade, uf) VALUES (?, ?, ?, ?, ?, ?, ?)';
+            var valEnd = [
+              d.cep || '', d.endereco || 'Não informado', d.numero || '',
+              d.complemento || '', d.bairro || '', d.cidade || 'Não informada', uf
+            ];
+
+            db.run(sqlEnd, valEnd, function (errEnd) {
+              if (errEnd) return recusar(res, 400, 'Erro no endereço: ' + errEnd.message);
+              var enderecoId = this.lastID;
+
+              var sqlCli = 'INSERT INTO cliente (nome, cpf, email, telefone, endereco_id, data_cadastro, senha) VALUES (?, ?, ?, ?, ?, ?, ?)';
+              var valCli = [d.nome, d.cpf, d.email, d.telefone || null, enderecoId, new Date().toISOString(), hash];
+
+              db.run(sqlCli, valCli, function (errCli) {
+                if (errCli) return recusar(res, 400, 'Erro no cliente: ' + errCli.message);
+                responder(res, 201, { id: this.lastID, mensagem: 'Cliente cadastrado com sucesso!' });
+              });
             });
           });
         });
-
-        Promise.all(promessas).then(function(entregasCompletas) {
-          responder(resposta, 200, entregasCompletas);
-        });
       });
-      return;
-    }
-    if (metodo === 'POST') {
-      lerDados(pedido, function (d) {
-        var sql = 'INSERT INTO entrega (numero, cliente_id, endereco_id, data, hora, subtotal, taxa, total, pagamento, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        var val = [d.numero, null, null, d.data, d.hora, Number(d.subtotal) || 0, Number(d.taxa) || 0, Number(d.total) || 0, d.pagamento || null, d.status || 'Entregue'];
-        
-        db.run(sql, val, function (erro) {
-          if (erro) return recusar(resposta, 400, erro.message);
-          var entregaId = this.lastID;
-          if (d.itens && d.itens.length > 0) {
-            var stmt = db.prepare('INSERT INTO entrega_item (entrega_id, nome_item, quantidade, valor_unit, subtotal) VALUES (?, ?, ?, ?, ?)');
-            d.itens.forEach(function(item) { stmt.run(entregaId, item.nome, item.qtd, item.preco, item.qtd * item.preco); });
-            stmt.finalize();
-          }
-          responder(resposta, 201, { id: entregaId });
-        });
-      });
-      return;
-    }
+    });
   }
 
-  if (metodo === 'GET' && !ehApi) return servirArquivo(resposta, url);
-  recusar(resposta, 404, 'Rota não encontrada.');
+  // ============================================================
+  // ARQUIVOS ESTÁTICOS
+  // ============================================================
+  if (!ehApi) {
+    var rel = (url === '/') ? '/html/login.html' : url;
+    var caminho = path.join(RAIZ, rel);
+    if (!caminho.startsWith(RAIZ)) {
+      res.writeHead(403); res.end('Acesso negado'); return;
+    }
+    return servirArquivo(res, caminho);
+  }
+
+  // ============================================================
+  // 404 FINAL — só cai aqui se nada acima bateu
+  // ============================================================
+  res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify({ ok: false, erro: 'Rota não encontrada: ' + metodo + ' ' + url }));
 });
 
 servidor.listen(PORTA, function () {
