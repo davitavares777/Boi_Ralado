@@ -64,7 +64,9 @@ function servirArquivo(res, caminhoRelativo) {
 }
 
 var servidor = http.createServer(function (pedido, resposta) {
-  var url = pedido.url.split('?')[0];
+  var urlPartes = pedido.url.split('?');
+  var url = urlPartes[0];
+  var parametrosUrl = new URLSearchParams(urlPartes[1] || '');
   var partes = url.split('/');
   var ehApi = (partes[1] === 'api');
   var recurso = partes[2];
@@ -153,25 +155,49 @@ var servidor = http.createServer(function (pedido, resposta) {
     return;
   }
 
-  // ========== GRÁFICOS ==========
+  // ========== GRÁFICOS DINÂMICOS ==========
   if (ehApi && recurso === 'graficos' && metodo === 'GET') {
-    var dados = { categorias: [], pagamentos: [], faturamento7dias: [], maisVendidos: [] };
-    
-    db.all('SELECT nome, estoque FROM produto', [], function(err, produtos) {
-      dados.categorias = produtos ? produtos.slice(0, 5).map(function(p) { return { nome: p.nome, qtd: p.estoque || 1 }; }) : [];
-      
-      dados.pagamentos = [
-        { nome: 'PIX', valor: 45 }, { nome: 'Cartão', valor: 30 }, { nome: 'Dinheiro', valor: 18 }, { nome: 'Vale', valor: 7 }
-      ];
-      
-      var dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-      for (var i = 6; i >= 0; i--) {
-        var d = new Date(); d.setDate(d.getDate() - i);
-        dados.faturamento7dias.push({ dia: dias[d.getDay()], valor: Math.floor(Math.random() * 5000) + 1000 });
+    var contextoGrafico = parametrosUrl.get('contexto') || 'geral';
+    Promise.all([
+      new Promise(function(resolve) { db.all('SELECT p.*, pi.nome_item, pi.quantidade, pi.valor_unit, pr.categoria AS categoria_produto FROM pedido p LEFT JOIN pedido_item pi ON pi.pedido_id = p.id LEFT JOIN produto pr ON lower(pr.nome) = lower(pi.nome_item)', [], function(e, rows) { resolve(e ? [] : rows || []); }); }),
+      new Promise(function(resolve) { db.all('SELECT e.*, ei.nome_item, ei.quantidade, ei.valor_unit, pr.categoria AS categoria_produto FROM entrega e LEFT JOIN entrega_item ei ON ei.entrega_id = e.id LEFT JOIN produto pr ON lower(pr.nome) = lower(ei.nome_item)', [], function(e, rows) { resolve(e ? [] : rows || []); }); })
+    ]).then(function(resultados) {
+      var pedidosRows = resultados[0], entregasRows = resultados[1];
+      var usarPedidos = contextoGrafico !== 'delivery';
+      var usarEntregas = contextoGrafico !== 'balcao';
+      var pedidos = [], entregas = [], itens = [];
+      if (usarPedidos || contextoGrafico === 'delivery') {
+        pedidosRows.forEach(function(row) {
+          var ehPedidoCliente = !!row.cliente_email;
+          if (contextoGrafico === 'delivery' && !ehPedidoCliente) return;
+          if (contextoGrafico === 'balcao' && ehPedidoCliente) return;
+          var atual = pedidos.find(function(x) { return x.id === row.id; });
+          if (!atual) { atual = { id: row.id, total: Number(row.total) || 0, data: row.data, pagamento: row.pagamento || 'Não informado', pagamento_status: row.pagamento_status, status: row.status }; pedidos.push(atual); }
+          if (row.nome_item) itens.push({ nome: row.nome_item, qtd: Number(row.quantidade) || 0, categoria: row.categoria_produto || 'Outros' });
+        });
       }
-      
-      dados.maisVendidos = dados.categorias.slice(0, 5);
-      
+      if (usarEntregas) {
+        entregasRows.forEach(function(row) {
+          var atual = entregas.find(function(x) { return x.id === row.id; });
+          if (!atual) { atual = { id: row.id, total: Number(row.total) || 0, data: row.data, pagamento: row.pagamento || 'Não informado', pagamento_status: 'Pago', status: row.status }; entregas.push(atual); }
+          if (row.nome_item) itens.push({ nome: row.nome_item, qtd: Number(row.quantidade) || 0, categoria: row.categoria_produto || 'Outros' });
+        });
+      }
+      var pagamentos = {};
+      pedidos.concat(entregas).forEach(function(x) { if (x.pagamento_status === 'Pago' || x.status === 'Pago') pagamentos[x.pagamento] = (pagamentos[x.pagamento] || 0) + x.total; });
+      var vendasPorDia = {};
+      pedidos.concat(entregas).forEach(function(x) { if (x.data) vendasPorDia[x.data] = (vendasPorDia[x.data] || 0) + x.total; });
+      var ultimosDias = [];
+      for (var i = 6; i >= 0; i--) { var dia = new Date(); dia.setDate(dia.getDate() - i); var iso = dia.getFullYear() + '-' + String(dia.getMonth()+1).padStart(2,'0') + '-' + String(dia.getDate()).padStart(2,'0'); ultimosDias.push({ dia: dia.toLocaleDateString('pt-BR', { weekday: 'short' }), valor: Number(vendasPorDia[iso] || 0) }); }
+      var vendidos = {}; var categorias = {};
+      itens.forEach(function(x) { vendidos[x.nome] = (vendidos[x.nome] || 0) + x.qtd; categorias[x.categoria] = (categorias[x.categoria] || 0) + x.qtd; });
+      var dados = {
+        categorias: Object.keys(categorias).map(function(nome) { return { nome: nome, qtd: categorias[nome] }; }),
+        pagamentos: Object.keys(pagamentos).map(function(nome) { return { nome: nome, valor: pagamentos[nome] }; }),
+        faturamento7dias: ultimosDias,
+        maisVendidos: Object.keys(vendidos).map(function(nome) { return { nome: nome, qtd: vendidos[nome] }; }).sort(function(a,b) { return b.qtd-a.qtd; }).slice(0,8),
+        totais: [pedidos.length, entregas.length, pedidos.reduce(function(s,x){return s+x.total;},0), entregas.reduce(function(s,x){return s+x.total;},0)]
+      };
       responder(resposta, 200, dados);
     });
     return;
@@ -189,9 +215,13 @@ var servidor = http.createServer(function (pedido, resposta) {
     if (metodo === 'POST') {
       lerDados(pedido, function (d) {
         if (!d.nome) return recusar(resposta, 400, 'Nome é obrigatório.');
-        db.run('INSERT INTO categoria (nome) VALUES (?)', [d.nome], function (erro) {
-          if (erro) return recusar(resposta, 400, erro.message);
-          responder(resposta, 201, { id: this.lastID, nome: d.nome });
+        db.get('SELECT id FROM categoria WHERE lower(nome) = lower(?)', [String(d.nome).trim()], function(errBusca, existente) {
+          if (errBusca) return recusar(resposta, 500, errBusca.message);
+          if (existente) return recusar(resposta, 409, 'Esta categoria já está cadastrada.');
+          db.run('INSERT INTO categoria (nome) VALUES (?)', [String(d.nome).trim()], function (erro) {
+            if (erro) return recusar(resposta, 400, erro.message);
+            responder(resposta, 201, { id: this.lastID, nome: String(d.nome).trim() });
+          });
         });
       });
       return;
@@ -262,25 +292,25 @@ var servidor = http.createServer(function (pedido, resposta) {
     if (metodo === 'GET') {
       db.all('SELECT * FROM pedido ORDER BY id DESC', [], function (erro, pedidos) {
         if (erro) return recusar(resposta, 500, erro.message);
-        if (!pedidos || pedidos.length === 0) return responder(resposta, 200, []);
-        var promessas = pedidos.map(function(p) {
+        var emailFiltro = (parametrosUrl.get('cliente_email') || '').toLowerCase();
+        var listaFiltrada = emailFiltro ? (pedidos || []).filter(function(p) { return String(p.cliente_email || '').toLowerCase() === emailFiltro; }) : (pedidos || []);
+        if (!listaFiltrada.length) return responder(resposta, 200, []);
+        var promessas = listaFiltrada.map(function(p) {
           return new Promise(function(resolve) {
-            db.all('SELECT * FROM pedido_item WHERE pedido_id = ?', [p.id], function(erroItem, itens) {
-              p.itens = itens || [];
+            db.all('SELECT nome_item, quantidade, valor_unit, subtotal FROM pedido_item WHERE pedido_id = ?', [p.id], function(erroItem, itens) {
+              p.itens = (itens || []).map(function(i) { return { nome_item: i.nome_item, quantidade: i.quantidade, valor_unit: i.valor_unit, nome: i.nome_item, qtd: i.quantidade, preco: i.valor_unit, subtotal: i.subtotal }; });
               resolve(p);
             });
           });
         });
-        Promise.all(promessas).then(function(pedidosCompletos) {
-          responder(resposta, 200, pedidosCompletos);
-        });
+        Promise.all(promessas).then(function(pedidosCompletos) { responder(resposta, 200, pedidosCompletos); });
       });
       return;
     }
     if (metodo === 'POST') {
       lerDados(pedido, function (d) {
-        var sql = 'INSERT INTO pedido (numero, mesa, cliente_id, data, hora, subtotal, taxa, total, status, observacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        var val = [d.numero, d.mesa || null, d.cliente_id || null, d.data, d.hora, Number(d.subtotal) || 0, Number(d.taxa) || 0, Number(d.total) || 0, d.status || 'Pago', d.observacao || null];
+        var sql = 'INSERT INTO pedido (numero, mesa, cliente_id, data, hora, subtotal, taxa, total, status, observacao, cliente_email, pagamento, pagamento_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        var val = [d.numero, d.mesa || null, d.cliente_id || null, d.data, d.hora, Number(d.subtotal) || 0, Number(d.taxa) || 0, Number(d.total) || 0, d.status || 'Em preparo', d.observacao || null, d.cliente_email || null, d.pagamento || null, d.pagamento_status || 'Pendente'];
         
         db.run(sql, val, function (erro) {
           if (erro) return recusar(resposta, 400, erro.message);
@@ -297,8 +327,8 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
     if (metodo === 'PUT' && id) {
       lerDados(pedido, function (d) {
-        var sql = 'UPDATE pedido SET numero=?, mesa=?, status=?, observacao=? WHERE id=?';
-        var val = [d.numero, d.mesa || null, d.status || 'Pago', d.observacao || null, id];
+        var sql = 'UPDATE pedido SET numero=COALESCE(?, numero), mesa=COALESCE(?, mesa), status=COALESCE(?, status), observacao=COALESCE(?, observacao), pagamento=COALESCE(?, pagamento), pagamento_status=COALESCE(?, pagamento_status) WHERE id=?';
+        var val = [d.numero || null, d.mesa || null, d.status || null, d.observacao || null, d.pagamento || null, d.pagamento_status || null, id];
         db.run(sql, val, function (erro) {
           if (erro) return recusar(resposta, 400, erro.message);
           responder(resposta, 200, { ok: true });

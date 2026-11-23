@@ -248,7 +248,8 @@
         <div class="page-head">
           <div>
             <div class="breadcrumbs"><i class="fa-solid fa-house"></i> Início <i class="fa-solid fa-chevron-right"></i>
-              <span class="current">Dashboard</span></div>
+              <span class="current">Dashboard</span>
+            </div>
             <h2 class="page-head__title">Bem-vindo de volta! 🔥</h2>
             <p class="page-head__subtitle">Confira o resumo do dia e acesse rapidamente os módulos do sistema.</p>
           </div>
@@ -330,43 +331,13 @@
           </div>
         </section>
 
-        <canvas id="graficoPizza"></canvas>
-<canvas id="graficoRosca"></canvas>
-<canvas id="graficoLinha"></canvas>
-<canvas id="graficoBarra"></canvas>
-<canvas id="graficoColuna"></canvas>
+        <section class="charts charts-dinamicos"><div class="chart-card chart-dinamico"><h3>Vendas por categoria</h3><div class="chart-container"><canvas id="graficoPizza"></canvas></div></div>
+        <div class="chart-card chart-dinamico"><h3>Formas de pagamento</h3><div class="chart-container"><canvas id="graficoRosca"></canvas></div></div>
+        <div class="chart-card chart-dinamico"><h3>Faturamento nos últimos 7 dias</h3><div class="chart-container"><canvas id="graficoLinha"></canvas></div></div>
+        <div class="chart-card chart-dinamico"><h3>Produtos mais pedidos</h3><div class="chart-container"><canvas id="graficoBarra"></canvas></div></div>
+        <div class="chart-card chart-dinamico"><h3>Resumo da operação</h3><div class="chart-container"><canvas id="graficoColuna"></canvas></div></div></section>
 
-        <section class="charts">
-          <div class="chart-card">
-            <h3>Formas de pagamento</h3>
-            <svg class="pie" viewBox="0 0 42 42">
-              <circle r="10.5" cx="21" cy="21" fill="none" stroke="#E85D26" stroke-width="21" stroke-dasharray="45 55"
-                stroke-dashoffset="0"></circle>
-              <circle r="10.5" cx="21" cy="21" fill="none" stroke="#FFB36B" stroke-width="21" stroke-dasharray="30 70"
-                stroke-dashoffset="-45"></circle>
-              <circle r="10.5" cx="21" cy="21" fill="none" stroke="#A61B1B" stroke-width="21" stroke-dasharray="18 82"
-                stroke-dashoffset="-75"></circle>
-              <circle r="10.5" cx="21" cy="21" fill="none" stroke="#C9B393" stroke-width="21" stroke-dasharray="7 93"
-                stroke-dashoffset="-93"></circle>
-            </svg>
-            <div class="lg">
-              <span><i style="background:#E85D26"></i>PIX 45%</span>
-              <span><i style="background:#FFB36B"></i>Cartão 30%</span>
-              <span><i style="background:#A61B1B"></i>Dinheiro 18%</span>
-              <span><i style="background:#C9B393"></i>Vale 7%</span>
-            </div>
-          </div>
-
-          <div class="chart-card">
-            <h3>Mais vendidos</h3>
-            <div id="maisVendidosChart"></div>
-          </div>
-
-          <div class="chart-card">
-            <h3>Faturamento — 7 dias</h3>
-            <div class="vb" id="faturamentoChart"></div>
-          </div>
-        </section>
+        
 
         <!-- TABELAS SEPARADAS: BALCÃO vs DELIVERY -->
         <div class="split-tables">
@@ -458,6 +429,7 @@
       </footer>
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="../js/app.js"></script>
   <script src="../js/index.js"></script>
   <script src="../js/grafico.js"></script>

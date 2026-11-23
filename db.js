@@ -123,6 +123,15 @@ db.serialize(function () {
     }
   });
 
+  // Migrações para associar pedidos de clientes e registrar pagamento fictício.
+  db.all('PRAGMA table_info(pedido)', [], function (err, cols) {
+    if (err) return;
+    var nomes = (cols || []).map(function (c) { return c.name; });
+    if (nomes.indexOf('cliente_email') === -1) db.run('ALTER TABLE pedido ADD COLUMN cliente_email TEXT');
+    if (nomes.indexOf('pagamento') === -1) db.run('ALTER TABLE pedido ADD COLUMN pagamento TEXT');
+    if (nomes.indexOf('pagamento_status') === -1) db.run("ALTER TABLE pedido ADD COLUMN pagamento_status TEXT DEFAULT 'Pendente'");
+  });
+
   db.run(`
     CREATE TABLE IF NOT EXISTS pedido_item (
       id           INTEGER PRIMARY KEY AUTOINCREMENT,

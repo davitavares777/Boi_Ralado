@@ -222,15 +222,75 @@
     var botaoSalvar = $$('main .btn').filter(function (b) { return $('i.fa-floppy-disk', b); })[0];
 
     if (page === 'produto.html') {
-        var selectCategoria = $$('.form-group').filter(function(g) { return textoLabel(g) === 'categoria'; })[0]?.querySelector('select');
-        var selectFornecedor = $$('.form-group').filter(function(g) { return textoLabel(g) === 'fornecedor'; })[0]?.querySelector('select');
+        var selectCategoria = document.getElementById('selectCategoria');
+        var selectFornecedor = document.getElementById('selectFornecedor');
+        var listaCategorias = document.getElementById('listaCategorias');
+        var inputNovaCategoria = document.getElementById('novaCategoria');
+        var btnAdicionarCategoria = document.getElementById('btnAdicionarCategoria');
+        var fornecedoresExemplo = ['Açougue Central (Exemplo)', 'Distribuidora São João (Exemplo)', 'Hortifruti Bom Preço (Exemplo)', 'Bebidas Paraná (Exemplo)'];
 
-        if (selectCategoria) {
-            pedir('GET', '/api/categorias').then(function(r) { if (r.ok && r.dados) r.dados.forEach(function(cat) { var opt = document.createElement('option'); opt.value = cat.nome; opt.textContent = cat.nome; selectCategoria.appendChild(opt); }); });
+        function carregarCategorias() {
+          return pedir('GET', '/api/categorias').then(function(r) {
+            var cats = r && r.ok && Array.isArray(r.dados) ? r.dados : [];
+            if (selectCategoria) {
+              var selecionada = selectCategoria.value;
+              selectCategoria.innerHTML = '<option value="">Sem categoria</option>';
+              cats.forEach(function(cat) {
+                var opt = document.createElement('option'); opt.value = cat.nome; opt.textContent = cat.nome;
+                selectCategoria.appendChild(opt);
+              });
+              selectCategoria.value = selecionada;
+            }
+            if (listaCategorias) {
+              if (!cats.length) { listaCategorias.innerHTML = '<p class="text-muted">Nenhuma categoria cadastrada.</p>'; return; }
+              listaCategorias.innerHTML = '<div class="cat-list">' + cats.map(function(cat) {
+                return '<span class="cat-tag"><i class="fa-solid fa-tag"></i> ' + esc(cat.nome) +
+                  '<button type="button" class="cat-del" data-excluir-categoria="' + cat.id + '" aria-label="Excluir ' + esc(cat.nome) + '" title="Excluir categoria"><i class="fa-solid fa-xmark"></i></button></span>';
+              }).join('') + '</div>';
+              listaCategorias.querySelectorAll('[data-excluir-categoria]').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                  var id = this.getAttribute('data-excluir-categoria');
+                  if (!confirm('Deseja realmente excluir esta categoria?')) return;
+                  pedir('DELETE', '/api/categorias/' + id).then(function(resp) {
+                    if (!resp.ok) return toast(resp.erro || 'Não foi possível excluir a categoria.', true);
+                    toast('Categoria excluída.'); carregarCategorias();
+                  });
+                });
+              });
+            }
+          });
         }
-        if (selectFornecedor) {
-            pedir('GET', '/api/fornecedores').then(function(r) { if (r.ok && r.dados) r.dados.forEach(function(forn) { var opt = document.createElement('option'); opt.value = forn.razao_social; opt.textContent = forn.razao_social; selectFornecedor.appendChild(opt); }); });
+        function carregarFornecedores() {
+          if (!selectFornecedor) return;
+          pedir('GET', '/api/fornecedores').then(function(r) {
+            var fornecedores = r && r.ok && Array.isArray(r.dados) ? r.dados : [];
+            var selecionado = selectFornecedor.value;
+            selectFornecedor.innerHTML = '<option value="">Sem fornecedor</option><optgroup label="Fornecedores de exemplo">' +
+              fornecedoresExemplo.map(function(nome) { return '<option value="' + esc(nome) + '">' + esc(nome) + '</option>'; }).join('') + '</optgroup>';
+            if (fornecedores.length) {
+              var grupo = document.createElement('optgroup'); grupo.label = 'Fornecedores cadastrados';
+              fornecedores.forEach(function(f) {
+                var nome = f.razao_social || f.nome_fantasia || f.nome;
+                if (!nome) return;
+                var opt = document.createElement('option'); opt.value = nome; opt.textContent = nome; grupo.appendChild(opt);
+              });
+              selectFornecedor.appendChild(grupo);
+            }
+            selectFornecedor.value = selecionado;
+          });
         }
+        if (btnAdicionarCategoria) btnAdicionarCategoria.addEventListener('click', function() {
+          var nome = (inputNovaCategoria && inputNovaCategoria.value || '').trim();
+          if (!nome) return toast('Digite o nome da categoria.', true);
+          pedir('POST', '/api/categorias', { nome: nome }).then(function(r) {
+            if (!r.ok) return toast(r.erro || 'Não foi possível cadastrar a categoria.', true);
+            if (inputNovaCategoria) inputNovaCategoria.value = '';
+            toast('Categoria cadastrada com sucesso!'); carregarCategorias();
+          });
+        });
+        if (inputNovaCategoria) inputNovaCategoria.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); if (btnAdicionarCategoria) btnAdicionarCategoria.click(); } });
+        carregarCategorias();
+        carregarFornecedores();
     }
 
     function coletarCampos() {
@@ -262,6 +322,9 @@
           if (el && chave && item[chave] !== undefined && item[chave] !== null) {
              var val = item[chave];
              if (chave === 'preco' && typeof val === 'number') val = val.toFixed(2).replace('.', ',');
+             if (el.tagName === 'SELECT' && val !== '' && !Array.prototype.some.call(el.options, function(opt) { return opt.value === String(val); })) {
+               var opcaoAtual = document.createElement('option'); opcaoAtual.value = val; opcaoAtual.textContent = val; el.appendChild(opcaoAtual);
+             }
              el.value = val;
           }
         });

@@ -147,7 +147,7 @@
   }
 
   // Inicializa
-  renderizarGrafico();
+  // Os cinco gráficos dinâmicos são renderizados por grafico.js a partir da API.
   desenharDelivery();
 
   btn.addEventListener('click', function () {

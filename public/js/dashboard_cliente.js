@@ -21,6 +21,7 @@ console.log('[dashboard_cliente] Script iniciado.');
   var carrinho = [];
   var categoriaAtiva = 'todos';
   var usuarioAtual = null;
+  var chaveCarrinho = 'br_carrinho_cliente_' + encodeURIComponent('anonimo');
 
   try {
     usuarioAtual = JSON.parse(localStorage.getItem('br_usuario_atual'));
@@ -28,6 +29,9 @@ console.log('[dashboard_cliente] Script iniciado.');
     console.error('[dashboard_cliente] Erro ao ler usuário:', e);
   }
 
+  if (usuarioAtual && usuarioAtual.email) chaveCarrinho = 'br_carrinho_cliente_' + encodeURIComponent(String(usuarioAtual.email).toLowerCase());
+  // Descarta a chave antiga compartilhada, que podia trazer itens de outro usuário.
+  try { localStorage.removeItem('br_carrinho_cliente'); } catch (e) {}
   console.log('[dashboard_cliente] Usuário atual:', usuarioAtual);
 
   if (!usuarioAtual || usuarioAtual.papel !== 'Cliente') {
@@ -339,10 +343,12 @@ console.log('[dashboard_cliente] Script iniciado.');
   }
 
   function salvarCarrinho() {
-    try { localStorage.setItem('br_carrinho_cliente', JSON.stringify(carrinho)); } catch (e) {}
+    try { localStorage.setItem(chaveCarrinho, JSON.stringify(carrinho)); } catch (e) {}
   }
   function carregarCarrinho() {
-    try { carrinho = JSON.parse(localStorage.getItem('br_carrinho_cliente')) || []; } catch (e) { carrinho = []; }
+    try { carrinho = JSON.parse(localStorage.getItem(chaveCarrinho)) || []; } catch (e) { carrinho = []; }
+    if (!Array.isArray(carrinho)) carrinho = [];
+    carrinho = carrinho.filter(function(i) { return i && i.id != null && i.nome && Number(i.qtd) > 0; });
     atualizarBadgeCarrinho();
   }
 
@@ -462,6 +468,8 @@ console.log('[dashboard_cliente] Script iniciado.');
         taxa: taxa,
         total: total,
         status: 'Em preparo',
+        pagamento_status: 'Pendente',
+        cliente_email: usuarioAtual.email,
         observacao: obs,
         itens: carrinho.map(function (i) {
           return { nome: i.nome, qtd: i.qtd, preco: i.preco };
@@ -477,6 +485,10 @@ console.log('[dashboard_cliente] Script iniciado.');
         
         if (!r.ok) return toast(r.erro || 'Erro ao finalizar pedido.', true);
         
+        pedido.id = r.dados && r.dados.id ? r.dados.id : null;
+        pedido.pagamento_status = 'Pendente';
+        pedido.dataHora = new Date().toISOString();
+        salvarPedidoLocal(pedido);
         carrinho = [];
         salvarCarrinho();
         atualizarBadgeCarrinho();
@@ -492,55 +504,81 @@ console.log('[dashboard_cliente] Script iniciado.');
   // Após confirmar, chama a função acima.
 
   // ========== MEUS PEDIDOS ==========
+  function salvarPedidoLocal(pedido) {
+    var chave = 'br_pedidos_cliente_' + String(usuarioAtual.email || '').toLowerCase();
+    var lista = [];
+    try { lista = JSON.parse(localStorage.getItem(chave)) || []; } catch (e) {}
+    if (!lista.some(function(p) { return (p.id && pedido.id && String(p.id) === String(pedido.id)) || p.numero === pedido.numero; })) lista.unshift(pedido);
+    localStorage.setItem(chave, JSON.stringify(lista));
+  }
+
+  function abrirPagamento(pedido) {
+    if (!pedido.id) return toast('Este pedido ainda não está sincronizado com o servidor.', true);
+    var ov = document.createElement('div');
+    ov.className = 'br-ov';
+    ov.innerHTML = '<div class="modal-qtd"><div class="modal-qtd__body"><h3>Finalizar pagamento</h3><p>Pedido ' + esc(pedido.numero) + ' — ' + brl(pedido.total) + '</p>' +
+      '<label for="formaPagamentoCliente">Forma de pagamento</label><select id="formaPagamentoCliente" class="form-control" style="width:100%;margin:12px 0 20px;padding:12px;border-radius:8px"><option value="">Selecione...</option><option>PIX</option><option>Cartão</option><option>Dinheiro</option></select>' +
+      '<div class="modal-qtd__acts"><button type="button" class="btn btn--outline" id="cancelarPagamentoCliente">Cancelar</button><button type="button" class="btn btn--primary" id="confirmarPagamentoCliente">Confirmar pagamento</button></div></div></div>';
+    document.body.appendChild(ov);
+    function fechar() { ov.remove(); }
+    ov.querySelector('#cancelarPagamentoCliente').addEventListener('click', fechar);
+    ov.addEventListener('click', function(e) { if (e.target === ov) fechar(); });
+    ov.querySelector('#confirmarPagamentoCliente').addEventListener('click', function() {
+      var forma = ov.querySelector('#formaPagamentoCliente').value;
+      if (!forma) return toast('Selecione uma forma de pagamento.', true);
+      var btn = this; btn.disabled = true; btn.textContent = 'Processando...';
+      pedir('PUT', '/api/pedidos/' + pedido.id, { pagamento: forma, pagamento_status: 'Pago' }).then(function(r) {
+        if (!r.ok) { btn.disabled = false; btn.textContent = 'Confirmar pagamento'; return toast(r.erro || 'Não foi possível registrar o pagamento.', true); }
+        pedido.pagamento = forma; pedido.pagamento_status = 'Pago'; salvarPedidoLocal(pedido); fechar();
+        toast('Pagamento fictício registrado com sucesso!'); renderizarPedidos();
+      });
+    });
+  }
+
   function renderizarPedidos() {
     var lista = document.getElementById('pedidosLista');
     if (!lista) return;
-    var pedidos = [];
-    try { pedidos = JSON.parse(localStorage.getItem('br_pedidos_cliente_' + usuarioAtual.email)) || []; } catch (e) {}
-
-    if (!pedidos.length) {
-      lista.innerHTML =
-        '<div class="empty-state">' +
-          '<i class="fa-solid fa-receipt"></i>' +
-          '<p>Você ainda não realizou nenhum pedido.</p>' +
-          '<button class="btn btn--primary" id="btnFazerPedido2"><i class="fa-solid fa-utensils"></i> Fazer um Pedido</button>' +
-        '</div>';
-      var b = document.getElementById('btnFazerPedido2');
-      if (b) b.addEventListener('click', function () { navegarPara('cardapio'); });
-      return;
-    }
-
-    lista.innerHTML = pedidos.map(function (p) {
-      var statusClass = 'status-pill--preparo';
-      if (p.status === 'Em rota') statusClass = 'status-pill--rota';
-      else if (p.status === 'Entregue') statusClass = 'status-pill--entregue';
-      else if (p.status === 'Cancelado') statusClass = 'status-pill--cancelado';
-
-      var dataFmt = '';
-      try {
-        var d = new Date(p.data);
-        dataFmt = d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      } catch (e) {}
-
-      var itensHtml = p.itens.map(function (i) {
-        return '<strong>' + i.qtd + 'x</strong> ' + esc(i.nome);
-      }).join(' • ');
-
-      return (
-        '<div class="pedido-card">' +
-          '<div class="pedido-card__head">' +
-            '<div class="pedido-card__num">' + esc(p.numero) + '<small>' + dataFmt + '</small></div>' +
-            '<div class="pedido-card__total">' + brl(p.total) + '</div>' +
-          '</div>' +
-          '<div class="pedido-card__itens">' + itensHtml + '</div>' +
-          (p.obs ? '<div class="pedido-card__itens"><strong>Obs:</strong> ' + esc(p.obs) + '</div>' : '') +
-          '<div class="pedido-card__foot">' +
-            '<span class="status-pill ' + statusClass + '"><i class="fa-solid fa-circle" style="font-size:8px;"></i> ' + esc(p.status) + '</span>' +
-            '<span style="font-size:12px;color:var(--text-dim);">Total: ' + brl(p.total) + '</span>' +
-          '</div>' +
-        '</div>'
-      );
-    }).join('');
+    var chave = 'br_pedidos_cliente_' + String(usuarioAtual.email || '').toLowerCase();
+    var locais = [];
+    try { locais = JSON.parse(localStorage.getItem(chave)) || []; } catch (e) {}
+    lista.innerHTML = '<div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Carregando seus pedidos...</p></div>';
+    pedir('GET', '/api/pedidos?cliente_email=' + encodeURIComponent(usuarioAtual.email || '')).then(function(resp) {
+      var pedidosApi = resp && resp.ok && Array.isArray(resp.dados) ? resp.dados : [];
+      var pedidos = pedidosApi.length ? pedidosApi : locais;
+      if (pedidosApi.length) {
+        pedidosApi.forEach(function(p) { salvarPedidoLocal(p); });
+        pedidos = pedidosApi;
+      }
+      if (!pedidos.length) {
+        lista.innerHTML = '<div class="empty-state"><i class="fa-solid fa-receipt"></i><p>Você ainda não realizou nenhum pedido.</p><button class="btn btn--primary" id="btnFazerPedido2"><i class="fa-solid fa-utensils"></i> Fazer um Pedido</button></div>';
+        var b = document.getElementById('btnFazerPedido2');
+        if (b) b.addEventListener('click', function() { navegarPara('cardapio'); });
+        return;
+      }
+      lista.innerHTML = pedidos.map(function(p) {
+        var status = p.status || 'Em preparo';
+        var statusClass = 'status-pill--preparo';
+        if (status === 'Em rota') statusClass = 'status-pill--rota';
+        else if (status === 'Entregue') statusClass = 'status-pill--entregue';
+        else if (status === 'Cancelado') statusClass = 'status-pill--cancelado';
+        var itens = (p.itens || []).map(function(i) { return '<strong>' + esc(i.qtd || i.quantidade || 1) + 'x</strong> ' + esc(i.nome || i.nome_item || 'Item'); }).join(' • ');
+        var dataFmt = p.data ? new Date(p.data + 'T00:00:00').toLocaleDateString('pt-BR') : '';
+        if (p.hora) dataFmt += ' às ' + esc(p.hora);
+        var pago = String(p.pagamento_status || '').toLowerCase() === 'pago';
+        return '<div class="pedido-card"><div class="pedido-card__head"><div class="pedido-card__num">' + esc(p.numero) + '<small>' + dataFmt + '</small></div><div class="pedido-card__total">' + brl(p.total) + '</div></div>' +
+          '<div class="pedido-card__itens">' + (itens || 'Itens do pedido') + '</div>' +
+          (p.observacao || p.obs ? '<div class="pedido-card__itens"><strong>Obs:</strong> ' + esc(p.observacao || p.obs) + '</div>' : '') +
+          '<div class="pedido-card__foot"><span class="status-pill ' + statusClass + '"><i class="fa-solid fa-circle" style="font-size:8px;"></i> ' + esc(status) + '</span><span style="font-size:12px;color:var(--text-dim);">' + (pago ? 'Pagamento: ' + esc(p.pagamento || 'Pago') : 'Pagamento pendente') + '</span></div>' +
+          (!pago && p.id ? '<div style="margin-top:14px"><button type="button" class="btn btn--primary" data-pagar-pedido="' + p.id + '"><i class="fa-solid fa-credit-card"></i> Pagar agora</button></div>' : '') +
+          '</div>';
+      }).join('');
+      lista.querySelectorAll('[data-pagar-pedido]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var pedido = pedidos.find(function(p) { return String(p.id) === String(btn.dataset.pagarPedido); });
+          if (pedido) abrirPagamento(pedido);
+        });
+      });
+    });
   }
 
   var btnAtualizarPedidos = document.getElementById('btnAtualizarPedidos');
