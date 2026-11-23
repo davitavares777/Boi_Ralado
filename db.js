@@ -8,6 +8,7 @@ var db = new sqlite3.Database(caminho);
 db.serialize(function () {
   db.run('PRAGMA foreign_keys = ON');
 
+  // --- Tabelas existentes ---
   db.run(`
     CREATE TABLE IF NOT EXISTS endereco (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -108,9 +109,19 @@ db.serialize(function () {
       taxa       REAL DEFAULT 0,
       total      REAL DEFAULT 0,
       status     TEXT DEFAULT 'Pago',
+      observacao TEXT,
       FOREIGN KEY (cliente_id) REFERENCES cliente(id)
     )
   `);
+
+  // Migração: adiciona coluna observacao se não existir
+  db.all("PRAGMA table_info(pedido)", [], function (err, cols) {
+    if (err) return;
+    var nomes = (cols || []).map(function (c) { return c.name; });
+    if (nomes.indexOf('observacao') === -1) {
+      db.run("ALTER TABLE pedido ADD COLUMN observacao TEXT");
+    }
+  });
 
   db.run(`
     CREATE TABLE IF NOT EXISTS pedido_item (
@@ -159,7 +170,30 @@ db.serialize(function () {
     )
   `);
 
-  // ---- Índices para performance em relatórios e buscas ----
+  // --- NOVAS TABELAS ---
+  db.run(`
+    CREATE TABLE IF NOT EXISTS usuario (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome       TEXT NOT NULL,
+      email      TEXT UNIQUE,
+      cpf        TEXT UNIQUE,
+      senha      TEXT NOT NULL,
+      papel      TEXT NOT NULL DEFAULT 'Cliente',
+      data_cadastro TEXT,
+      foto       TEXT
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS funcionario (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      usuario_id INTEGER NOT NULL,
+      cargo      TEXT NOT NULL,
+      FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE CASCADE
+    )
+  `);
+
+  // --- Índices ---
   db.run('CREATE INDEX IF NOT EXISTS idx_pedido_data      ON pedido(data)');
   db.run('CREATE INDEX IF NOT EXISTS idx_entrega_data     ON entrega(data)');
   db.run('CREATE INDEX IF NOT EXISTS idx_produto_cat      ON produto(categoria)');
@@ -167,6 +201,8 @@ db.serialize(function () {
   db.run('CREATE INDEX IF NOT EXISTS idx_fornecedor_cnpj  ON fornecedor(cnpj)');
   db.run('CREATE INDEX IF NOT EXISTS idx_pedido_item_ped  ON pedido_item(pedido_id)');
   db.run('CREATE INDEX IF NOT EXISTS idx_entrega_item_ent ON entrega_item(entrega_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_usuario_email    ON usuario(email)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_usuario_cpf      ON usuario(cpf)');
 
   // Migração: adiciona coluna 'foto' na tabela cliente se ainda não existir
   db.all("PRAGMA table_info(cliente)", [], function (err, cols) {

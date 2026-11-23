@@ -441,62 +441,55 @@ console.log('[dashboard_cliente] Script iniciado.');
     if (elTot) elTot.textContent = brl(total);
   }
 
-  // ========== FINALIZAR PEDIDO ==========
+    // ========== FINALIZAR PEDIDO (ENVIA PARA O BACKEND) ==========
   var btnFinalizar = document.getElementById('btnFinalizarPedido');
   if (btnFinalizar) {
     btnFinalizar.addEventListener('click', function () {
       if (!carrinho.length) return toast('Adicione itens ao carrinho antes de finalizar.', true);
+      
       var sub = carrinho.reduce(function (s, i) { return s + (i.preco * i.qtd); }, 0);
       var taxa = sub * 0.10;
       var total = sub + taxa;
       var obs = (document.getElementById('obsPedido') || {}).value || '';
 
       var pedido = {
-        id: Date.now(),
         numero: '#CLI' + String(Date.now()).slice(-6),
-        cliente: usuarioAtual.nome,
-        data: new Date().toISOString(),
-        status: 'Em preparo',
-        obs: obs,
+        mesa: null,
+        cliente_id: usuarioAtual.id || null,
+        data: new Date().toISOString().split('T')[0],
+        hora: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
         subtotal: sub,
         taxa: taxa,
         total: total,
+        status: 'Em preparo',
+        observacao: obs,
         itens: carrinho.map(function (i) {
           return { nome: i.nome, qtd: i.qtd, preco: i.preco };
         })
       };
 
-      var pedidos = [];
-      try { pedidos = JSON.parse(localStorage.getItem('br_pedidos_cliente_' + usuarioAtual.email)) || []; } catch (e) {}
-      pedidos.unshift(pedido);
-      try { localStorage.setItem('br_pedidos_cliente_' + usuarioAtual.email, JSON.stringify(pedidos)); } catch (e) {}
+      btnFinalizar.disabled = true;
+      btnFinalizar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
 
-      try {
-        var rel = JSON.parse(localStorage.getItem('br_relatorio_balcao')) || [];
-        rel.unshift({
-          numero: pedido.numero,
-          cliente: pedido.cliente,
-          total: pedido.total,
-          data: pedido.data.split('T')[0],
-          hora: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-          status: 'Pago',
-          mesa: null
-        });
-        localStorage.setItem('br_relatorio_balcao', JSON.stringify(rel));
-      } catch (e) {}
-
-      carrinho = [];
-      salvarCarrinho();
-      atualizarBadgeCarrinho();
-      renderizarCarrinho();
-
-      toast('Pedido ' + pedido.numero + ' realizado com sucesso! 🎉');
-      setTimeout(function () {
-        navegarPara('pedidos');
-        renderizarPedidos();
-      }, 800);
+      pedir('POST', '/api/pedidos', pedido).then(function (r) {
+        btnFinalizar.disabled = false;
+        btnFinalizar.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Finalizar Pedido';
+        
+        if (!r.ok) return toast(r.erro || 'Erro ao finalizar pedido.', true);
+        
+        carrinho = [];
+        salvarCarrinho();
+        atualizarBadgeCarrinho();
+        renderizarCarrinho();
+        toast('Pedido ' + pedido.numero + ' realizado! Acompanhe em "Meus Pedidos".');
+        setTimeout(function () { navegarPara('pedidos'); renderizarPedidos(); }, 800);
+      });
     });
   }
+
+  // Pagamento fictício (modal antes de finalizar)
+  // Adicione um botão "Pagar" no carrinho que abre um modal com opções: PIX, Cartão, Dinheiro
+  // Após confirmar, chama a função acima.
 
   // ========== MEUS PEDIDOS ==========
   function renderizarPedidos() {

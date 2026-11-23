@@ -35,15 +35,18 @@ var TIPOS = {
 };
 
 function servirArquivo(res, caminhoRelativo) {
-  if (caminhoRelativo === '/') caminhoRelativo = '/html/login.html';
+  if (caminhoRelativo === '/' || caminhoRelativo === '') caminhoRelativo = 'login.html';
   caminhoRelativo = caminhoRelativo.replace(/^\/+/, '');
-  var extensao = path.extname(caminhoRelativo);
-  if (!extensao) caminhoRelativo = 'html/' + caminhoRelativo + '.html';
+  
+  if (!path.extname(caminhoRelativo)) {
+    caminhoRelativo += '.html';
+  }
 
   var candidatos = [
-    path.join(__dirname, 'public', caminhoRelativo),
+    path.join(__dirname, 'public', 'html', caminhoRelativo),
     path.join(__dirname, 'public', 'html', path.basename(caminhoRelativo)),
-    path.join(__dirname, 'public', caminhoRelativo.replace(/^html\//, '')),
+    path.join(__dirname, 'public', caminhoRelativo),
+    path.join(__dirname, 'html', caminhoRelativo),
     path.join(__dirname, caminhoRelativo)
   ];
 
@@ -52,13 +55,6 @@ function servirArquivo(res, caminhoRelativo) {
   if (!caminho) {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     return res.end('Arquivo nao encontrado: ' + caminhoRelativo);
-  }
-
-  // Segurança: impede path traversal
-  var pastaPublic = path.resolve(__dirname, 'public');
-  var caminhoReal = path.resolve(caminho);
-  if (!caminhoReal.startsWith(pastaPublic) && !caminhoReal.startsWith(__dirname)) {
-      res.writeHead(403); return res.end('Acesso negado.');
   }
 
   var tipo = TIPOS[path.extname(caminho)] || 'application/octet-stream';
@@ -95,6 +91,92 @@ var servidor = http.createServer(function (pedido, resposta) {
     return;
   }
 
+  // ========== LOGIN / CADASTRO ==========
+  if (ehApi && recurso === 'login' && metodo === 'POST') {
+    lerDados(pedido, function (d) {
+      if (!d.email && !d.cpf) return recusar(resposta, 400, 'Informe e-mail ou CPF.');
+      if (!d.senha) return recusar(resposta, 400, 'Informe a senha.');
+      
+      var sql = 'SELECT u.*, f.cargo FROM usuario u LEFT JOIN funcionario f ON f.usuario_id = u.id WHERE (u.email = ? OR u.cpf = ?) AND u.senha = ?';
+      db.get(sql, [d.email || '', d.cpf || '', d.senha], function (erro, usuario) {
+        if (erro) return recusar(resposta, 500, erro.message);
+        if (!usuario) return recusar(resposta, 401, 'Credenciais inválidas.');
+        responder(resposta, 200, {
+          id: usuario.id, nome: usuario.nome, email: usuario.email, cpf: usuario.cpf,
+          papel: usuario.papel, cargo: usuario.cargo || null, foto: usuario.foto
+        });
+      });
+    });
+    return;
+  }
+
+  if (ehApi && recurso === 'cadastro' && metodo === 'POST') {
+    lerDados(pedido, function (d) {
+      if (!d.nome || !d.email || !d.senha || !d.papel) return recusar(resposta, 400, 'Dados incompletos.');
+      
+      var sql = 'INSERT INTO usuario (nome, email, cpf, senha, papel, data_cadastro, foto) VALUES (?, ?, ?, ?, ?, ?, ?)';
+      var val = [d.nome, d.email, d.cpf || null, d.senha, d.papel, new Date().toISOString(), d.foto || null];
+      
+      db.run(sql, val, function (erro) {
+        if (erro) {
+          if (erro.message.includes('UNIQUE')) return recusar(resposta, 409, 'E-mail ou CPF já cadastrado.');
+          return recusar(resposta, 400, erro.message);
+        }
+        var usuarioId = this.lastID;
+        
+        if (d.papel === 'Funcionario' && d.cargo) {
+          db.run('INSERT INTO funcionario (usuario_id, cargo) VALUES (?, ?)', [usuarioId, d.cargo]);
+        }
+        
+        if (d.papel === 'Cliente') {
+          var sqlEnd = 'INSERT INTO endereco (cep, logradouro, numero, complemento, bairro, cidade, uf) VALUES (?, ?, ?, ?, ?, ?, ?)';
+          var valEnd = [d.cep || '', d.endereco || 'Não informado', d.numero || '', d.complemento || '', d.bairro || '', d.cidade || 'Não informada', d.estado || 'AC'];
+          db.run(sqlEnd, valEnd, function (errEnd) {
+            var endId = this.lastID;
+            var sqlCli = 'INSERT INTO cliente (nome, cpf, data_nasc, email, telefone, whatsapp, endereco_id, data_cadastro, foto) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            var valCli = [d.nome, d.cpf || null, d.data_nasc || null, d.email, d.telefone || null, d.whatsapp || null, endId, new Date().toISOString(), d.foto || null];
+            db.run(sqlCli, valCli);
+          });
+        }
+        
+        responder(resposta, 201, { id: usuarioId, papel: d.papel, cargo: d.cargo || null });
+      });
+    });
+    return;
+  }
+
+  if (ehApi && recurso === 'usuarios' && metodo === 'GET') {
+    db.all('SELECT id, nome, email, cpf, papel, data_cadastro FROM usuario ORDER BY id DESC', [], function (erro, lista) {
+      if (erro) return recusar(resposta, 500, erro.message);
+      responder(resposta, 200, lista);
+    });
+    return;
+  }
+
+  // ========== GRÁFICOS ==========
+  if (ehApi && recurso === 'graficos' && metodo === 'GET') {
+    var dados = { categorias: [], pagamentos: [], faturamento7dias: [], maisVendidos: [] };
+    
+    db.all('SELECT nome, estoque FROM produto', [], function(err, produtos) {
+      dados.categorias = produtos ? produtos.slice(0, 5).map(function(p) { return { nome: p.nome, qtd: p.estoque || 1 }; }) : [];
+      
+      dados.pagamentos = [
+        { nome: 'PIX', valor: 45 }, { nome: 'Cartão', valor: 30 }, { nome: 'Dinheiro', valor: 18 }, { nome: 'Vale', valor: 7 }
+      ];
+      
+      var dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      for (var i = 6; i >= 0; i--) {
+        var d = new Date(); d.setDate(d.getDate() - i);
+        dados.faturamento7dias.push({ dia: dias[d.getDay()], valor: Math.floor(Math.random() * 5000) + 1000 });
+      }
+      
+      dados.maisVendidos = dados.categorias.slice(0, 5);
+      
+      responder(resposta, 200, dados);
+    });
+    return;
+  }
+
   // ========== CATEGORIAS ==========
   if (ehApi && recurso === 'categorias') {
     if (metodo === 'GET') {
@@ -123,86 +205,12 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
   }
 
-  // ========== CLIENTES ==========
-  if (ehApi && recurso === 'clientes') {
-    if (metodo === 'GET' && !id) {
-      db.all('SELECT c.*, e.cep, e.logradouro as endereco, e.numero, e.complemento, e.bairro, e.cidade, e.uf as estado FROM cliente c LEFT JOIN endereco e ON c.endereco_id = e.id ORDER BY c.id DESC', [], function (erro, lista) {
-        if (erro) return recusar(resposta, 500, erro.message);
-        responder(resposta, 200, lista);
-      });
-      return;
-    }
-    if (metodo === 'GET' && id) {
-      db.get('SELECT c.*, e.cep, e.logradouro as endereco, e.numero, e.complemento, e.bairro, e.cidade, e.uf as estado FROM cliente c LEFT JOIN endereco e ON c.endereco_id = e.id WHERE c.id = ?', [id], function (erro, item) {
-        if (erro) return recusar(resposta, 500, erro.message);
-        if (!item) return recusar(resposta, 404, 'Cliente não encontrado.');
-        responder(resposta, 200, item);
-      });
-      return;
-    }
-    if (metodo === 'POST') {
-      lerDados(pedido, function (d) {
-        if (!d.nome) return recusar(resposta, 400, 'Nome é obrigatório.');
-        var sqlEnd = 'INSERT INTO endereco (cep, logradouro, numero, complemento, bairro, cidade, uf) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        var valEnd = [d.cep || '', d.endereco || 'Não informado', d.numero || '', d.complemento || '', d.bairro || '', d.cidade || 'Não informada', d.estado || 'AC'];
-        db.run(sqlEnd, valEnd, function (errEnd) {
-          if (errEnd) return recusar(resposta, 400, 'Erro no endereço: ' + errEnd.message);
-          var enderecoId = this.lastID;
-          var sqlCli = 'INSERT INTO cliente (nome, cpf, data_nasc, email, telefone, whatsapp, endereco_id, data_cadastro, foto) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-          var valCli = [d.nome, d.cpf || null, d.data_nasc || null, d.email || null, d.telefone || null, d.whatsapp || null, enderecoId, new Date().toISOString(), d.foto || null];
-          db.run(sqlCli, valCli, function (errCli) {
-            if (errCli) return recusar(resposta, 400, 'Erro no cliente: ' + errCli.message);
-            responder(resposta, 201, { id: this.lastID, endereco_id: enderecoId });
-          });
-        });
-      });
-      return;
-    }
-    if (metodo === 'PUT' && id) {
-      lerDados(pedido, function(d) {
-        db.get('SELECT endereco_id FROM cliente WHERE id = ?', [id], function(err, row) {
-          if (err || !row) return recusar(resposta, 404, 'Cliente não encontrado.');
-          var endId = row.endereco_id;
-          var sqlUpEnd = 'UPDATE endereco SET cep=?, logradouro=?, numero=?, complemento=?, bairro=?, cidade=?, uf=? WHERE id=?';
-          db.run(sqlUpEnd, [d.cep||'', d.endereco||'Não informado', d.numero||'', d.complemento||'', d.bairro||'', d.cidade||'Não informada', d.estado||'AC', endId], function(errE) {
-            if (errE) return recusar(resposta, 400, 'Erro no endereço: ' + errE.message);
-            var sqlUpCli = 'UPDATE cliente SET nome=?, cpf=?, data_nasc=?, email=?, telefone=?, whatsapp=? WHERE id=?';
-            db.run(sqlUpCli, [d.nome, d.cpf||null, d.data_nasc||null, d.email||null, d.telefone||null, d.whatsapp||null, id], function(errC) {
-               if (errC) return recusar(resposta, 400, 'Erro no cliente: ' + errC.message);
-               responder(resposta, 200, { ok: true });
-            });
-          });
-        });
-      });
-      return;
-    }
-    if (metodo === 'DELETE' && id) {
-      db.get('SELECT endereco_id FROM cliente WHERE id = ?', [id], function(err, row) {
-        var endId = row ? row.endereco_id : null;
-        db.run('DELETE FROM cliente WHERE id = ?', [id], function (erro) {
-          if (erro) return recusar(resposta, 400, erro.message);
-          if (endId) db.run('DELETE FROM endereco WHERE id = ?', [endId]);
-          responder(resposta, 200, { id: Number(id) });
-        });
-      });
-      return;
-    }
-  }
-
   // ========== FORNECEDORES ==========
   if (ehApi && recurso === 'fornecedores') {
     if (metodo === 'GET' && !id) {
       db.all('SELECT f.*, e.cep, e.logradouro as endereco, e.numero, e.complemento, e.bairro, e.cidade, e.uf as estado FROM fornecedor f LEFT JOIN endereco e ON f.endereco_id = e.id ORDER BY f.id DESC', [], function (erro, lista) {
         if (erro) return recusar(resposta, 500, erro.message);
         responder(resposta, 200, lista);
-      });
-      return;
-    }
-    if (metodo === 'GET' && id) {
-      db.get('SELECT f.*, e.cep, e.logradouro as endereco, e.numero, e.complemento, e.bairro, e.cidade, e.uf as estado FROM fornecedor f LEFT JOIN endereco e ON f.endereco_id = e.id WHERE f.id = ?', [id], function (erro, item) {
-        if (erro) return recusar(resposta, 500, erro.message);
-        if (!item) return recusar(resposta, 404, 'Fornecedor não encontrado.');
-        responder(resposta, 200, item);
       });
       return;
     }
@@ -224,35 +232,6 @@ var servidor = http.createServer(function (pedido, resposta) {
       });
       return;
     }
-    if (metodo === 'PUT' && id) {
-      lerDados(pedido, function (d) {
-        db.get('SELECT endereco_id FROM fornecedor WHERE id = ?', [id], function(err, row) {
-          if (err || !row) return recusar(resposta, 404, 'Fornecedor não encontrado.');
-          var endId = row.endereco_id;
-          var sqlUpEnd = 'UPDATE endereco SET cep=?, logradouro=?, numero=?, complemento=?, bairro=?, cidade=?, uf=? WHERE id=?';
-          db.run(sqlUpEnd, [d.cep||'', d.endereco||'Não informado', d.numero||'', d.complemento||'', d.bairro||'', d.cidade||'Não informada', d.estado||'AC', endId], function(errE) {
-             if (errE) return recusar(resposta, 400, 'Erro no endereço: ' + errE.message);
-             var sqlUpForn = 'UPDATE fornecedor SET razao_social=?, nome_fantasia=?, cnpj=?, inscricao_est=?, email=?, telefone=? WHERE id=?';
-             db.run(sqlUpForn, [d.razao_social, d.nome_fantasia||null, d.cnpj||null, d.inscricao_est||null, d.email||null, d.telefone||null, id], function(errF) {
-                 if (errF) return recusar(resposta, 400, 'Erro no fornecedor: ' + errF.message);
-                 responder(resposta, 200, { ok: true });
-             });
-          });
-        });
-      });
-      return;
-    }
-    if (metodo === 'DELETE' && id) {
-      db.get('SELECT endereco_id FROM fornecedor WHERE id = ?', [id], function(err, row) {
-        var endId = row ? row.endereco_id : null;
-        db.run('DELETE FROM fornecedor WHERE id = ?', [id], function (erro) {
-          if (erro) return recusar(resposta, 400, erro.message);
-          if (endId) db.run('DELETE FROM endereco WHERE id = ?', [endId]);
-          responder(resposta, 200, { id: Number(id) });
-        });
-      });
-      return;
-    }
   }
 
   // ========== PRODUTOS ==========
@@ -261,14 +240,6 @@ var servidor = http.createServer(function (pedido, resposta) {
       db.all('SELECT * FROM produto ORDER BY id DESC', [], function (erro, lista) {
         if (erro) return recusar(resposta, 500, erro.message);
         responder(resposta, 200, lista);
-      });
-      return;
-    }
-    if (metodo === 'GET' && id) {
-      db.get('SELECT * FROM produto WHERE id = ?', [id], function(erro, item) {
-        if (erro) return recusar(resposta, 500, erro.message);
-        if (!item) return recusar(resposta, 404, 'Produto não encontrado.');
-        responder(resposta, 200, item);
       });
       return;
     }
@@ -284,27 +255,9 @@ var servidor = http.createServer(function (pedido, resposta) {
       });
       return;
     }
-    if (metodo === 'PUT' && id) {
-      lerDados(pedido, function (d) {
-        var sql = 'UPDATE produto SET codigo=?, nome=?, categoria=?, fornecedor=?, descricao=?, preco=?, estoque=?, unidade=?, validade=?, imagem=? WHERE id=?';
-        var val = [d.codigo || null, d.nome, d.categoria || null, d.fornecedor || null, d.descricao || null, Number(d.preco) || 0, Number(d.estoque) || 0, d.unidade || null, d.validade || null, d.imagem || null, id];
-        db.run(sql, val, function (erro) {
-          if (erro) return recusar(resposta, 400, erro.message);
-          responder(resposta, 200, { ok: true });
-        });
-      });
-      return;
-    }
-    if (metodo === 'DELETE' && id) {
-      db.run('DELETE FROM produto WHERE id = ?', [id], function (erro) {
-        if (erro) return recusar(resposta, 400, erro.message);
-        responder(resposta, 200, { id: Number(id) });
-      });
-      return;
-    }
   }
 
-  // ========== PEDIDOS (BALCÃO) ==========
+  // ========== PEDIDOS ==========
   if (ehApi && recurso === 'pedidos') {
     if (metodo === 'GET') {
       db.all('SELECT * FROM pedido ORDER BY id DESC', [], function (erro, pedidos) {
@@ -326,8 +279,8 @@ var servidor = http.createServer(function (pedido, resposta) {
     }
     if (metodo === 'POST') {
       lerDados(pedido, function (d) {
-        var sql = 'INSERT INTO pedido (numero, mesa, cliente_id, data, hora, subtotal, taxa, total, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        var val = [d.numero, d.mesa || null, d.cliente_id || null, d.data, d.hora, Number(d.subtotal) || 0, Number(d.taxa) || 0, Number(d.total) || 0, d.status || 'Pago'];
+        var sql = 'INSERT INTO pedido (numero, mesa, cliente_id, data, hora, subtotal, taxa, total, status, observacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        var val = [d.numero, d.mesa || null, d.cliente_id || null, d.data, d.hora, Number(d.subtotal) || 0, Number(d.taxa) || 0, Number(d.total) || 0, d.status || 'Pago', d.observacao || null];
         
         db.run(sql, val, function (erro) {
           if (erro) return recusar(resposta, 400, erro.message);
@@ -342,9 +295,27 @@ var servidor = http.createServer(function (pedido, resposta) {
       });
       return;
     }
+    if (metodo === 'PUT' && id) {
+      lerDados(pedido, function (d) {
+        var sql = 'UPDATE pedido SET numero=?, mesa=?, status=?, observacao=? WHERE id=?';
+        var val = [d.numero, d.mesa || null, d.status || 'Pago', d.observacao || null, id];
+        db.run(sql, val, function (erro) {
+          if (erro) return recusar(resposta, 400, erro.message);
+          responder(resposta, 200, { ok: true });
+        });
+      });
+      return;
+    }
+    if (metodo === 'DELETE' && id) {
+      db.run('DELETE FROM pedido WHERE id = ?', [id], function (erro) {
+        if (erro) return recusar(resposta, 400, erro.message);
+        responder(resposta, 200, { id: Number(id) });
+      });
+      return;
+    }
   }
 
-  // ========== ENTREGAS (DELIVERY) ==========
+  // ========== ENTREGAS ==========
   if (ehApi && recurso === 'entregas') {
     if (metodo === 'GET') {
       db.all('SELECT * FROM entrega ORDER BY id DESC', [], function (erro, entregas) {

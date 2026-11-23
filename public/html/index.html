@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,36 +8,196 @@
   <link rel="icon" type="image/png" href="../img/logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="stylesheet" href="../css/extra.css" />
 
   <style>
-    .br-ov { position: fixed; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 999998; padding: 20px; }
-    .produto-detalhe { background: linear-gradient(145deg, #1F1610, #17100A); border: 1px solid rgba(232, 93, 38, 0.45); border-radius: 20px; width: min(520px, 94vw); max-height: 92vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,.65), 0 0 60px rgba(232,93,38,.25); animation: popIn .35s cubic-bezier(.22,1,.36,1); }
-    @keyframes popIn { from { opacity: 0; transform: scale(.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-    .produto-detalhe__img { width: 100%; height: 240px; overflow: hidden; background: radial-gradient(circle, rgba(232,93,38,.25), #120C08 70%); position: relative; }
-    .produto-detalhe__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .produto-detalhe__close { position: absolute; top: 14px; right: 14px; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,.65); color: #fff; display: grid; place-items: center; cursor: pointer; transition: background .2s, transform .2s; border: 1px solid rgba(255,255,255,.15); backdrop-filter: blur(6px); font-size: 15px; }
-    .produto-detalhe__close:hover { background: #E85D26; transform: rotate(90deg); }
-    .produto-detalhe__body { padding: 24px 26px 26px; }
-    .produto-detalhe__tag { display: inline-block; padding: 4px 12px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #E85D26; background: rgba(232,93,38,.12); border: 1px solid rgba(232,93,38,.3); margin-bottom: 10px; }
-    .produto-detalhe h3 { font: 700 26px 'Playfair Display', serif; color: #fff; margin-bottom: 10px; line-height: 1.2; }
-    .produto-detalhe__desc { color: #A89078; font-size: 14px; line-height: 1.6; margin-bottom: 18px; }
-    .produto-detalhe__info { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-    .produto-detalhe__info-item { flex: 1; min-width: 120px; padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(201,179,147,.12); }
-    .produto-detalhe__info-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.2px; color: #A89078; font-weight: 600; margin-bottom: 4px; }
-    .produto-detalhe__info-valor { font-size: 18px; font-weight: 700; color: #FF7A3D; font-family: 'Playfair Display', serif; }
-    .produto-detalhe__btn { width: 100%; padding: 15px; border-radius: 12px; background: linear-gradient(135deg, #E85D26, #7A1010); color: #fff; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 6px 20px rgba(232,93,38,.4); transition: transform .2s, box-shadow .2s; text-decoration: none; }
-    .produto-detalhe__btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(232,93,38,.55); }
-    .pcard { cursor: pointer; }
+    .br-ov {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999998;
+      padding: 20px;
+    }
+
+    .produto-detalhe {
+      background: linear-gradient(145deg, #1F1610, #17100A);
+      border: 1px solid rgba(232, 93, 38, 0.45);
+      border-radius: 20px;
+      width: min(520px, 94vw);
+      max-height: 92vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .65), 0 0 60px rgba(232, 93, 38, .25);
+      animation: popIn .35s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(.9) translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .produto-detalhe__img {
+      width: 100%;
+      height: 240px;
+      overflow: hidden;
+      background: radial-gradient(circle, rgba(232, 93, 38, .25), #120C08 70%);
+      position: relative;
+    }
+
+    .produto-detalhe__img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .produto-detalhe__close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, .65);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+      border: 1px solid rgba(255, 255, 255, .15);
+      backdrop-filter: blur(6px);
+      font-size: 15px;
+    }
+
+    .produto-detalhe__close:hover {
+      background: #E85D26;
+      transform: rotate(90deg);
+    }
+
+    .produto-detalhe__body {
+      padding: 24px 26px 26px;
+    }
+
+    .produto-detalhe__tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #E85D26;
+      background: rgba(232, 93, 38, .12);
+      border: 1px solid rgba(232, 93, 38, .3);
+      margin-bottom: 10px;
+    }
+
+    .produto-detalhe h3 {
+      font: 700 26px 'Playfair Display', serif;
+      color: #fff;
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+
+    .produto-detalhe__desc {
+      color: #A89078;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    .produto-detalhe__info {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .produto-detalhe__info-item {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(201, 179, 147, .12);
+    }
+
+    .produto-detalhe__info-label {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #A89078;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .produto-detalhe__info-valor {
+      font-size: 18px;
+      font-weight: 700;
+      color: #FF7A3D;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .produto-detalhe__btn {
+      width: 100%;
+      padding: 15px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #E85D26, #7A1010);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 6px 20px rgba(232, 93, 38, .4);
+      transition: transform .2s, box-shadow .2s;
+      text-decoration: none;
+    }
+
+    .produto-detalhe__btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(232, 93, 38, .55);
+    }
+
+    .pcard {
+      cursor: pointer;
+    }
 
     /* Novas regras para as tabelas lado a lado */
-    .split-tables { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 36px; }
-    @media (max-width: 900px) { .split-tables { grid-template-columns: 1fr; } }
+    .split-tables {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 36px;
+    }
+
+    @media (max-width: 900px) {
+      .split-tables {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
+
 <body>
   <div class="app">
     <aside class="sidebar" id="sidebar">
@@ -49,11 +210,11 @@
       </div>
 
       <div class="sidebar__search-wrap">
-          <label class="top-search">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="topSearch" placeholder="Buscar...">
-          </label>
-          <div class="top-search__results" id="topSearchResults" style="display:none;"></div>
+        <label class="top-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="topSearch" placeholder="Buscar...">
+        </label>
+        <div class="top-search__results" id="topSearchResults" style="display:none;"></div>
       </div>
 
       <nav class="sidebar__nav">
@@ -86,7 +247,8 @@
       <main class="content">
         <div class="page-head">
           <div>
-            <div class="breadcrumbs"><i class="fa-solid fa-house"></i> Início <i class="fa-solid fa-chevron-right"></i> <span class="current">Dashboard</span></div>
+            <div class="breadcrumbs"><i class="fa-solid fa-house"></i> Início <i class="fa-solid fa-chevron-right"></i>
+              <span class="current">Dashboard</span></div>
             <h2 class="page-head__title">Bem-vindo de volta! 🔥</h2>
             <p class="page-head__subtitle">Confira o resumo do dia e acesse rapidamente os módulos do sistema.</p>
           </div>
@@ -129,27 +291,63 @@
 
         <section class="pgrid" id="pgridCardapio">
           <!-- Cards mantidos iguais -->
-          <div class="pcard" data-produto="0"><div class="pcard__img"><img src="../img/produtos/boi-ralado.jpg" alt="Boi Ralado Tradicional" loading="lazy"></div><h4>Boi Ralado Tradicional</h4></div>
-          <div class="pcard" data-produto="1"><div class="pcard__img"><img src="../img/produtos/hamburguer.jpg" alt="Hambúrguer Boi Ralado" loading="lazy"></div><h4>Hambúrguer Boi Ralado</h4></div>
-          <div class="pcard" data-produto="2"><div class="pcard__img"><img src="../img/produtos/pastel.jpg" alt="Pastel de Boi Ralado" loading="lazy"></div><h4>Pastel de Boi Ralado</h4></div>
-          <div class="pcard" data-produto="3"><div class="pcard__img"><img src="../img/produtos/picanha.jpg" alt="Picanha na Chapa" loading="lazy"></div><h4>Picanha na Chapa</h4></div>
-          <div class="pcard" data-produto="4"><div class="pcard__img"><img src="../img/produtos/executivo.jpg" alt="Prato Executivo da Casa" loading="lazy"></div><h4>Prato Executivo da Casa</h4></div>
-          <div class="pcard" data-produto="5"><div class="pcard__img"><img src="../img/produtos/batata.jpg" alt="Batata Rústica" loading="lazy"></div><h4>Batata Rústica</h4></div>
-          <div class="pcard" data-produto="6"><div class="pcard__img"><img src="../img/produtos/suco.jpg" alt="Suco de Laranja" loading="lazy"></div><h4>Suco de Laranja</h4></div>
-          <div class="pcard" data-produto="7"><div class="pcard__img"><img src="../img/produtos/mousse.webp" alt="Mousse de Maracujá" loading="lazy"></div><h4>Mousse de Maracujá</h4></div>
+          <div class="pcard" data-produto="0">
+            <div class="pcard__img"><img src="../img/produtos/boi-ralado.jpg" alt="Boi Ralado Tradicional"
+                loading="lazy"></div>
+            <h4>Boi Ralado Tradicional</h4>
+          </div>
+          <div class="pcard" data-produto="1">
+            <div class="pcard__img"><img src="../img/produtos/hamburguer.jpg" alt="Hambúrguer Boi Ralado"
+                loading="lazy"></div>
+            <h4>Hambúrguer Boi Ralado</h4>
+          </div>
+          <div class="pcard" data-produto="2">
+            <div class="pcard__img"><img src="../img/produtos/pastel.jpg" alt="Pastel de Boi Ralado" loading="lazy">
+            </div>
+            <h4>Pastel de Boi Ralado</h4>
+          </div>
+          <div class="pcard" data-produto="3">
+            <div class="pcard__img"><img src="../img/produtos/picanha.jpg" alt="Picanha na Chapa" loading="lazy"></div>
+            <h4>Picanha na Chapa</h4>
+          </div>
+          <div class="pcard" data-produto="4">
+            <div class="pcard__img"><img src="../img/produtos/executivo.jpg" alt="Prato Executivo da Casa"
+                loading="lazy"></div>
+            <h4>Prato Executivo da Casa</h4>
+          </div>
+          <div class="pcard" data-produto="5">
+            <div class="pcard__img"><img src="../img/produtos/batata.jpg" alt="Batata Rústica" loading="lazy"></div>
+            <h4>Batata Rústica</h4>
+          </div>
+          <div class="pcard" data-produto="6">
+            <div class="pcard__img"><img src="../img/produtos/suco.jpg" alt="Suco de Laranja" loading="lazy"></div>
+            <h4>Suco de Laranja</h4>
+          </div>
+          <div class="pcard" data-produto="7">
+            <div class="pcard__img"><img src="../img/produtos/mousse.webp" alt="Mousse de Maracujá" loading="lazy">
+            </div>
+            <h4>Mousse de Maracujá</h4>
+          </div>
         </section>
 
-        <h3 class="section-title">Desempenho da <em>semana</em></h3>
-        <p class="section-subtitle">Salão + delivery — dados consolidados dos últimos 7 dias.</p>
+        <canvas id="graficoPizza"></canvas>
+<canvas id="graficoRosca"></canvas>
+<canvas id="graficoLinha"></canvas>
+<canvas id="graficoBarra"></canvas>
+<canvas id="graficoColuna"></canvas>
 
         <section class="charts">
           <div class="chart-card">
             <h3>Formas de pagamento</h3>
             <svg class="pie" viewBox="0 0 42 42">
-              <circle r="10.5" cx="21" cy="21" fill="none" stroke="#E85D26" stroke-width="21" stroke-dasharray="45 55" stroke-dashoffset="0"></circle>
-              <circle r="10.5" cx="21" cy="21" fill="none" stroke="#FFB36B" stroke-width="21" stroke-dasharray="30 70" stroke-dashoffset="-45"></circle>
-              <circle r="10.5" cx="21" cy="21" fill="none" stroke="#A61B1B" stroke-width="21" stroke-dasharray="18 82" stroke-dashoffset="-75"></circle>
-              <circle r="10.5" cx="21" cy="21" fill="none" stroke="#C9B393" stroke-width="21" stroke-dasharray="7 93" stroke-dashoffset="-93"></circle>
+              <circle r="10.5" cx="21" cy="21" fill="none" stroke="#E85D26" stroke-width="21" stroke-dasharray="45 55"
+                stroke-dashoffset="0"></circle>
+              <circle r="10.5" cx="21" cy="21" fill="none" stroke="#FFB36B" stroke-width="21" stroke-dasharray="30 70"
+                stroke-dashoffset="-45"></circle>
+              <circle r="10.5" cx="21" cy="21" fill="none" stroke="#A61B1B" stroke-width="21" stroke-dasharray="18 82"
+                stroke-dashoffset="-75"></circle>
+              <circle r="10.5" cx="21" cy="21" fill="none" stroke="#C9B393" stroke-width="21" stroke-dasharray="7 93"
+                stroke-dashoffset="-93"></circle>
             </svg>
             <div class="lg">
               <span><i style="background:#E85D26"></i>PIX 45%</span>
@@ -174,34 +372,47 @@
         <div class="split-tables">
           <div class="table-wrap">
             <div class="table-actions">
-              <h3><i class="fa-solid fa-store" style="color:var(--color-red); margin-right:6px;"></i> Últimos Pedidos - Balcão</h3>
+              <h3><i class="fa-solid fa-store" style="color:var(--color-red); margin-right:6px;"></i> Últimos Pedidos -
+                Balcão</h3>
               <a href="pedido.html" class="btn btn--ghost btn--sm">Ver todos <i class="fa-solid fa-arrow-right"></i></a>
             </div>
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>#</th><th>Cliente</th><th class="num">Valor</th><th>Status</th>
+                  <th>#</th>
+                  <th>Cliente</th>
+                  <th class="num">Valor</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody id="tbodyBalcao">
-                <tr><td colspan="4" class="text-center">Carregando pedidos...</td></tr>
+                <tr>
+                  <td colspan="4" class="text-center">Carregando pedidos...</td>
+                </tr>
               </tbody>
             </table>
           </div>
 
           <div class="table-wrap">
             <div class="table-actions">
-              <h3><i class="fa-solid fa-motorcycle" style="color:var(--color-red); margin-right:6px;"></i> Últimos Pedidos - Delivery</h3>
-              <a href="entrega.html" class="btn btn--ghost btn--sm">Ver todos <i class="fa-solid fa-arrow-right"></i></a>
+              <h3><i class="fa-solid fa-motorcycle" style="color:var(--color-red); margin-right:6px;"></i> Últimos
+                Pedidos - Delivery</h3>
+              <a href="entrega.html" class="btn btn--ghost btn--sm">Ver todos <i
+                  class="fa-solid fa-arrow-right"></i></a>
             </div>
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>#</th><th>Cliente</th><th class="num">Valor</th><th>Status</th>
+                  <th>#</th>
+                  <th>Cliente</th>
+                  <th class="num">Valor</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody id="tbodyDelivery">
-                <tr><td colspan="4" class="text-center">Carregando pedidos...</td></tr>
+                <tr>
+                  <td colspan="4" class="text-center">Carregando pedidos...</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -212,7 +423,8 @@
         <div class="pz__grid">
           <div>
             <div class="pz__brand"><img src="../img/logo-puzles.png" alt="Puzles Softwares"><b>Boi Ralado</b></div>
-            <p>Tradição, sabor de fogo e carne de verdade. Do boi ralado ao prato executivo, feito com carinho todos os dias.</p>
+            <p>Tradição, sabor de fogo e carne de verdade. Do boi ralado ao prato executivo, feito com carinho todos os
+              dias.</p>
           </div>
           <div>
             <h5>Navegação</h5>
@@ -230,14 +442,17 @@
           </div>
           <div>
             <h5>Redes Sociais</h5>
-            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank"><i class="fa-brands fa-instagram"></i> Instagram</a>
+            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank"><i class="fa-brands fa-instagram"></i>
+              Instagram</a>
           </div>
         </div>
         <div class="pz__bar">
           <span>© 2026 Boi Ralado. Todos os direitos reservados.</span>
-          <span class="pz__by">Desenvolvido com <i class="fa-solid fa-fire"></i> por <a href="#" class="pz__logo"><i class="fa-solid fa-puzzle-piece"></i> Puzles</a></span>
+          <span class="pz__by">Desenvolvido com <i class="fa-solid fa-fire"></i> por <a href="#" class="pz__logo"><i
+                class="fa-solid fa-puzzle-piece"></i> Puzles</a></span>
           <span class="pz__soc">
-            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank" title="Instagram"><i
+                class="fa-brands fa-instagram"></i></a>
           </span>
         </div>
       </footer>
@@ -245,5 +460,8 @@
   </div>
   <script src="../js/app.js"></script>
   <script src="../js/index.js"></script>
+  <script src="../js/grafico.js"></script>
+
 </body>
+
 </html>

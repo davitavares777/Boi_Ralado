@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,29 +8,59 @@
   <link rel="icon" type="image/png" href="../img/logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="../css/style.css" />
 
   <style>
     .cat-tag {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 14px; border-radius: 99px;
-      background: rgba(232,93,38,.12); border: 1px solid rgba(232,93,38,.35);
-      color: var(--ink-100); font-size: 13px; font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 99px;
+      background: rgba(232, 93, 38, .12);
+      border: 1px solid rgba(232, 93, 38, .35);
+      color: var(--ink-100);
+      font-size: 13px;
+      font-weight: 600;
       transition: background .2s, border-color .2s;
     }
-    .cat-tag:hover { background: rgba(232,93,38,.2); border-color: var(--ember); }
-    .cat-tag i.fa-tag { color: var(--ember-light); font-size: 11px; }
-    .cat-tag .cat-del {
-      margin-left: 4px; width: 20px; height: 20px; border-radius: 50%;
-      background: rgba(248,113,113,.15); color: #F87171;
-      display: grid; place-items: center; font-size: 11px;
-      transition: background .15s, color .15s; cursor: pointer; border: 0;
+
+    .cat-tag:hover {
+      background: rgba(232, 93, 38, .2);
+      border-color: var(--ember);
     }
-    .cat-tag .cat-del:hover { background: #F87171; color: #fff; }
+
+    .cat-tag i.fa-tag {
+      color: var(--ember-light);
+      font-size: 11px;
+    }
+
+    .cat-tag .cat-del {
+      margin-left: 4px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(248, 113, 113, .15);
+      color: #F87171;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      transition: background .15s, color .15s;
+      cursor: pointer;
+      border: 0;
+    }
+
+    .cat-tag .cat-del:hover {
+      background: #F87171;
+      color: #fff;
+    }
   </style>
 </head>
+
 <body>
   <div class="app">
     <aside class="sidebar" id="sidebar">
@@ -42,11 +73,11 @@
       </div>
 
       <div class="sidebar__search-wrap">
-          <label class="top-search">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="topSearch" placeholder="Buscar...">
-          </label>
-          <div class="top-search__results" id="topSearchResults" style="display:none;"></div>
+        <label class="top-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="topSearch" placeholder="Buscar...">
+        </label>
+        <div class="top-search__results" id="topSearchResults" style="display:none;"></div>
       </div>
 
       <nav class="sidebar__nav">
@@ -79,7 +110,9 @@
       <main class="content">
         <div class="page-head">
           <div>
-            <div class="breadcrumbs"><a href="index.html"><i class="fa-solid fa-house"></i> Início</a> <i class="fa-solid fa-chevron-right"></i> <a href="cadastro.html">Cadastro</a> <i class="fa-solid fa-chevron-right"></i> <span class="current">Produto</span></div>
+            <div class="breadcrumbs"><a href="index.html"><i class="fa-solid fa-house"></i> Início</a> <i
+                class="fa-solid fa-chevron-right"></i> <a href="cadastro.html">Cadastro</a> <i
+                class="fa-solid fa-chevron-right"></i> <span class="current">Produto</span></div>
             <h2 class="page-head__title">Cadastro de Produto</h2>
             <p class="page-head__subtitle">Informe os dados do produto, categoria, estoque e fornecedor.</p>
           </div>
@@ -96,9 +129,9 @@
 
           <div class="form-grid">
             <div class="form-group col-12">
-                <label>Imagem do Produto</label>
-                <input type="file" id="inputImagemProduto" name="imagem" accept="image/*" />
-                <small style="color:var(--text-muted);">Selecione uma imagem (jpg, png, webp).</small>
+              <label>Imagem do Produto</label>
+              <input type="file" id="inputImagemProduto" name="imagem" accept="image/*" />
+              <small style="color:var(--text-muted);">Selecione uma imagem (jpg, png, webp).</small>
             </div>
 
             <div class="form-group col-4">
@@ -126,7 +159,8 @@
 
             <div class="form-group col-12">
               <label>Descrição</label>
-              <textarea id="inputDescricaoProduto" placeholder="Descrição detalhada do produto, ingredientes, sugestões..."></textarea>
+              <textarea id="inputDescricaoProduto"
+                placeholder="Descrição detalhada do produto, ingredientes, sugestões..."></textarea>
             </div>
 
             <div class="form-group col-3">
@@ -159,7 +193,8 @@
           <div class="btn-row">
             <a href="cadastro.html" class="btn btn--outline"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
             <button type="reset" class="btn btn--ghost"><i class="fa-solid fa-eraser"></i> Limpar</button>
-            <button type="button" class="btn btn--primary" id="btnSalvarProduto"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+            <button type="button" class="btn btn--primary" id="btnSalvarProduto"><i class="fa-solid fa-floppy-disk"></i>
+              Salvar</button>
           </div>
         </form>
 
@@ -179,7 +214,8 @@
               <input type="text" id="novaCategoria" placeholder="Ex: Bebidas, Sobremesas..." maxlength="50" />
             </div>
             <div class="form-group col-3" style="display:flex;align-items:flex-end;">
-              <button type="button" class="btn btn--primary" id="btnAdicionarCategoria" style="width:100%;justify-content:center;">
+              <button type="button" class="btn btn--primary" id="btnAdicionarCategoria"
+                style="width:100%;justify-content:center;">
                 <i class="fa-solid fa-plus"></i> Adicionar
               </button>
             </div>
@@ -192,8 +228,9 @@
       <footer class="footer pz">
         <div class="pz__grid">
           <div>
-            <div class="pz__brand"><img src="../img/logo-puzles.png" alt="Puzles Softwares"><b>Boi Ralado</b></div>
-            <p>Tradição, sabor de fogo e carne de verdade. Do boi ralado ao prato executivo, feito com carinho todos os dias.</p>
+            <div class="pz__brand"><img src="../img/logo-puzzle.png" alt="Puzzlesoftwares"><b>Boi Ralado</b></div>
+            <p>Tradição, sabor de fogo e carne de verdade. Do boi ralado ao prato executivo, feito com carinho todos os
+              dias.</p>
           </div>
           <div>
             <h5>Navegação</h5>
@@ -211,14 +248,18 @@
           </div>
           <div>
             <h5>Redes Sociais</h5>
-            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank"><i class="fa-brands fa-instagram"></i> Instagram</a>
+            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank"><i class="fa-brands fa-instagram"></i>
+              Instagram</a>
+            <a href="https://github.com/davitavares777" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>
           </div>
         </div>
         <div class="pz__bar">
           <span>© 2026 Boi Ralado. Todos os direitos reservados.</span>
-          <span class="pz__by">Desenvolvido com <i class="fa-solid fa-fire"></i> por <a href="#" class="pz__logo"><i class="fa-solid fa-puzzle-piece"></i> Puzles</a></span>
+          <span class="pz__by">Criado por <a href="#" class="pz__logo"><i class="fa-solid fa-puzzle-piece"></i>
+              Puzzlesoftwares</a></span>
           <span class="pz__soc">
-            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            <a href="https://www.instagram.com/puzzlesoftwares/" target="_blank" title="Instagram"><i
+                class="fa-brands fa-instagram"></i></a>
           </span>
         </div>
       </footer>
@@ -226,4 +267,5 @@
   </div>
   <script src="../js/app.js"></script>
 </body>
+
 </html>
