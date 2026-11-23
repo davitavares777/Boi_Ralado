@@ -11,6 +11,7 @@
     rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/dashboard-modern.css" />
 </head>
 
 <body>
@@ -22,6 +23,13 @@
           <span class="sidebar__brand-title">Boi Ralado</span>
           <span class="sidebar__brand-sub">Restaurante</span>
         </div>
+      </div>
+      <div class="sidebar__search-wrap">
+        <label class="top-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="topSearch" placeholder="Buscar...">
+        </label>
+        <div class="top-search__results" id="topSearchResults" style="display:none;"></div>
       </div>
       <nav class="sidebar__nav">
         <a href="index.html"><i class="fa-solid fa-house"></i> Dashboard</a>
