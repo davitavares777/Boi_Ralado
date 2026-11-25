@@ -99,6 +99,9 @@
     $('#perfilEmail').textContent = email || 'Não informado';
     $('#perfilCpf').textContent = cpf ? brCpf(cpf) : 'Não informado';
     $('#perfilTelefone').textContent = tel ? brTelefone(tel) : 'Não informado';
+    var enderecoTxt = dadosCliente ? [dadosCliente.endereco, dadosCliente.numero, dadosCliente.complemento, dadosCliente.bairro, dadosCliente.cidade, dadosCliente.estado].filter(Boolean).join(', ') : '';
+    $('#perfilEndereco').textContent = enderecoTxt || 'Não informado';
+    $('#perfilCep').textContent = (dadosCliente && dadosCliente.cep) || 'Não informado';
     $('#perfilDesde').textContent = desde ? brData(desde) : '—';
 
     if (!nome) $('#perfilNomeCompleto').classList.add('perfil-row__value--vazio');
@@ -183,6 +186,8 @@
   var editEmail = $('#editEmail');
   var editCpf = $('#editCpf');
   var editTelefone = $('#editTelefone');
+  var camposEndereco = ['Cep','Endereco','Numero','Complemento','Bairro','Cidade','Estado'];
+  function campoEndereco(nome) { return $('#edit' + nome); }
 
   function entrarModoEdicao() {
     var nome = (dadosCliente && dadosCliente.nome) || usuario.nome || '';
@@ -194,6 +199,14 @@
     editEmail.value = email;
     editCpf.value = cpf ? brCpf(cpf) : '';
     editTelefone.value = tel ? brTelefone(tel) : '';
+    var end = dadosCliente || {};
+    campoEndereco('Cep').value = end.cep || '';
+    campoEndereco('Endereco').value = end.endereco || '';
+    campoEndereco('Numero').value = end.numero || '';
+    campoEndereco('Complemento').value = end.complemento || '';
+    campoEndereco('Bairro').value = end.bairro || '';
+    campoEndereco('Cidade').value = end.cidade || '';
+    campoEndereco('Estado').value = end.estado || '';
 
     modoVisualizar.style.display = 'none';
     modoEditar.style.display = 'block';
@@ -210,6 +223,11 @@
 
   if (editCpf) editCpf.addEventListener('input', function () { this.value = mascaraCpf(this.value); });
   if (editTelefone) editTelefone.addEventListener('input', function () { this.value = mascaraTelefone(this.value); });
+  var editCep = campoEndereco('Cep');
+  if (editCep) editCep.addEventListener('input', function () {
+    var d = soDigitos(this.value).slice(0, 8);
+    this.value = d.length > 5 ? d.slice(0,5) + '-' + d.slice(5) : d;
+  });
 
   if (btnSalvar) {
     btnSalvar.addEventListener('click', function () {
@@ -234,7 +252,14 @@
         nome: nome,
         cpf: cpf || null,
         email: email,
-        telefone: tel || null
+        telefone: tel || null,
+        cep: soDigitos(campoEndereco('Cep').value),
+        endereco: campoEndereco('Endereco').value.trim(),
+        numero: campoEndereco('Numero').value.trim(),
+        complemento: campoEndereco('Complemento').value.trim(),
+        bairro: campoEndereco('Bairro').value.trim(),
+        cidade: campoEndereco('Cidade').value.trim(),
+        estado: campoEndereco('Estado').value.trim().toUpperCase()
       };
 
       var metodo = (dadosCliente && dadosCliente.id) ? 'PUT' : 'POST';
@@ -257,6 +282,7 @@
           dadosCliente.email = email;
           dadosCliente.cpf = cpf;
           dadosCliente.telefone = tel;
+          Object.keys(payload).forEach(function(k) { if (k !== 'nome' && k !== 'email' && k !== 'cpf' && k !== 'telefone') dadosCliente[k] = payload[k]; });
 
           // Atualiza o usuário logado (agora com o e-mail NOVO)
           usuario.nome = nome;

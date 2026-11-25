@@ -203,6 +203,66 @@ var servidor = http.createServer(function (pedido, resposta) {
     return;
   }
 
+
+  // ========== CLIENTES / PERFIL ==========
+  if (ehApi && recurso === 'clientes') {
+    if (metodo === 'GET') {
+      db.all('SELECT c.*, e.cep, e.logradouro AS endereco, e.numero, e.complemento, e.bairro, e.cidade, e.uf AS estado FROM cliente c LEFT JOIN endereco e ON e.id = c.endereco_id ORDER BY c.id DESC', [], function (erro, lista) {
+        if (erro) return recusar(resposta, 500, erro.message);
+        responder(resposta, 200, lista || []);
+      });
+      return;
+    }
+    if (metodo === 'POST') {
+      lerDados(pedido, function (d) {
+        db.run('INSERT INTO endereco (cep, logradouro, numero, complemento, bairro, cidade, uf) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [d.cep || '', d.endereco || 'Não informado', d.numero || '', d.complemento || '', d.bairro || '', d.cidade || 'Não informada', d.estado || 'AC'],
+          function (errEnd) {
+            if (errEnd) return recusar(resposta, 400, errEnd.message);
+            var endId = this.lastID;
+            db.run('INSERT INTO cliente (nome, cpf, email, telefone, endereco_id, data_cadastro) VALUES (?, ?, ?, ?, ?, ?)',
+              [d.nome, d.cpf || null, d.email || null, d.telefone || null, endId, new Date().toISOString()],
+              function (errCli) {
+                if (errCli) return recusar(resposta, 400, errCli.message);
+                responder(resposta, 201, { id: this.lastID, endereco_id: endId });
+              });
+          });
+      });
+      return;
+    }
+    if (metodo === 'PUT' && id) {
+      lerDados(pedido, function (d) {
+        db.get('SELECT endereco_id FROM cliente WHERE id = ?', [id], function (errBusca, cli) {
+          if (errBusca) return recusar(resposta, 500, errBusca.message);
+          if (!cli) return recusar(resposta, 404, 'Cliente não encontrado.');
+          function salvarCliente(endId) {
+            db.run('UPDATE cliente SET nome=?, cpf=?, email=?, telefone=?, endereco_id=? WHERE id=?',
+              [d.nome, d.cpf || null, d.email || null, d.telefone || null, endId, id],
+              function (errCli) {
+                if (errCli) return recusar(resposta, 400, errCli.message);
+                responder(resposta, 200, { id: Number(id), endereco_id: endId });
+              });
+          }
+          var valores = [d.cep || '', d.endereco || 'Não informado', d.numero || '', d.complemento || '', d.bairro || '', d.cidade || 'Não informada', d.estado || 'AC'];
+          if (cli.endereco_id) {
+            db.run('UPDATE endereco SET cep=?, logradouro=?, numero=?, complemento=?, bairro=?, cidade=?, uf=? WHERE id=?',
+              valores.concat([cli.endereco_id]), function (errEnd) {
+                if (errEnd) return recusar(resposta, 400, errEnd.message);
+                salvarCliente(cli.endereco_id);
+              });
+          } else {
+            db.run('INSERT INTO endereco (cep, logradouro, numero, complemento, bairro, cidade, uf) VALUES (?, ?, ?, ?, ?, ?, ?)',
+              valores, function (errEnd) {
+                if (errEnd) return recusar(resposta, 400, errEnd.message);
+                salvarCliente(this.lastID);
+              });
+          }
+        });
+      });
+      return;
+    }
+  }
+
   // ========== CATEGORIAS ==========
   if (ehApi && recurso === 'categorias') {
     if (metodo === 'GET') {

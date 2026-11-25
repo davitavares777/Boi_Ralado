@@ -68,7 +68,23 @@
         var entregasApi = (rs[1].ok && rs[1].dados) ? rs[1].dados : [];
 
         var todosPedidos = [];
-        
+
+        // Dados demonstrativos somente quando o banco está vazio; nada é gravado.
+        if (!pedidosApi.length && !entregasApi.length) {
+            var hojeDemo = todayIso();
+            var ontemDemo = new Date(); ontemDemo.setDate(ontemDemo.getDate() - 1);
+            var isoOntemDemo = ontemDemo.getFullYear() + '-' + String(ontemDemo.getMonth()+1).padStart(2,'0') + '-' + String(ontemDemo.getDate()).padStart(2,'0');
+            pedidosApi = [
+              { id:'demo-b1', numero:'#B2041', mesa:'04', data:hojeDemo, hora:'12:20', total:128.50, status:'Pago', itens:[{nome_item:'Boi Ralado Tradicional',quantidade:2,valor_unit:34.90},{nome_item:'Suco de Laranja',quantidade:2,valor_unit:9}] },
+              { id:'demo-b2', numero:'#B2042', mesa:'07', data:hojeDemo, hora:'13:05', total:89.80, status:'Em preparo', itens:[{nome_item:'Prato Executivo da Casa',quantidade:2,valor_unit:29.90},{nome_item:'Batata Rústica',quantidade:1,valor_unit:24.90}] },
+              { id:'demo-b3', numero:'#B2038', mesa:'02', data:isoOntemDemo, hora:'12:45', total:68.90, status:'Pago', itens:[{nome_item:'Picanha na Chapa',quantidade:1,valor_unit:68.90}] }
+            ];
+            entregasApi = [
+              { id:'demo-d1', numero:'#D3011', data:hojeDemo, hora:'13:30', total:75.00, status:'Em rota', itens:[{nome_item:'Hambúrguer Boi Ralado',quantidade:1,valor_unit:32},{nome_item:'Pastel de Boi Ralado',quantidade:2,valor_unit:14}] },
+              { id:'demo-d2', numero:'#D3008', data:isoOntemDemo, hora:'19:10', total:92.90, status:'Entregue', itens:[{nome_item:'Boi Ralado Tradicional',quantidade:1,valor_unit:34.90},{nome_item:'Picanha na Chapa',quantidade:1,valor_unit:58}] }
+            ];
+        }
+
         pedidosApi.forEach(function(p) { 
             p.tipo = 'Balcão'; 
             p.cliente = p.cliente_id ? 'Cliente ID ' + p.cliente_id : (p.mesa ? 'Mesa ' + p.mesa : 'Cliente Balcão');

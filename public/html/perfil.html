@@ -406,6 +406,20 @@
                 </div>
 
                 <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-location-dot"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">Endereço</div>
+                    <div class="perfil-row__value" id="perfilEndereco">Não informado</div>
+                  </div>
+                </div>
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-mail-bulk"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">CEP</div>
+                    <div class="perfil-row__value" id="perfilCep">Não informado</div>
+                  </div>
+                </div>
+                <div class="perfil-row">
                   <div class="perfil-row__icon"><i class="fa-solid fa-calendar"></i></div>
                   <div style="flex:1;">
                     <div class="perfil-row__label">Cliente desde</div>
@@ -450,6 +464,55 @@
                   </div>
                 </div>
 
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-map-pin"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">CEP</div>
+                    <input type="text" class="perfil-input" id="editCep" placeholder="00000-000" maxlength="9" inputmode="numeric" />
+                  </div>
+                </div>
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-road"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">Logradouro / Endereço</div>
+                    <input type="text" class="perfil-input" id="editEndereco" placeholder="Rua, avenida..." />
+                  </div>
+                </div>
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-house"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">Número</div>
+                    <input type="text" class="perfil-input" id="editNumero" placeholder="Número" />
+                  </div>
+                </div>
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-building"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">Complemento</div>
+                    <input type="text" class="perfil-input" id="editComplemento" placeholder="Apartamento, bloco..." />
+                  </div>
+                </div>
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-map"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">Bairro</div>
+                    <input type="text" class="perfil-input" id="editBairro" placeholder="Bairro" />
+                  </div>
+                </div>
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-city"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">Cidade</div>
+                    <input type="text" class="perfil-input" id="editCidade" placeholder="Cidade" />
+                  </div>
+                </div>
+                <div class="perfil-row">
+                  <div class="perfil-row__icon"><i class="fa-solid fa-flag"></i></div>
+                  <div style="flex:1;">
+                    <div class="perfil-row__label">Estado (UF)</div>
+                    <input type="text" class="perfil-input" id="editEstado" placeholder="UF" maxlength="2" />
+                  </div>
+                </div>
                 <div class="perfil-editar-actions">
                   <button type="button" class="btn btn--outline" id="btnCancelarEdicao">
                     <i class="fa-solid fa-xmark"></i> Cancelar

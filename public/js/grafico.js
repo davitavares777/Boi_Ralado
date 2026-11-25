@@ -13,6 +13,51 @@
     fetch('/api/graficos?contexto=' + contexto).then(function (r) { return r.json(); }).then(function (res) {
       if (!res || !res.ok || !res.dados) return;
       var d = res.dados;
+      // Os exemplos são usados somente quando ainda não existem vendas reais
+      // para o contexto consultado. Assim, ao cadastrar vendas, os dados reais
+      // substituem automaticamente os demonstrativos.
+      var totaisAtuais = Array.isArray(d.totais) ? d.totais : [0, 0, 0, 0];
+      var possuiVendasReais = (Number(totaisAtuais[0]) || 0) + (Number(totaisAtuais[1]) || 0) > 0;
+      if (!possuiVendasReais) {
+        var diasDemo = [];
+        var valoresDemo = contexto === 'balcao'
+          ? [420, 560, 385, 690, 740, 615, 820]
+          : contexto === 'delivery'
+            ? [310, 475, 520, 430, 680, 590, 760]
+            : [730, 1035, 905, 1120, 1420, 1205, 1580];
+        for (var diaDemo = 6; diaDemo >= 0; diaDemo--) {
+          var dataDemo = new Date();
+          dataDemo.setDate(dataDemo.getDate() - diaDemo);
+          diasDemo.push(dataDemo.toLocaleDateString('pt-BR', { weekday: 'short' }));
+        }
+        var demo = contexto === 'balcao'
+          ? {
+              categorias: [{nome:'Pratos executivos',qtd:28},{nome:'Lanches',qtd:19},{nome:'Bebidas',qtd:34},{nome:'Sobremesas',qtd:12}],
+              pagamentos: [{nome:'Pix',valor:685},{nome:'Cartão',valor:940},{nome:'Dinheiro',valor:510}],
+              maisVendidos: [{nome:'Boi Ralado Tradicional',qtd:24},{nome:'Prato Executivo',qtd:18},{nome:'Suco de Laranja',qtd:16},{nome:'Hambúrguer',qtd:11}],
+              totais: [42,0,2135,0]
+            }
+          : contexto === 'delivery'
+            ? {
+                categorias: [{nome:'Pratos executivos',qtd:21},{nome:'Lanches',qtd:26},{nome:'Bebidas',qtd:18},{nome:'Porções',qtd:14}],
+                pagamentos: [{nome:'Pix',valor:825},{nome:'Cartão',valor:615},{nome:'Dinheiro',valor:402}],
+                maisVendidos: [{nome:'Hambúrguer',qtd:22},{nome:'Boi Ralado',qtd:17},{nome:'Batata Rústica',qtd:13},{nome:'Refrigerante',qtd:12}],
+                totais: [0,36,0,1842]
+              }
+            : {
+                categorias: [{nome:'Pratos executivos',qtd:49},{nome:'Lanches',qtd:45},{nome:'Bebidas',qtd:52},{nome:'Sobremesas e porções',qtd:26}],
+                pagamentos: [{nome:'Pix',valor:1510},{nome:'Cartão',valor:1555},{nome:'Dinheiro',valor:912}],
+                maisVendidos: [{nome:'Boi Ralado Tradicional',qtd:41},{nome:'Hambúrguer',qtd:33},{nome:'Prato Executivo',qtd:29},{nome:'Suco de Laranja',qtd:24}],
+                totais: [42,36,2135,1842]
+              };
+        d = {
+          categorias: demo.categorias,
+          pagamentos: demo.pagamentos,
+          faturamento7dias: diasDemo.map(function(dia, indice) { return {dia: dia, valor: valoresDemo[indice]}; }),
+          maisVendidos: demo.maisVendidos,
+          totais: demo.totais
+        };
+      }
       var defaults = {
         responsive: true,
         maintainAspectRatio: false,
