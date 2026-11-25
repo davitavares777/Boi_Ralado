@@ -315,29 +315,38 @@
         registroAtual = item;
         var titulo = $('.page-head__title'); if (titulo) titulo.textContent = 'Editar ' + cfgCadastro.tipo;
         if (botaoSalvar) botaoSalvar.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar alteração';
-        
+
+        // Compatibilidade com respostas da API que retornam campos de endereço ou aliases.
+        var aliases = { estado: ['estado','uf'], endereco: ['endereco','logradouro'], data_nasc: ['data_nasc','data_nascimento'] };
         $$('.form-group').forEach(function (g) {
           var el = $('input,select,textarea', g);
-          var chave = cfgCadastro.campos[textoLabel(g)];
-          if (el && chave && item[chave] !== undefined && item[chave] !== null) {
-             var val = item[chave];
-             if (chave === 'preco' && typeof val === 'number') val = val.toFixed(2).replace('.', ',');
-             if (el.tagName === 'SELECT' && val !== '' && !Array.prototype.some.call(el.options, function(opt) { return opt.value === String(val); })) {
-               var opcaoAtual = document.createElement('option'); opcaoAtual.value = val; opcaoAtual.textContent = val; el.appendChild(opcaoAtual);
-             }
-             el.value = val;
+          var label = textoLabel(g);
+          var chave = cfgCadastro.campos[label];
+          if (!el || !chave) return;
+          var val = item[chave];
+          if (val === undefined || val === null) {
+            (aliases[chave] || [chave]).some(function(alias) {
+              if (item[alias] !== undefined && item[alias] !== null) { val = item[alias]; return true; }
+              return false;
+            });
           }
+          if (val === undefined || val === null) return;
+          if (chave === 'preco' && typeof val === 'number') val = val.toFixed(2).replace('.', ',');
+          if (el.tagName === 'SELECT' && val !== '' && !Array.prototype.some.call(el.options, function(opt) { return opt.value === String(val); })) {
+            var opcaoAtual = document.createElement('option'); opcaoAtual.value = String(val); opcaoAtual.textContent = String(val); el.appendChild(opcaoAtual);
+          }
+          el.value = String(val);
         });
     }
 
     if (idEdicao) {
-      pedir('GET', cfgCadastro.api + '/' + idEdicao).then(function (r) {
-        if (r.ok && r.dados) preencherFormulario(r.dados);
-        else pedir('GET', cfgCadastro.api).then(function(resAll) {
-                var item = (resAll.ok && resAll.dados) ? resAll.dados.find(function(x) { return String(x.id) === String(idEdicao); }) : null;
-                preencherFormulario(item);
-        });
-      });
+      // Busca pela listagem (compatível com APIs que não possuem GET /recurso/:id).
+      pedir('GET', cfgCadastro.api).then(function (res) {
+        var lista = res && res.ok && res.dados ? (Array.isArray(res.dados) ? res.dados : (res.dados.lista || res.dados.items || [])) : [];
+        var item = lista.find(function (x) { return String(x.id) === String(idEdicao); }) || null;
+        if (item) preencherFormulario(item);
+        else toast('Registro não encontrado na listagem. Verifique se ele ainda existe.', true);
+      }).catch(function () { toast('Não foi possível carregar os dados para edição.', true); });
     }
 
     if (botaoSalvar) {

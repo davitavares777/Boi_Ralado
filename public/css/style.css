@@ -573,3 +573,49 @@ input[type="file"]::file-selector-button:hover {
   transform:translateY(-4px) rotate(10deg) !important;
   box-shadow:0 8px 22px rgba(232,93,38,.5)
 }
+/* ==========================================================
+   BOI RALADO — acabamento premium inspirado na referência
+   Mantém a paleta original: carvão, café, terracota e âmbar.
+   ========================================================== */
+:root{
+ --br-gold:#D99A55; --br-gold-soft:#F0B875; --br-line:rgba(217,154,85,.28);
+ --br-glass:rgba(25,17,13,.88);
+}
+body{background:#0b0807;letter-spacing:.01em}
+body::before{background:radial-gradient(ellipse at 78% 8%,rgba(232,93,38,.12),transparent 38%),radial-gradient(ellipse at 8% 75%,rgba(166,27,27,.10),transparent 42%),#0b0807}
+.sidebar{background:rgba(9,7,6,.94);border-bottom:1px solid var(--br-line);box-shadow:0 10px 35px rgba(0,0,0,.34)}
+.sidebar__brand img{border-radius:12px;border-color:var(--br-line);box-shadow:0 0 24px rgba(232,93,38,.18)}
+.sidebar__brand-title{letter-spacing:.2px}
+.sidebar__nav{gap:5px}
+.sidebar__nav a{border-radius:7px;padding:10px 13px;font-size:12px;letter-spacing:.025em}
+.sidebar__nav a.active{background:rgba(232,93,38,.12);box-shadow:inset 0 -2px 0 var(--ember);color:#fff}
+.sidebar__nav a:hover{background:rgba(232,93,38,.10)}
+.sidebar__search-wrap .top-search{background:#130e0b;border-color:rgba(217,154,85,.2);height:39px}
+.header{border-bottom:1px solid rgba(201,179,147,.06);background:rgba(11,8,7,.35)}
+.content{max-width:1500px;margin:0 auto;padding:26px clamp(18px,3.2vw,52px) 48px}
+.page-head{margin-bottom:22px}
+.page-head__title{font-family:var(--font-display);font-weight:700;letter-spacing:-.5px}
+.breadcrumbs{color:var(--text-dim);font-size:11px;letter-spacing:1.3px;text-transform:uppercase}
+.section-title{font-family:var(--font-display);font-size:clamp(23px,2.4vw,31px);letter-spacing:-.3px}
+.section-title em{color:var(--ember-light)}
+.section-subtitle{color:var(--text-muted);font-size:13px}
+.stats-grid{gap:14px}
+.stat-card{position:relative;overflow:hidden;border:1px solid rgba(217,154,85,.19);border-radius:15px;background:linear-gradient(145deg,rgba(38,26,19,.96),rgba(18,13,10,.98));box-shadow:0 12px 28px rgba(0,0,0,.22);transition:transform .25s,border-color .25s}
+.stat-card:after{content:"";position:absolute;width:110px;height:110px;right:-55px;top:-62px;border-radius:50%;background:radial-gradient(circle,rgba(232,93,38,.2),transparent 70%);pointer-events:none}
+.stat-card:hover{transform:translateY(-3px);border-color:rgba(232,93,38,.48)}
+.stat-card__value{font-variant-numeric:tabular-nums}
+.pgrid{gap:17px}
+.pcard{position:relative;text-align:left;padding:10px 10px 15px;border:1px solid rgba(217,154,85,.24);border-radius:17px;background:linear-gradient(150deg,#29201a,#17110e 72%);box-shadow:0 12px 26px rgba(0,0,0,.2);transition:transform .28s,border-color .28s,box-shadow .28s}
+.pcard:hover{transform:translateY(-5px);border-color:var(--ember);box-shadow:0 18px 34px rgba(0,0,0,.38),0 0 26px rgba(232,93,38,.10)}
+.pcard__img{aspect-ratio:1.2;border-radius:11px;margin-bottom:13px;background:#100b08}
+.pcard h4{font:600 15px var(--font-body);padding:0 4px;color:#f5e9dc}
+.pcard b{margin:8px 4px 0;background:linear-gradient(120deg,var(--ember),var(--brand-red-dark));border-radius:6px}
+.chart-card,.charts-dinamicos .chart-card,.total-cell,.report-section,.table-wrap{border-color:rgba(217,154,85,.17);border-radius:16px;background:linear-gradient(145deg,rgba(36,25,19,.96),rgba(17,12,9,.98));box-shadow:0 12px 28px rgba(0,0,0,.18)}
+.data-table th{color:var(--br-gold-soft);letter-spacing:.8px;text-transform:uppercase;font-size:10px}
+.data-table tbody tr:hover{background:rgba(232,93,38,.055)}
+.btn,.login-form__submit{border-radius:8px;letter-spacing:.35px}
+.btn--primary,.login-form__submit{background:linear-gradient(120deg,var(--ember),var(--brand-red-dark));box-shadow:0 8px 20px rgba(166,27,27,.2)}
+input,select,textarea{border-radius:8px}
+.footer{border-top:1px solid var(--br-line);background:#090706}
+@media(max-width:900px){.sidebar{background:rgba(9,7,6,.98)}.content{padding-top:20px}}
+@media(max-width:600px){.stat-card{border-radius:12px}.pcard{padding:8px 8px 12px}.pcard h4{font-size:13px}}
